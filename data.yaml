@@ -1,0 +1,15 @@
+train: C:\Users\HP\OneDrive\Desktop\SAFETYEYE 2\Dataset\processed\images\train
+val: C:\Users\HP\OneDrive\Desktop\SAFETYEYE 2\Dataset\processed\images\val
+test: C:\Users\HP\OneDrive\Desktop\SAFETYEYE 2\Dataset\processed\images\test
+nc: 10
+names:
+- Hardhat
+- Mask
+- NO-Hardhat
+- NO-Mask
+- NO-Safety Vest
+- Person
+- Safety Cone
+- Safety Vest
+- machinery
+- vehicle
