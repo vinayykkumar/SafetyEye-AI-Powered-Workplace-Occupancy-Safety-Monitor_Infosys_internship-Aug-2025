@@ -1,0 +1,14 @@
+ultralytics
+torch
+torchvision
+opencv-python
+pandas
+matplotlib
+seaborn
+scikit-learn
+pyyaml
+flask
+fastapi
+uvicorn
+requests
+psutil
