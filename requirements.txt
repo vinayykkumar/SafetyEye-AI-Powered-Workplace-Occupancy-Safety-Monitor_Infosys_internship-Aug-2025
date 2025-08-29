@@ -1,0 +1,14 @@
+streamlit~=1.48.1
+pandas~=2.3.1
+scikit-learn~=1.6.1
+ultralytics~=8.3.180
+albumentations~=2.0.8
+opencv-python~=4.11.0.86
+pillow~=11.3.0
+ImageHash~=4.3.2
+jupyterlab-pygments~=0.3.0
+pip~=25.2
+attrs~=25.3.0
+protobuf~=6.32.0
+cryptography~=45.0.5
+filelock~=3.19.1
