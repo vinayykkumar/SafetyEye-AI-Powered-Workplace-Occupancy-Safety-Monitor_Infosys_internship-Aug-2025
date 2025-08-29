@@ -1,0 +1,23 @@
+
+name: safetyeye
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pytorch
+  - torchvision
+  - cudatoolkit
+  - pip
+  - pip:
+      - ultralytics>=8.2.0
+      - numpy
+      - opencv-python
+      - pandas
+      - pyyaml
+      - python-dotenv
+      - tqdm
+      - scikit-learn
+      - kaggle
+      - matplotlib

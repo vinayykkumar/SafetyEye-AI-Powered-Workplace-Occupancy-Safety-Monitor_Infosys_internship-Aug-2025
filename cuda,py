@@ -1,0 +1,9 @@
+import torch
+
+# Check if CUDA is available
+if torch.cuda.is_available():
+    device = torch.device("cuda")  # use GPU
+    print(f"CUDA is available! Using GPU: {torch.cuda.get_device_name(0)}")
+else:
+    device = torch.device("cpu")   # fallback to CPU
+    print("CUDA not available. Using CPU.")
