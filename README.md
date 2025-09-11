@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 # SafetyEye-AI-Powered-Workplace-Occupancy-Safety-Monitor_Infosys_internship-Aug-2025
 
  - **Author:** Shally Katariya Group 1
@@ -165,3 +166,4 @@ python predictions/predict.py
  - Alert System: Automated notifications for detected violations.
  - Model Optimization: Experiment with larger YOLOv8 variants (yolov8s, yolov8m) + hyperparameter tuning.
  - Expand PPE Classes: Add detection for safety glasses, gloves, and ear protection.
+=======
