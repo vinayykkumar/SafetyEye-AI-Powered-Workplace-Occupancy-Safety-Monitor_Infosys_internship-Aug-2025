@@ -20,8 +20,6 @@ final_dataset/
 *.zip
 
 # Ultralytics Runs & Results
-runs/
+runs/detect/yolov8n_ppe_gpu_run_1/weights
 
 # Prediction results
-*.jpg
-*.png
