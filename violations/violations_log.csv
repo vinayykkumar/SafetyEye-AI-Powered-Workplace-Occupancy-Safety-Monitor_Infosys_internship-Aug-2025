@@ -1,0 +1,391 @@
+timestamp,frame,person_id,reason,snapshot_path,conf_person,conf_helmet
+2025-09-24 12:02:19,3,3,no_ppe,violations\violation_20250924_120219_f3_id3.jpg,0.0,0.0
+2025-09-24 12:02:19,3,2,no_ppe,violations\violation_20250924_120219_f3_id2.jpg,0.0,0.355
+2025-09-24 12:02:19,3,4,no_ppe,violations\violation_20250924_120219_f3_id4.jpg,0.0,0.0
+2025-09-24 12:02:20,3,5,no_ppe,violations\violation_20250924_120219_f3_id5.jpg,0.0,0.0
+2025-09-24 12:02:20,3,1,no_ppe,violations\violation_20250924_120220_f3_id1.jpg,0.0,0.0
+2025-09-24 12:02:20,13,12,no_ppe,violations\violation_20250924_120220_f13_id12.jpg,0.0,0.0
+2025-09-24 12:02:20,13,11,no_ppe,violations\violation_20250924_120220_f13_id11.jpg,0.0,0.0
+2025-09-24 12:02:21,20,13,no_ppe,violations\violation_20250924_120221_f20_id13.jpg,0.0,0.0
+2025-09-24 12:02:25,60,3,no_ppe,violations\violation_20250924_120225_f60_id3.jpg,0.0,0.0
+2025-09-24 12:02:25,60,4,no_ppe,violations\violation_20250924_120225_f60_id4.jpg,0.0,0.484
+2025-09-24 12:02:25,60,1,no_ppe,violations\violation_20250924_120225_f60_id1.jpg,0.0,0.0
+2025-09-24 12:02:26,71,12,no_ppe,violations\violation_20250924_120226_f71_id12.jpg,0.0,0.45
+2025-09-24 12:02:30,118,4,no_ppe,violations\violation_20250924_120230_f118_id4.jpg,0.0,0.0
+2025-09-24 12:02:30,118,3,no_ppe,violations\violation_20250924_120230_f118_id3.jpg,0.0,0.592
+2025-09-24 12:02:30,118,1,no_ppe,violations\violation_20250924_120230_f118_id1.jpg,0.0,0.0
+2025-09-24 12:02:30,126,16,no_ppe,violations\violation_20250924_120230_f126_id16.jpg,0.0,0.0
+2025-09-24 12:02:31,129,12,no_ppe,violations\violation_20250924_120231_f129_id12.jpg,0.0,0.0
+2025-09-24 12:02:32,148,17,no_ppe,violations\violation_20250924_120232_f148_id17.jpg,0.0,0.371
+2025-09-24 12:02:32,149,18,no_ppe,violations\violation_20250924_120232_f149_id18.jpg,0.0,0.0
+2025-09-24 12:02:35,176,4,no_ppe,violations\violation_20250924_120235_f176_id4.jpg,0.0,0.0
+2025-09-24 12:02:35,176,3,no_ppe,violations\violation_20250924_120235_f176_id3.jpg,0.0,0.582
+2025-09-24 12:02:36,187,12,no_ppe,violations\violation_20250924_120236_f187_id12.jpg,0.393,0.0
+2025-09-24 12:07:08,5,4,no_ppe,violations\violation_20250924_120708_f5_id4.jpg,0.0,0.0
+2025-09-24 12:07:08,5,3,no_ppe,violations\violation_20250924_120708_f5_id3.jpg,0.0,0.0
+2025-09-24 12:07:08,5,2,no_ppe,violations\violation_20250924_120708_f5_id2.jpg,0.0,0.0
+2025-09-24 12:07:08,5,1,no_ppe,violations\violation_20250924_120708_f5_id1.jpg,0.0,0.0
+2025-09-24 12:07:11,34,17,no_ppe,violations\violation_20250924_120711_f34_id17.jpg,0.0,0.0
+2025-09-24 12:07:16,88,3,no_ppe,violations\violation_20250924_120716_f88_id3.jpg,0.0,0.0
+2025-09-24 12:07:16,88,2,no_ppe,violations\violation_20250924_120716_f88_id2.jpg,0.0,0.557
+2025-09-24 12:07:16,88,4,no_ppe,violations\violation_20250924_120716_f88_id4.jpg,0.0,0.0
+2025-09-24 12:07:16,88,1,no_ppe,violations\violation_20250924_120716_f88_id1.jpg,0.0,0.0
+2025-09-24 12:07:24,185,4,no_ppe,violations\violation_20250924_120724_f185_id4.jpg,0.0,0.0
+2025-09-24 12:07:24,185,2,no_ppe,violations\violation_20250924_120724_f185_id2.jpg,0.0,0.0
+2025-09-24 12:07:24,185,3,no_ppe,violations\violation_20250924_120724_f185_id3.jpg,0.0,0.0
+
+2025-09-24 12:11:12,5,4,no_ppe,violations\violation_20250924_121112_f5_id4.jpg,0.0,0.0
+2025-09-24 12:11:12,5,3,no_ppe,violations\violation_20250924_121112_f5_id3.jpg,0.0,0.0
+2025-09-24 12:11:12,5,2,no_ppe,violations\violation_20250924_121112_f5_id2.jpg,0.0,0.0
+2025-09-24 12:11:12,5,1,no_ppe,violations\violation_20250924_121112_f5_id1.jpg,0.0,0.0
+2025-09-24 12:11:14,34,17,no_ppe,violations\violation_20250924_121114_f34_id17.jpg,0.0,0.0
+2025-09-24 12:11:20,102,3,no_ppe,violations\violation_20250924_121120_f102_id3.jpg,0.0,0.0
+2025-09-24 12:11:20,102,4,no_ppe,violations\violation_20250924_121120_f102_id4.jpg,0.0,0.0
+2025-09-24 12:11:20,102,1,no_ppe,violations\violation_20250924_121120_f102_id1.jpg,0.0,0.0
+2025-09-24 12:11:21,111,2,no_ppe,violations\violation_20250924_121121_f111_id2.jpg,0.0,0.0
+
+2025-09-24 13:13:51,5,4,no_hardhat+no_vest,violations\violation_20250924_131351_f5_id4.jpg,0.0,0.0
+2025-09-24 13:13:51,5,3,no_hardhat+no_vest,violations\violation_20250924_131351_f5_id3.jpg,0.0,0.0
+2025-09-24 13:13:51,5,2,no_hardhat+no_vest,violations\violation_20250924_131351_f5_id2.jpg,0.0,0.0
+2025-09-24 13:13:51,5,1,no_hardhat+no_vest,violations\violation_20250924_131351_f5_id1.jpg,0.0,0.0
+2025-09-24 13:13:54,34,17,no_hardhat+no_vest,violations\violation_20250924_131354_f34_id17.jpg,0.0,0.0
+2025-09-24 13:13:59,87,3,no_hardhat+no_vest,violations\violation_20250924_131359_f87_id3.jpg,0.0,0.0
+2025-09-24 13:13:59,87,1,no_hardhat+no_vest,violations\violation_20250924_131359_f87_id1.jpg,0.0,0.0
+2025-09-24 13:13:59,90,4,no_hardhat+no_vest,violations\violation_20250924_131359_f90_id4.jpg,0.0,0.0
+2025-09-24 13:14:02,111,2,no_hardhat+no_vest,violations\violation_20250924_131402_f111_id2.jpg,0.0,0.0
+2025-09-24 13:14:07,166,3,no_hardhat+no_vest,violations\violation_20250924_131407_f166_id3.jpg,0.0,0.0
+2025-09-24 13:14:07,168,4,no_hardhat+no_vest,violations\violation_20250924_131407_f168_id4.jpg,0.0,0.0
+2025-09-24 13:14:10,191,2,no_hardhat+no_vest,violations\violation_20250924_131410_f191_id2.jpg,0.0,0.0
+
+2025-09-24 13:23:59,5,4,no_hardhat+no_vest,violations\violation_20250924_132359_f5_id4.jpg,0.0,0.0
+2025-09-24 13:23:59,5,3,no_hardhat+no_vest,violations\violation_20250924_132359_f5_id3.jpg,0.0,0.0
+2025-09-24 13:23:59,5,2,no_hardhat+no_vest,violations\violation_20250924_132359_f5_id2.jpg,0.0,0.0
+2025-09-24 13:23:59,5,1,no_hardhat+no_vest,violations\violation_20250924_132359_f5_id1.jpg,0.0,0.0
+2025-09-24 13:24:02,34,17,no_hardhat+no_vest,violations\violation_20250924_132402_f34_id17.jpg,0.0,0.0
+2025-09-24 13:24:07,98,4,no_hardhat+no_vest,violations\violation_20250924_132407_f98_id4.jpg,0.0,0.0
+2025-09-24 13:24:07,98,3,no_hardhat+no_vest,violations\violation_20250924_132407_f98_id3.jpg,0.0,0.0
+2025-09-24 13:24:07,98,1,no_hardhat+no_vest,violations\violation_20250924_132407_f98_id1.jpg,0.0,0.0
+2025-09-24 13:24:08,111,2,no_hardhat+no_vest,violations\violation_20250924_132408_f111_id2.jpg,0.0,0.0
+
+2025-09-24 13:25:11,5,2,no_hardhat+no_vest,violations\violation_20250924_132511_f5_id2.jpg,0.0,0.0
+2025-09-24 13:25:11,5,4,no_hardhat+no_vest,violations\violation_20250924_132511_f5_id4.jpg,0.0,0.0
+2025-09-24 13:25:11,5,1,no_hardhat+no_vest,violations\violation_20250924_132511_f5_id1.jpg,0.0,0.0
+2025-09-24 13:25:12,12,3,no_hardhat+no_vest,violations\violation_20250924_132512_f12_id3.jpg,0.0,0.0
+2025-09-24 13:25:13,21,6,no_hardhat+no_vest,violations\violation_20250924_132513_f21_id6.jpg,0.0,0.0
+2025-09-24 13:25:13,21,7,no_hardhat+no_vest,violations\violation_20250924_132513_f21_id7.jpg,0.0,0.0
+2025-09-24 13:25:13,27,8,no_hardhat+no_vest,violations\violation_20250924_132513_f27_id8.jpg,0.0,0.0
+2025-09-24 13:25:13,28,5,no_hardhat+no_vest,violations\violation_20250924_132513_f28_id5.jpg,0.0,0.0
+2025-09-24 13:25:15,41,10,no_hardhat+no_vest,violations\violation_20250924_132515_f41_id10.jpg,0.0,0.0
+2025-09-24 13:25:16,58,14,no_hardhat+no_vest,violations\violation_20250924_132516_f58_id14.jpg,0.0,0.0
+2025-09-24 13:25:17,68,16,no_hardhat+no_vest,violations\violation_20250924_132517_f68_id16.jpg,0.0,0.0
+2025-09-24 13:25:19,93,1,no_hardhat+no_vest,violations\violation_20250924_132519_f93_id1.jpg,0.0,0.0
+2025-09-24 13:25:19,93,4,no_hardhat+no_vest,violations\violation_20250924_132519_f93_id4.jpg,0.0,0.0
+2025-09-24 13:25:20,100,3,no_hardhat+no_vest,violations\violation_20250924_132520_f100_id3.jpg,0.0,0.0
+2025-09-24 13:25:20,103,17,no_hardhat+no_vest,violations\violation_20250924_132520_f103_id17.jpg,0.0,0.0
+2025-09-24 13:25:21,115,8,no_hardhat+no_vest,violations\violation_20250924_132521_f115_id8.jpg,0.0,0.0
+2025-09-24 13:25:21,116,5,no_hardhat+no_vest,violations\violation_20250924_132521_f116_id5.jpg,0.0,0.0
+2025-09-24 13:25:24,147,14,no_hardhat+no_vest,violations\violation_20250924_132524_f147_id14.jpg,0.0,0.0
+2025-09-24 13:25:27,181,4,no_hardhat+no_vest,violations\violation_20250924_132527_f181_id4.jpg,0.0,0.0
+2025-09-24 13:25:27,181,1,no_hardhat+no_vest,violations\violation_20250924_132527_f181_id1.jpg,0.0,0.0
+2025-09-24 13:25:28,189,3,no_hardhat+no_vest,violations\violation_20250924_132528_f189_id3.jpg,0.0,0.0
+2025-09-24 13:25:28,192,17,no_hardhat+no_vest,violations\violation_20250924_132528_f192_id17.jpg,0.0,0.0
+
+2025-09-24 14:28:06,5,4,no_hardhat+no_vest,violations\violation_20250924_142806_f5_id4.jpg,0.0,0.0
+2025-09-24 14:28:06,5,3,no_hardhat+no_vest,violations\violation_20250924_142806_f5_id3.jpg,0.0,0.0
+2025-09-24 14:28:06,5,2,no_hardhat+no_vest,violations\violation_20250924_142806_f5_id2.jpg,0.0,0.0
+2025-09-24 14:28:06,5,1,no_hardhat+no_vest,violations\violation_20250924_142806_f5_id1.jpg,0.0,0.0
+2025-09-24 14:28:09,34,17,no_hardhat+no_vest,violations\violation_20250924_142809_f34_id17.jpg,0.0,0.0
+2025-09-24 14:28:14,73,2,no_hardhat,violations\violation_20250924_142814_f73_id2.jpg,0.0,0.607
+2025-09-24 14:28:14,73,4,no_hardhat,violations\violation_20250924_142814_f73_id4.jpg,0.0,0.0
+2025-09-24 14:28:14,73,1,no_hardhat+no_vest,violations\violation_20250924_142814_f73_id1.jpg,0.0,0.0
+2025-09-24 14:28:14,73,3,no_hardhat+no_vest,violations\violation_20250924_142814_f73_id3.jpg,0.0,0.0
+2025-09-24 14:28:22,141,2,no_hardhat+no_vest,violations\violation_20250924_142822_f141_id2.jpg,0.0,0.0
+2025-09-24 14:28:22,141,4,no_hardhat+no_vest,violations\violation_20250924_142822_f141_id4.jpg,0.0,0.0
+2025-09-24 14:28:22,141,3,no_hardhat+no_vest,violations\violation_20250924_142822_f141_id3.jpg,0.0,0.27
+2025-09-24 14:28:22,141,1,no_hardhat+no_vest,violations\violation_20250924_142822_f141_id1.jpg,0.0,0.0
+
+2025-09-24 14:28:57,5,4,no_hardhat+no_vest,violations\violation_20250924_142857_f5_id4.jpg,0.0,0.0
+2025-09-24 14:28:57,5,3,no_hardhat+no_vest,violations\violation_20250924_142857_f5_id3.jpg,0.0,0.0
+2025-09-24 14:28:57,5,2,no_hardhat+no_vest,violations\violation_20250924_142857_f5_id2.jpg,0.0,0.0
+2025-09-24 14:28:57,5,1,no_hardhat+no_vest,violations\violation_20250924_142857_f5_id1.jpg,0.0,0.0
+2025-09-24 14:29:01,34,17,no_hardhat+no_vest,violations\violation_20250924_142901_f34_id17.jpg,0.0,0.0
+2025-09-24 14:29:05,72,4,no_hardhat,violations\violation_20250924_142905_f72_id4.jpg,0.0,0.0
+2025-09-24 14:29:05,72,2,no_hardhat,violations\violation_20250924_142905_f72_id2.jpg,0.0,0.532
+2025-09-24 14:29:05,72,3,no_hardhat+no_vest,violations\violation_20250924_142905_f72_id3.jpg,0.0,0.0
+2025-09-24 14:29:05,72,1,no_hardhat+no_vest,violations\violation_20250924_142905_f72_id1.jpg,0.0,0.0
+2025-09-24 14:29:13,143,4,no_hardhat+no_vest,violations\violation_20250924_142913_f143_id4.jpg,0.0,0.0
+2025-09-24 14:29:13,143,2,no_hardhat+no_vest,violations\violation_20250924_142913_f143_id2.jpg,0.0,0.0
+2025-09-24 14:29:13,143,3,no_hardhat+no_vest,violations\violation_20250924_142913_f143_id3.jpg,0.0,0.303
+2025-09-24 14:29:13,143,1,no_hardhat+no_vest,violations\violation_20250924_142913_f143_id1.jpg,0.0,0.0
+
+2025-09-24 14:31:56,10,4,no_hardhat+no_vest,violations\violation_20250924_143156_f10_id4.jpg,0.0,0.0
+2025-09-24 14:31:56,10,3,no_hardhat+no_vest,violations\violation_20250924_143156_f10_id3.jpg,0.0,0.0
+2025-09-24 14:31:56,10,1,no_hardhat+no_vest,violations\violation_20250924_143156_f10_id1.jpg,0.0,0.0
+2025-09-24 14:31:58,28,2,no_hardhat+no_vest,violations\violation_20250924_143158_f28_id2.jpg,0.0,0.0
+2025-09-24 14:32:04,82,3,no_hardhat+no_vest,violations\violation_20250924_143204_f82_id3.jpg,0.0,0.374
+2025-09-24 14:32:04,82,4,no_hardhat+no_vest,violations\violation_20250924_143204_f82_id4.jpg,0.0,0.0
+2025-09-24 14:32:04,82,1,no_hardhat+no_vest,violations\violation_20250924_143204_f82_id1.jpg,0.0,0.0
+2025-09-24 14:32:06,101,2,no_hardhat,violations\violation_20250924_143206_f101_id2.jpg,0.0,0.642
+2025-09-24 14:32:12,155,4,no_hardhat+no_vest,violations\violation_20250924_143212_f155_id4.jpg,0.0,0.0
+2025-09-24 14:32:12,155,3,no_hardhat+no_vest,violations\violation_20250924_143212_f155_id3.jpg,0.0,0.0
+2025-09-24 14:32:12,155,1,no_hardhat+no_vest,violations\violation_20250924_143212_f155_id1.jpg,0.0,0.0
+2025-09-24 14:32:14,173,2,no_hardhat+no_vest,violations\violation_20250924_143214_f173_id2.jpg,0.0,0.0
+
+2025-09-24 14:40:38,10,4,no_hardhat+no_vest,violations\violation_20250924_144038_f10_id4.jpg,0.0,0.0
+2025-09-24 14:40:38,10,3,no_hardhat+no_vest,violations\violation_20250924_144038_f10_id3.jpg,0.0,0.0
+2025-09-24 14:40:38,10,1,no_hardhat+no_vest,violations\violation_20250924_144038_f10_id1.jpg,0.0,0.0
+2025-09-24 14:40:50,143,3,no_hardhat+no_vest,violations\violation_20250924_144050_f143_id3.jpg,0.0,0.303
+2025-09-24 14:40:50,143,1,no_hardhat+no_vest,violations\violation_20250924_144050_f143_id1.jpg,0.0,0.0
+
+2025-09-24 14:44:38,10,4,no_hardhat+no_vest,violations\violation_20250924_144438_f10_id4.jpg,0.0,0.0
+2025-09-24 14:44:38,10,3,no_hardhat+no_vest,violations\violation_20250924_144438_f10_id3.jpg,0.0,0.264
+2025-09-24 14:44:38,10,1,no_hardhat+no_vest,violations\violation_20250924_144438_f10_id1.jpg,0.0,0.0
+2025-09-24 14:44:50,151,3,no_hardhat,violations\violation_20250924_144450_f151_id3.jpg,0.0,0.637
+2025-09-24 14:44:50,151,1,no_hardhat+no_vest,violations\violation_20250924_144450_f151_id1.jpg,0.0,0.0
+
+2025-09-24 16:40:12,12,3,no_hardhat+no_vest,violations\violation_20250924_164012_f12_id3.jpg,0.0,0.0
+2025-09-24 16:40:12,12,1,no_hardhat+no_vest,violations\violation_20250924_164012_f12_id1.jpg,0.0,0.0
+2025-09-24 16:40:19,83,4,no_hardhat,violations\violation_20250924_164019_f83_id4.jpg,0.0,0.577
+2025-09-24 16:40:24,146,3,no_hardhat+no_vest,violations\violation_20250924_164024_f146_id3.jpg,0.0,0.0
+2025-09-24 16:40:24,146,1,no_hardhat+no_vest,violations\violation_20250924_164024_f146_id1.jpg,0.0,0.0
+
+2025-09-24 16:41:10,12,3,no_hardhat+no_vest,violations\violation_20250924_164110_f12_id3.jpg,0.0,0.0
+2025-09-24 16:41:10,12,1,no_hardhat+no_vest,violations\violation_20250924_164110_f12_id1.jpg,0.0,0.0
+2025-09-24 16:41:18,83,4,no_hardhat,violations\violation_20250924_164118_f83_id4.jpg,0.0,0.577
+2025-09-24 16:41:22,127,3,no_hardhat+no_vest,violations\violation_20250924_164122_f127_id3.jpg,0.0,0.0
+2025-09-24 16:41:22,127,1,no_hardhat+no_vest,violations\violation_20250924_164122_f127_id1.jpg,0.0,0.0
+
+2025-09-24 17:13:23,12,3,no_hardhat+no_vest,violations\violation_20250924_171323_f12_id3.jpg,0.0,0.0
+2025-09-24 17:13:23,12,1,no_hardhat+no_vest,violations\violation_20250924_171323_f12_id1.jpg,0.0,0.0
+2025-09-24 17:13:30,83,4,no_hardhat,violations\violation_20250924_171330_f83_id4.jpg,0.0,0.577
+2025-09-24 17:13:35,133,3,no_hardhat+no_vest,violations\violation_20250924_171335_f133_id3.jpg,0.0,0.283
+2025-09-24 17:13:35,133,1,no_hardhat+no_vest,violations\violation_20250924_171335_f133_id1.jpg,0.0,0.0
+
+2025-09-24 17:41:04,12,3,no_hardhat+no_vest,violations\violation_20250924_174104_f12_id3.jpg,0.0,0.312
+2025-09-24 17:41:04,12,1,no_hardhat+no_vest,violations\violation_20250924_174104_f12_id1.jpg,0.0,0.0
+2025-09-24 17:41:11,83,4,no_hardhat,violations\violation_20250924_174111_f83_id4.jpg,0.0,0.577
+2025-09-24 17:41:16,134,3,no_hardhat,violations\violation_20250924_174116_f134_id3.jpg,0.0,0.59
+2025-09-24 17:41:16,134,1,no_hardhat+no_vest,violations\violation_20250924_174116_f134_id1.jpg,0.0,0.0
+
+2025-09-24 17:42:09,12,3,no_hardhat+no_vest,violations\violation_20250924_174209_f12_id3.jpg,0.0,0.312
+2025-09-24 17:42:09,12,1,no_hardhat+no_vest,violations\violation_20250924_174209_f12_id1.jpg,0.0,0.0
+2025-09-24 17:42:17,83,4,no_hardhat,violations\violation_20250924_174217_f83_id4.jpg,0.0,0.577
+2025-09-24 17:42:21,114,3,no_hardhat,violations\violation_20250924_174221_f114_id3.jpg,0.0,0.54
+2025-09-24 17:42:21,114,1,no_hardhat+no_vest,violations\violation_20250924_174221_f114_id1.jpg,0.0,0.0
+
+2025-09-24 17:44:50,12,3,no_hardhat+no_vest,violations\violation_20250924_174450_f12_id3.jpg,0.0,0.312
+2025-09-24 17:44:50,12,1,no_hardhat+no_vest,violations\violation_20250924_174450_f12_id1.jpg,0.0,0.0
+2025-09-24 17:44:59,83,4,no_hardhat,violations\violation_20250924_174459_f83_id4.jpg,0.0,0.577
+2025-09-24 17:45:02,112,3,no_hardhat,violations\violation_20250924_174502_f112_id3.jpg,0.0,0.552
+2025-09-24 17:45:02,112,1,no_hardhat+no_vest,violations\violation_20250924_174502_f112_id1.jpg,0.0,0.0
+
+2025-09-24 17:45:23,12,3,no_hardhat+no_vest,violations\violation_20250924_174523_f12_id3.jpg,0.0,0.312
+2025-09-24 17:45:23,12,1,no_hardhat+no_vest,violations\violation_20250924_174523_f12_id1.jpg,0.0,0.0
+2025-09-24 17:45:31,83,4,no_hardhat,violations\violation_20250924_174531_f83_id4.jpg,0.0,0.577
+2025-09-24 17:45:36,126,3,no_hardhat,violations\violation_20250924_174536_f126_id3.jpg,0.0,0.648
+2025-09-24 17:45:36,126,1,no_hardhat+no_vest,violations\violation_20250924_174536_f126_id1.jpg,0.0,0.0
+
+2025-09-24 17:47:55,12,1,no_hardhat,violations\violation_20250924_174755_f12_id1.jpg,0.0,0.833
+2025-09-24 17:47:55,12,6,no_hardhat,violations\violation_20250924_174755_f12_id6.jpg,0.0,0.77
+2025-09-24 17:47:55,12,4,no_hardhat,violations\violation_20250924_174755_f12_id4.jpg,0.0,0.848
+2025-09-24 17:47:55,12,2,no_hardhat,violations\violation_20250924_174755_f12_id2.jpg,0.0,0.792
+2025-09-24 17:47:55,12,3,no_hardhat,violations\violation_20250924_174755_f12_id3.jpg,0.0,0.642
+2025-09-24 17:47:55,12,5,no_hardhat,violations\violation_20250924_174755_f12_id5.jpg,0.0,0.896
+2025-09-24 17:47:55,13,7,no_hardhat,violations\violation_20250924_174755_f13_id7.jpg,0.0,0.825
+2025-09-24 17:47:57,34,8,no_hardhat,violations\violation_20250924_174757_f34_id8.jpg,0.0,0.573
+2025-09-24 17:47:58,37,10,no_hardhat,violations\violation_20250924_174758_f37_id10.jpg,0.0,0.822
+2025-09-24 17:48:00,58,14,no_hardhat,violations\violation_20250924_174800_f58_id14.jpg,0.0,0.741
+2025-09-24 17:48:02,75,16,no_hardhat,violations\violation_20250924_174802_f75_id16.jpg,0.0,0.716
+2025-09-24 17:48:06,110,17,no_hardhat,violations\violation_20250924_174806_f110_id17.jpg,0.0,0.734
+2025-09-24 17:48:07,115,4,no_hardhat,violations\violation_20250924_174807_f115_id4.jpg,0.0,0.877
+2025-09-24 17:48:07,115,3,no_hardhat,violations\violation_20250924_174807_f115_id3.jpg,0.0,0.654
+2025-09-24 17:48:07,115,1,no_hardhat,violations\violation_20250924_174807_f115_id1.jpg,0.0,0.872
+2025-09-24 17:48:07,115,5,no_hardhat,violations\violation_20250924_174807_f115_id5.jpg,0.0,0.901
+2025-09-24 17:48:09,137,8,no_hardhat,violations\violation_20250924_174809_f137_id8.jpg,0.0,0.678
+
+2025-09-24 18:06:30,12,1,no_hardhat,violations\violation_20250924_180630_f12_id1.jpg,0.0,0.833
+2025-09-24 18:06:30,12,6,no_hardhat,violations\violation_20250924_180630_f12_id6.jpg,0.0,0.77
+2025-09-24 18:06:30,12,4,no_hardhat,violations\violation_20250924_180630_f12_id4.jpg,0.0,0.848
+2025-09-24 18:06:30,12,2,no_hardhat,violations\violation_20250924_180630_f12_id2.jpg,0.0,0.792
+2025-09-24 18:06:30,12,3,no_hardhat,violations\violation_20250924_180630_f12_id3.jpg,0.0,0.642
+2025-09-24 18:06:30,12,5,no_hardhat,violations\violation_20250924_180630_f12_id5.jpg,0.0,0.896
+2025-09-24 18:06:30,13,7,no_hardhat,violations\violation_20250924_180630_f13_id7.jpg,0.0,0.825
+2025-09-24 18:06:32,34,8,no_hardhat,violations\violation_20250924_180632_f34_id8.jpg,0.0,0.573
+2025-09-24 18:06:33,37,10,no_hardhat,violations\violation_20250924_180633_f37_id10.jpg,0.0,0.822
+2025-09-24 18:06:35,58,14,no_hardhat,violations\violation_20250924_180635_f58_id14.jpg,0.0,0.741
+2025-09-24 18:06:37,75,16,no_hardhat,violations\violation_20250924_180637_f75_id16.jpg,0.0,0.716
+2025-09-24 18:06:41,110,17,no_hardhat,violations\violation_20250924_180641_f110_id17.jpg,0.0,0.734
+2025-09-24 18:06:42,123,5,no_hardhat,violations\violation_20250924_180642_f123_id5.jpg,0.0,0.91
+2025-09-24 18:06:42,123,4,no_hardhat,violations\violation_20250924_180642_f123_id4.jpg,0.0,0.864
+2025-09-24 18:06:42,123,3,no_hardhat,violations\violation_20250924_180642_f123_id3.jpg,0.0,0.53
+2025-09-24 18:06:42,123,1,no_hardhat,violations\violation_20250924_180642_f123_id1.jpg,0.0,0.865
+2025-09-24 18:06:45,146,8,no_hardhat,violations\violation_20250924_180645_f146_id8.jpg,0.0,0.716
+
+2025-09-24 18:07:59,12,1,no_hardhat,violations\violation_20250924_180759_f12_id1.jpg,0.0,0.833
+2025-09-24 18:07:59,12,6,no_hardhat,violations\violation_20250924_180759_f12_id6.jpg,0.0,0.77
+2025-09-24 18:08:00,12,4,no_hardhat,violations\violation_20250924_180759_f12_id4.jpg,0.0,0.848
+2025-09-24 18:08:00,12,2,no_hardhat,violations\violation_20250924_180800_f12_id2.jpg,0.0,0.792
+2025-09-24 18:08:00,12,3,no_hardhat,violations\violation_20250924_180800_f12_id3.jpg,0.0,0.642
+2025-09-24 18:08:00,12,5,no_hardhat,violations\violation_20250924_180800_f12_id5.jpg,0.0,0.896
+2025-09-24 18:08:00,13,7,no_hardhat,violations\violation_20250924_180800_f13_id7.jpg,0.0,0.825
+2025-09-24 18:08:02,34,8,no_hardhat,violations\violation_20250924_180802_f34_id8.jpg,0.0,0.573
+2025-09-24 18:08:02,37,10,no_hardhat,violations\violation_20250924_180802_f37_id10.jpg,0.0,0.822
+2025-09-24 18:08:05,58,14,no_hardhat,violations\violation_20250924_180804_f58_id14.jpg,0.0,0.741
+2025-09-24 18:08:06,75,16,no_hardhat,violations\violation_20250924_180806_f75_id16.jpg,0.0,0.716
+2025-09-24 18:08:10,110,17,no_hardhat,violations\violation_20250924_180810_f110_id17.jpg,0.0,0.734
+2025-09-24 18:08:12,124,3,no_hardhat,violations\violation_20250924_180812_f124_id3.jpg,0.0,0.556
+2025-09-24 18:08:12,124,5,no_hardhat,violations\violation_20250924_180812_f124_id5.jpg,0.0,0.911
+2025-09-24 18:08:12,124,4,no_hardhat,violations\violation_20250924_180812_f124_id4.jpg,0.0,0.859
+2025-09-24 18:08:12,124,1,no_hardhat,violations\violation_20250924_180812_f124_id1.jpg,0.0,0.861
+2025-09-24 18:08:14,146,8,no_hardhat,violations\violation_20250924_180814_f146_id8.jpg,0.0,0.716
+
+2025-09-24 18:09:35,12,1,no_hardhat,violations\violation_20250924_180935_f12_id1.jpg,0.0,0.833
+2025-09-24 18:09:35,12,6,no_hardhat,violations\violation_20250924_180935_f12_id6.jpg,0.0,0.77
+2025-09-24 18:09:35,12,4,no_hardhat,violations\violation_20250924_180935_f12_id4.jpg,0.0,0.848
+2025-09-24 18:09:35,12,2,no_hardhat,violations\violation_20250924_180935_f12_id2.jpg,0.0,0.792
+2025-09-24 18:09:35,12,3,no_hardhat,violations\violation_20250924_180935_f12_id3.jpg,0.0,0.642
+2025-09-24 18:09:35,12,5,no_hardhat,violations\violation_20250924_180935_f12_id5.jpg,0.0,0.896
+2025-09-24 18:09:35,13,7,no_hardhat,violations\violation_20250924_180935_f13_id7.jpg,0.0,0.825
+2025-09-24 18:09:38,34,8,no_hardhat,violations\violation_20250924_180938_f34_id8.jpg,0.0,0.573
+2025-09-24 18:09:38,37,10,no_hardhat,violations\violation_20250924_180938_f37_id10.jpg,0.0,0.822
+2025-09-24 18:09:41,58,14,no_hardhat,violations\violation_20250924_180941_f58_id14.jpg,0.0,0.741
+2025-09-24 18:09:43,75,16,no_hardhat,violations\violation_20250924_180943_f75_id16.jpg,0.0,0.716
+2025-09-24 18:09:47,99,3,no_hardhat,violations\violation_20250924_180947_f99_id3.jpg,0.0,0.529
+2025-09-24 18:09:47,99,1,no_hardhat,violations\violation_20250924_180947_f99_id1.jpg,0.0,0.878
+2025-09-24 18:09:47,99,5,no_hardhat,violations\violation_20250924_180947_f99_id5.jpg,0.0,0.897
+2025-09-24 18:09:47,99,4,no_hardhat,violations\violation_20250924_180947_f99_id4.jpg,0.0,0.842
+2025-09-24 18:09:49,110,17,no_hardhat,violations\violation_20250924_180949_f110_id17.jpg,0.0,0.734
+2025-09-24 18:09:50,117,8,no_hardhat,violations\violation_20250924_180950_f117_id8.jpg,0.0,0.71
+2025-09-24 18:09:53,136,14,no_hardhat,violations\violation_20250924_180953_f136_id14.jpg,0.0,0.866
+2025-09-24 18:09:59,176,3,no_hardhat,violations\violation_20250924_180959_f176_id3.jpg,0.0,0.693
+2025-09-24 18:09:59,176,5,no_hardhat,violations\violation_20250924_180959_f176_id5.jpg,0.0,0.887
+2025-09-24 18:09:59,176,4,no_hardhat,violations\violation_20250924_180959_f176_id4.jpg,0.0,0.857
+2025-09-24 18:09:59,176,1,no_hardhat,violations\violation_20250924_180959_f176_id1.jpg,0.0,0.846
+2025-09-24 18:10:01,192,17,no_hardhat,violations\violation_20250924_181001_f192_id17.jpg,0.0,0.83
+
+2025-09-24 18:48:38,12,1,no_hardhat,violations\violation_20250924_184838_f12_id1.jpg,0.0,0.833
+2025-09-24 18:48:38,12,6,no_hardhat,violations\violation_20250924_184838_f12_id6.jpg,0.0,0.77
+2025-09-24 18:48:38,12,4,no_hardhat,violations\violation_20250924_184838_f12_id4.jpg,0.0,0.848
+2025-09-24 18:48:38,12,2,no_hardhat,violations\violation_20250924_184838_f12_id2.jpg,0.0,0.792
+2025-09-24 18:48:38,12,3,no_hardhat,violations\violation_20250924_184838_f12_id3.jpg,0.0,0.642
+2025-09-24 18:48:38,12,5,no_hardhat,violations\violation_20250924_184838_f12_id5.jpg,0.0,0.896
+2025-09-24 18:48:38,13,7,no_hardhat,violations\violation_20250924_184838_f13_id7.jpg,0.0,0.825
+2025-09-24 18:48:40,34,8,no_hardhat,violations\violation_20250924_184840_f34_id8.jpg,0.0,0.573
+2025-09-24 18:48:40,37,10,no_hardhat,violations\violation_20250924_184840_f37_id10.jpg,0.0,0.822
+2025-09-24 18:48:42,58,14,no_hardhat,violations\violation_20250924_184842_f58_id14.jpg,0.0,0.741
+2025-09-24 18:48:44,75,16,no_hardhat,violations\violation_20250924_184844_f75_id16.jpg,0.0,0.716
+2025-09-24 18:48:47,110,17,no_hardhat,violations\violation_20250924_184847_f110_id17.jpg,0.0,0.734
+2025-09-24 18:48:50,143,3,no_hardhat,violations\violation_20250924_184850_f143_id3.jpg,0.0,0.546
+2025-09-24 18:48:50,143,1,no_hardhat,violations\violation_20250924_184850_f143_id1.jpg,0.0,0.839
+2025-09-24 18:48:50,143,4,no_hardhat,violations\violation_20250924_184850_f143_id4.jpg,0.0,0.842
+2025-09-24 18:48:50,143,5,no_hardhat,violations\violation_20250924_184850_f143_id5.jpg,0.0,0.904
+2025-09-24 18:48:52,166,8,no_hardhat,violations\violation_20250924_184852_f166_id8.jpg,0.0,0.752
+
+2025-09-24 19:19:00,12,1,no_hardhat,violations\violation_20250924_191900_f12_id1.jpg,0.0,0.833
+2025-09-24 19:19:00,12,6,no_hardhat,violations\violation_20250924_191900_f12_id6.jpg,0.0,0.77
+2025-09-24 19:19:00,12,4,no_hardhat,violations\violation_20250924_191900_f12_id4.jpg,0.0,0.848
+2025-09-24 19:19:00,12,2,no_hardhat,violations\violation_20250924_191900_f12_id2.jpg,0.0,0.792
+2025-09-24 19:19:00,12,3,no_hardhat,violations\violation_20250924_191900_f12_id3.jpg,0.0,0.642
+2025-09-24 19:19:00,12,5,no_hardhat,violations\violation_20250924_191900_f12_id5.jpg,0.0,0.896
+2025-09-24 19:19:00,13,7,no_hardhat,violations\violation_20250924_191900_f13_id7.jpg,0.0,0.825
+2025-09-24 19:19:03,34,8,no_hardhat,violations\violation_20250924_191903_f34_id8.jpg,0.0,0.573
+2025-09-24 19:19:03,37,10,no_hardhat,violations\violation_20250924_191903_f37_id10.jpg,0.0,0.822
+2025-09-24 19:19:06,58,14,no_hardhat,violations\violation_20250924_191906_f58_id14.jpg,0.0,0.741
+2025-09-24 19:19:08,75,16,no_hardhat,violations\violation_20250924_191908_f75_id16.jpg,0.0,0.716
+2025-09-24 19:19:12,110,17,no_hardhat,violations\violation_20250924_191912_f110_id17.jpg,0.0,0.734
+2025-09-24 19:19:12,111,4,no_hardhat,violations\violation_20250924_191912_f111_id4.jpg,0.0,0.876
+2025-09-24 19:19:12,111,3,no_hardhat,violations\violation_20250924_191912_f111_id3.jpg,0.0,0.515
+2025-09-24 19:19:12,111,5,no_hardhat,violations\violation_20250924_191912_f111_id5.jpg,0.0,0.9
+2025-09-24 19:19:12,111,1,no_hardhat,violations\violation_20250924_191912_f111_id1.jpg,0.0,0.87
+2025-09-24 19:19:15,136,8,no_hardhat,violations\violation_20250924_191915_f136_id8.jpg,0.0,0.682
+
+2025-09-24 21:33:34,10,4,no_vest,violations\violation_20250924_213334_f10_id4.jpg,0.679,0.0
+2025-09-24 21:33:34,10,3,no_vest,violations\violation_20250924_213334_f10_id3.jpg,0.57,0.264
+2025-09-24 21:33:34,10,1,no_vest,violations\violation_20250924_213334_f10_id1.jpg,0.761,0.0
+2025-09-24 21:33:46,163,1,no_vest,violations\violation_20250924_213346_f163_id1.jpg,0.752,0.0
+
+2025-09-24 21:47:49,10,1,no_vest,violations\violation_20250924_214749_f10_id1.jpg,0.748,0.0
+2025-09-24 21:47:49,20,3,no_vest,violations\violation_20250924_214749_f20_id3.jpg,0.582,0.428
+2025-09-24 21:47:56,81,4,no_hardhat,violations\violation_20250924_214755_f81_id4.jpg,0.0,0.631
+2025-09-24 21:48:04,162,3,no_hardhat,violations\violation_20250924_214804_f162_id3.jpg,0.437,0.566
+
+2025-09-24 21:48:44,34,8,no_hardhat,violations\violation_20250924_214844_f34_id8.jpg,0.0,0.607
+
+2025-09-24 21:49:22,34,8,no_hardhat,violations\violation_20250924_214922_f34_id8.jpg,0.0,0.607
+
+2025-09-24 21:51:11,34,8,no_hardhat,violations\violation_20250924_215111_f34_id8.jpg,0.0,0.607
+
+2025-09-24 21:58:06,12,1,no_vest,violations\violation_20250924_215806_f12_id1.jpg,0.736,0.0
+2025-09-24 21:58:07,22,3,no_vest,violations\violation_20250924_215807_f22_id3.jpg,0.575,0.441
+2025-09-24 21:58:13,83,4,no_hardhat,violations\violation_20250924_215813_f83_id4.jpg,0.0,0.601
+2025-09-24 21:58:21,164,3,no_hardhat,violations\violation_20250924_215821_f164_id3.jpg,0.44,0.58
+
+2025-09-24 21:58:36,34,8,no_hardhat,violations\violation_20250924_215836_f34_id8.jpg,0.0,0.607
+
+2025-09-24 21:59:21,36,8,no_hardhat,violations\violation_20250924_215921_f36_id8.jpg,0.0,0.559
+2025-09-24 21:59:21,39,2,no_hardhat,violations\violation_20250924_215921_f39_id2.jpg,0.462,0.659
+
+2025-09-24 22:04:41,21,2,no_hardhat+no_vest,violations\violation_20250924_220441_f21_id2.jpg,0.267,0.0
+2025-09-24 22:04:50,122,19,no_vest,violations\violation_20250924_220450_f122_id19.jpg,0.735,0.0
+
+2025-09-24 22:08:01,21,2,no_hardhat+no_vest,violations\violation_20250924_220801_f21_id2.jpg,0.267,0.0
+2025-09-24 22:08:12,122,19,no_vest,violations\violation_20250924_220812_f122_id19.jpg,0.735,0.0
+
+2025-09-24 22:08:45,36,8,no_hardhat,violations\violation_20250924_220845_f36_id8.jpg,0.0,0.559
+2025-09-24 22:08:45,39,2,no_hardhat,violations\violation_20250924_220845_f39_id2.jpg,0.462,0.659
+
+2025-09-24 22:10:39,36,8,no_hardhat,violations\violation_20250924_221039_f36_id8.jpg,0.0,0.559
+2025-09-24 22:10:39,39,2,no_hardhat,violations\violation_20250924_221039_f39_id2.jpg,0.462,0.659
+
+2025-09-24 22:11:11,36,8,no_hardhat,violations\violation_20250924_221111_f36_id8.jpg,0.0,0.559
+2025-09-24 22:11:11,39,2,no_hardhat,violations\violation_20250924_221111_f39_id2.jpg,0.462,0.659
+
+2025-09-24 22:11:43,36,8,no_hardhat,violations\violation_20250924_221143_f36_id8.jpg,0.0,0.559
+2025-09-24 22:11:43,39,2,no_hardhat,violations\violation_20250924_221143_f39_id2.jpg,0.462,0.659
+
+2025-09-24 22:13:44,12,1,no_vest,violations\violation_20250924_221344_f12_id1.jpg,0.736,0.0
+2025-09-24 22:13:45,22,3,no_vest,violations\violation_20250924_221345_f22_id3.jpg,0.575,0.441
+2025-09-24 22:13:53,83,4,no_hardhat,violations\violation_20250924_221353_f83_id4.jpg,0.0,0.601
+2025-09-24 22:13:57,115,3,no_hardhat,violations\violation_20250924_221357_f115_id3.jpg,0.497,0.546
+
+2025-09-25 01:58:13,10,4,NO_VEST,violations\violation_20250925_015813_f10_id4.jpg,0.679,0.0
+2025-09-25 01:58:15,10,3,NO_VEST,violations\violation_20250925_015815_f10_id3.jpg,0.57,0.264
+2025-09-25 01:58:16,10,1,NO_VEST,violations\violation_20250925_015816_f10_id1.jpg,0.761,0.0
+2025-09-25 01:58:25,114,1,NO_VEST,violations\violation_20250925_015825_f114_id1.jpg,0.8,0.0
+2025-09-25 01:58:28,127,3,NO_HARDHAT,violations\violation_20250925_015828_f127_id3.jpg,0.0,0.64
+
+2025-09-25 02:30:13,10,4,NO_VEST,violations\violation_20250925_023013_f10_id4.jpg,0.679,0.0
+2025-09-25 02:30:15,10,3,NO_VEST,violations\violation_20250925_023015_f10_id3.jpg,0.57,0.264
+2025-09-25 02:30:16,10,1,NO_VEST,violations\violation_20250925_023016_f10_id1.jpg,0.761,0.0
+2025-09-25 02:30:25,115,1,NO_VEST,violations\violation_20250925_023025_f115_id1.jpg,0.811,0.0
+2025-09-25 02:30:28,127,3,NO_HARDHAT,violations\violation_20250925_023028_f127_id3.jpg,0.0,0.64
+
+2025-09-25 02:46:43,32,8,NO_HARDHAT,violations\violation_20250925_024643_f32_id8.jpg,0.0,0.685
+2025-09-25 02:46:48,75,10,NO_HARDHAT,violations\violation_20250925_024648_f75_id10.jpg,0.0,0.879
+
+2025-09-25 10:26:40,32,8,NO_HARDHAT,violations\violation_20250925_102640_f32_id8.jpg,0.0,0.685
+2025-09-25 10:26:48,75,10,NO_HARDHAT,violations\violation_20250925_102648_f75_id10.jpg,0.0,0.879
+
+2025-09-25 10:28:24,10,4,NO_VEST,violations\violation_20250925_102824_f10_id4.jpg,0.679,0.0
+2025-09-25 10:28:26,10,3,NO_VEST,violations\violation_20250925_102826_f10_id3.jpg,0.57,0.264
+2025-09-25 10:28:27,10,1,NO_VEST,violations\violation_20250925_102827_f10_id1.jpg,0.761,0.0
+2025-09-25 10:28:36,75,1,NO_VEST,violations\violation_20250925_102836_f75_id1.jpg,0.822,0.0
+2025-09-25 10:28:39,81,4,NO_HARDHAT,violations\violation_20250925_102839_f81_id4.jpg,0.0,0.616
+2025-09-25 10:28:41,86,3,NO_HARDHAT,violations\violation_20250925_102841_f86_id3.jpg,0.29,0.64
+2025-09-25 10:28:48,133,1,NO_VEST,violations\violation_20250925_102848_f133_id1.jpg,0.798,0.0
+
+2025-09-25 10:33:44,10,3,NO_VEST,violations\violation_20250925_103344_f10_id3.jpg,0.57,0.264
+2025-09-25 10:33:46,10,1,NO_VEST,violations\violation_20250925_103346_f10_id1.jpg,0.761,0.0
+2025-09-25 10:33:56,103,1,NO_VEST,violations\violation_20250925_103356_f103_id1.jpg,0.779,0.0
+2025-09-25 10:33:59,111,3,NO_HARDHAT,violations\violation_20250925_103359_f111_id3.jpg,0.427,0.575
+
+2025-09-25 10:35:19,71,1,NO_VEST,violations\violation_20250925_103519_f71_id1.jpg,0.759,0.363
+
+2025-09-25 10:37:06,34,8,NO_HARDHAT,violations\violation_20250925_103706_f34_id8.jpg,0.0,0.573
+2025-09-25 10:37:10,75,10,NO_HARDHAT,violations\violation_20250925_103710_f75_id10.jpg,0.0,0.879
+
+
+2025-09-25 10:40:16,12,2,NO_VEST,violations\violation_20250925_104016_f12_id2.jpg,0.336,0.0
+2025-09-25 10:40:21,74,12,NO_HARDHAT,violations\violation_20250925_104021_f74_id12.jpg,0.0,0.434
+2025-09-25 10:40:25,126,19,NO_VEST,violations\violation_20250925_104025_f126_id19.jpg,0.671,0.0
+2025-09-25 10:40:30,182,21,NO_VEST,violations\violation_20250925_104030_f182_id21.jpg,0.715,0.399
