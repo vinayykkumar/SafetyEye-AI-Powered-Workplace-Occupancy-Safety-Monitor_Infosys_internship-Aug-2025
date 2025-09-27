@@ -62,7 +62,7 @@ The app can detect the following 10 classes:
    **Note**: This project uses NumPy 1.x for compatibility with PyTorch and OpenCV. The requirements.txt includes version constraints to prevent compatibility issues.
 
 4. **Ensure you have the trained models**:
-   Make sure the following model files are in the `outputs/` folder:
+   Make sure the following model files are in the `models/` folder:
    - `yolov8n.pt`
    - `yolo11n.pt`
 
@@ -105,7 +105,7 @@ dataset11/
 ├── requirements.txt              # Python dependencies
 ├── README.md                    # This file
 ├── data.yaml                    # Dataset configuration
-├── outputs/                     # Trained models directory
+├── models/                      # Trained models directory
 │   ├── yolov8n.pt              # YOLOv8 nano model
 │   └── yolo11n.pt              # YOLO11 nano model
 ├── train/                       # Training dataset
@@ -143,7 +143,7 @@ You can customize the app by:
    - Recreate your virtual environment and reinstall from requirements.txt
    - The requirements.txt includes version constraints to prevent this issue
 
-2. **Model loading errors**: Ensure the model files exist in the `outputs/` folder
+2. **Model loading errors**: Ensure the model files exist in the `models/` folder
 3. **Video upload issues**: Check that your video format is supported (MP4, AVI, MOV, MKV)
 4. **Memory issues**: Try processing smaller video files or reduce the confidence threshold
 5. **Slow processing**: Lower the confidence threshold or process fewer frames
