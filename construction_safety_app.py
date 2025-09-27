@@ -12,6 +12,11 @@ import io
 import requests
 import json
 import base64
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
 
 # Configure Streamlit page
 st.set_page_config(
@@ -503,15 +508,20 @@ def update_live_stats(placeholder, total_violations, frame_stats, current_frame)
         
         st.info(f"📈 {total_persons} total workers processed")
 
-def send_email_with_csv_formspree(csv_data, filename, recipient_email, sender_name, analysis_type="Video Analysis"):
-    """Send email with CSV attachment using Formspree (no login required)"""
+def send_email_with_csv_smtp(csv_data, filename, recipient_email, sender_name, analysis_type="Video Analysis"):
+    """Send email with CSV attachment using Gmail SMTP"""
     try:
-        # Formspree endpoint (free service)
-        formspree_url = "https://formspree.io/f/xpzvgbwd"  # Free public endpoint for construction safety
+        # Gmail SMTP configuration
+        sender_email = "safetyeyeteam8@gmail.com"
+        password = "dtwmwimtbqquqwda"  # App Password for Gmail
         
-        # Prepare email content
-        email_subject = f"🚧 Construction Safety Analysis Results - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        # Create email message
+        msg = MIMEMultipart()
+        msg["From"] = sender_email
+        msg["To"] = recipient_email
+        msg["Subject"] = f"🚧 Construction Safety Analysis Results - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
         
+        # Email body
         email_body = f"""
 Construction Safety Analysis Complete!
 
@@ -519,7 +529,7 @@ Analysis Details:
 📊 Type: {analysis_type}
 ⏰ Completed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 📁 File: {filename}
-👤 Sent by: {sender_name}
+👤 Sent by: {sender_name or 'Safety Monitor'}
 
 This email contains your detailed safety violation report as a CSV attachment.
 
@@ -533,57 +543,48 @@ Best regards,
 Construction Safety Monitor System 🚧
         """
         
-        # Encode CSV as base64 for attachment
-        csv_base64 = base64.b64encode(csv_data.encode()).decode()
+        # Attach body to email
+        msg.attach(MIMEText(email_body, "plain"))
         
-        # Prepare form data
-        form_data = {
-            "email": recipient_email,
-            "subject": email_subject,
-            "message": email_body,
-            "_replyto": recipient_email,
-            "_subject": email_subject,
-            "sender_name": sender_name or "Safety Monitor",
-            "analysis_type": analysis_type,
-            "attachment_name": filename,
-            "attachment_data": csv_base64,
-            "_format": "plain"
-        }
-        
-        # Send email via Formspree
-        response = requests.post(
-            formspree_url,
-            data=form_data,
-            headers={
-                "Accept": "application/json",
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            timeout=30
+        # Add CSV attachment
+        part = MIMEBase('application', 'octet-stream')
+        part.set_payload(csv_data.encode())
+        encoders.encode_base64(part)
+        part.add_header(
+            'Content-Disposition',
+            f'attachment; filename= {filename}'
         )
+        msg.attach(part)
         
-        if response.status_code == 200:
-            return True, "Email sent successfully! 📧 (Check spam folder if needed)"
-        else:
-            # Fallback: Try alternative method with just email notification
-            return send_email_notification_only(recipient_email, sender_name, filename, analysis_type)
-            
+        # Connect to Gmail SMTP server and send
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(sender_email, password)
+            server.sendmail(sender_email, recipient_email, msg.as_string())
+        
+        return True, "✅ Email sent successfully! 📧 (Check spam folder if needed)"
+        
+    except smtplib.SMTPAuthenticationError:
+        return False, "❌ Email authentication failed. Please check Gmail App Password settings."
+    except smtplib.SMTPException as e:
+        return False, f"❌ SMTP error occurred: {str(e)}"
     except Exception as e:
-        # Fallback: Try simple notification
-        try:
-            return send_email_notification_only(recipient_email, sender_name, filename, analysis_type)
-        except:
-            return False, f"Email service temporarily unavailable. Please download CSV manually. ({str(e)})"
+        return False, f"❌ Email sending failed: {str(e)}"
 
 def send_email_notification_only(recipient_email, sender_name, filename, analysis_type):
-    """Send simple email notification using alternative service"""
+    """Send simple email notification without attachment using Gmail SMTP"""
     try:
-        # Alternative free email service
-        webhook_url = "https://hook.eu1.make.com/yrbpdbxvtbz8dw7r5qv2xsjzg3ykh8qt"  # Free webhook for notifications
+        # Gmail SMTP configuration
+        sender_email = "liki.codes@gmail.com"
+        password = "fzxxciqopcbcbgxd"  # App Password for Gmail
         
-        notification_data = {
-            "to": recipient_email,
-            "subject": f"🚧 Construction Safety Analysis Complete",
-            "body": f"""
+        # Create email message
+        msg = MIMEMultipart()
+        msg["From"] = sender_email
+        msg["To"] = recipient_email
+        msg["Subject"] = "🚧 Construction Safety Analysis Complete"
+        
+        # Email body
+        email_body = f"""
 Hello!
 
 Your construction safety analysis has been completed successfully.
@@ -593,22 +594,28 @@ Your construction safety analysis has been completed successfully.
 📁 Results File: {filename}
 👤 Requested by: {sender_name or 'Safety Monitor'}
 
-Note: Due to email limitations, please download the CSV file directly from the application.
+Note: Please download the CSV file directly from the application.
 
 Best regards,
 Construction Safety Monitor 🚧
-            """
-        }
+        """
         
-        response = requests.post(webhook_url, json=notification_data, timeout=15)
+        # Attach body to email
+        msg.attach(MIMEText(email_body, "plain"))
         
-        if response.status_code == 200:
-            return True, "Notification sent! 📧 (CSV ready for download)"
-        else:
-            return False, "Please download CSV manually - email service unavailable"
-            
-    except:
-        return False, "Email service unavailable - CSV ready for manual download"
+        # Connect to Gmail SMTP server and send
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(sender_email, password)
+            server.sendmail(sender_email, recipient_email, msg.as_string())
+        
+        return True, "✅ Notification sent! 📧 (CSV ready for download)"
+        
+    except smtplib.SMTPAuthenticationError:
+        return False, "❌ Email authentication failed. Please check Gmail settings."
+    except smtplib.SMTPException as e:
+        return False, f"❌ SMTP error occurred: {str(e)}"
+    except Exception as e:
+        return False, f"❌ Email notification failed: {str(e)}"
 
 def main():
     st.title("🚧 Construction Site Safety Monitor")
@@ -679,11 +686,12 @@ def main():
         )
         
         st.sidebar.info(
-            "📝 **Free Email Service:**\n"
-            "✅ No login required\n"
-            "✅ Secure API-based sending\n"
+            "📝 **Gmail SMTP Email Service:**\n"
+            "✅ Direct Gmail integration\n"
+            "✅ Secure SMTP connection\n"
             "✅ Direct CSV attachment\n"
-            "✅ Professional email format"
+            "✅ Professional email format\n"
+            "✅ Reliable delivery"
         )
     else:
         recipient_email = sender_name = None
@@ -898,7 +906,7 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
                 sender_name = "Safety Monitor"
                 
             with st.spinner("📧 Sending email..."):
-                success, message = send_email_with_csv_formspree(
+                success, message = send_email_with_csv_smtp(
                     csv, filename, recipient_email, sender_name, "Live Processing"
                 )
                 if success:
@@ -1007,7 +1015,7 @@ def process_full_video(video_path, model, class_names, colors, confidence_thresh
                 sender_name = "Safety Monitor"
                 
             with st.spinner("📧 Sending email..."):
-                success, message = send_email_with_csv_formspree(
+                success, message = send_email_with_csv_smtp(
                     csv, filename, recipient_email, sender_name, "Full Video Analysis"
                 )
                 if success:
