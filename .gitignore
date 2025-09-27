@@ -49,7 +49,7 @@ Thumbs.db
 .streamlit/
 
 # Model files (optional - comment out if you want to include models in repo)
-# outputs/*.pt
+# models/*.pt
 # *.pt
 
 # Data files (large datasets)

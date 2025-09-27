@@ -619,8 +619,8 @@ def main():
     
     # Model selection
     model_options = {
-        "YOLOv8n": "outputs/yolov8n.pt",
-        "YOLO11n": "outputs/yolo11n.pt"
+        "YOLOv8n": "models/yolov8n.pt",
+        "YOLO11n": "models/yolo11n.pt"
     }
     
     selected_model = st.sidebar.selectbox("Select Model", list(model_options.keys()))
