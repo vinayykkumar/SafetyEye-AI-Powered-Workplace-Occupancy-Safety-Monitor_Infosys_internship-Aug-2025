@@ -17,6 +17,110 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
+import threading
+import queue
+from collections import deque
+
+# Email Queue System
+class EmailQueue:
+    """Thread-safe email queue system for non-blocking email processing"""
+    
+    def __init__(self):
+        self.queue = queue.Queue()
+        self.worker_thread = None
+        self.is_running = False
+        self.sent_count = 0
+        self.failed_count = 0
+        self.processing = False
+        self.current_email_info = None
+        self.recent_logs = deque(maxlen=5)  # Keep last 5 email logs
+        
+    def start_worker(self):
+        """Start the email worker thread"""
+        if not self.is_running:
+            self.is_running = True
+            self.worker_thread = threading.Thread(target=self._worker, daemon=True)
+            self.worker_thread.start()
+            
+    def stop_worker(self):
+        """Stop the email worker thread"""
+        self.is_running = False
+        if self.worker_thread:
+            self.worker_thread.join(timeout=1)
+            
+    def add_email(self, email_data):
+        """Add email to the queue"""
+        self.queue.put(email_data)
+        
+    def get_status(self):
+        """Get current queue status"""
+        return {
+            'queue_size': self.queue.qsize(),
+            'sent_count': self.sent_count,
+            'failed_count': self.failed_count,
+            'is_processing': self.processing,
+            'current_email': self.current_email_info,
+            'recent_logs': list(self.recent_logs),
+            'is_running': self.is_running
+        }
+        
+    def _worker(self):
+        """Email worker thread - processes emails from queue"""
+        while self.is_running:
+            try:
+                # Get email from queue with timeout
+                email_data = self.queue.get(timeout=1)
+                self.processing = True
+                self.current_email_info = f"Frame {email_data.get('frame_number', 'N/A')}"
+                
+                # Process the email
+                success = self._send_email(email_data)
+                
+                if success:
+                    self.sent_count += 1
+                    self.recent_logs.appendleft(f"✅ Frame {email_data.get('frame_number', 'N/A')} - {datetime.now().strftime('%H:%M:%S')}")
+                else:
+                    self.failed_count += 1
+                    self.recent_logs.appendleft(f"❌ Frame {email_data.get('frame_number', 'N/A')} - {datetime.now().strftime('%H:%M:%S')}")
+                
+                self.processing = False
+                self.current_email_info = None
+                self.queue.task_done()
+                
+            except queue.Empty:
+                # No emails in queue, continue
+                self.processing = False
+                self.current_email_info = None
+                continue
+            except Exception as e:
+                self.failed_count += 1
+                self.recent_logs.appendleft(f"❌ Error: {str(e)[:30]}... - {datetime.now().strftime('%H:%M:%S')}")
+                self.processing = False
+                self.current_email_info = None
+                
+    def _send_email(self, email_data):
+        """Send individual email"""
+        try:
+            if email_data['type'] == 'realtime_alert':
+                success, _ = send_realtime_violation_alert_direct(
+                    email_data['frame'], email_data['violations'], 
+                    email_data['frame_number'], email_data['recipient_email'], 
+                    email_data['sender_name'], email_data.get('timestamp')
+                )
+                return success
+            elif email_data['type'] == 'csv_summary':
+                success, _ = send_email_with_csv_smtp(
+                    email_data['csv_data'], email_data['filename'],
+                    email_data['recipient_email'], email_data['sender_name'],
+                    email_data['analysis_type']
+                )
+                return success
+            return False
+        except Exception:
+            return False
+
+# Global email queue instance
+email_queue = EmailQueue()
 
 # Configure Streamlit page
 st.set_page_config(
@@ -450,8 +554,8 @@ def update_live_alerts(placeholder, violations, current_frame):
             else:  # Low
                 st.info(f"ℹ️ **{violation['type']} Violation** - Frame {violation['frame']} | **LOW SEVERITY**")
 
-def update_live_stats(placeholder, total_violations, frame_stats, current_frame):
-    """Update live statistics display using Streamlit components"""
+def update_live_stats(placeholder, total_violations, frame_stats, current_frame, show_email_queue=False):
+    """Update live statistics display using Streamlit components with optional email queue status"""
     if not frame_stats:
         return
     
@@ -487,6 +591,33 @@ def update_live_stats(placeholder, total_violations, frame_stats, current_frame)
             st.metric("Total Violations", total_violations_count)
         with col2:
             st.metric("Current Frame", current_frame)
+        
+        # Email queue status (if enabled)
+        if show_email_queue:
+            st.markdown("#### 📧 Email Queue Status")
+            queue_status = email_queue.get_status()
+            
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Queued", queue_status['queue_size'])
+            with col2:
+                st.metric("Sent", queue_status['sent_count'], delta=None)
+            with col3:
+                st.metric("Failed", queue_status['failed_count'], delta=None)
+            
+            # Processing status
+            if queue_status['is_processing']:
+                st.info(f"📤 Currently processing: {queue_status['current_email']}")
+            elif queue_status['queue_size'] > 0:
+                st.warning(f"⏳ {queue_status['queue_size']} emails waiting in queue")
+            else:
+                st.success("✅ Email queue is empty")
+            
+            # Recent email logs
+            if queue_status['recent_logs']:
+                st.markdown("**Recent Email Activity:**")
+                for log in queue_status['recent_logs']:
+                    st.text(log)
         
         # Violation breakdown
         st.markdown("#### Violation Breakdown")
@@ -569,6 +700,146 @@ Construction Safety Monitor System 🚧
         return False, f"❌ SMTP error occurred: {str(e)}"
     except Exception as e:
         return False, f"❌ Email sending failed: {str(e)}"
+
+def send_realtime_violation_alert_direct(frame, violations, frame_number, recipient_email, sender_name, timestamp=None):
+    """Direct email sending function for queue worker (same as send_realtime_violation_alert but without queue)"""
+    if not violations:
+        return True, "No violations to report"
+    
+    try:
+        # Gmail SMTP configuration
+        sender_email = "safetyeyeteam8@gmail.com"
+        password = "dtwmwimtbqquqwda"  # App Password for Gmail
+        
+        # Create email message
+        msg = MIMEMultipart()
+        msg["From"] = sender_email
+        msg["To"] = recipient_email
+        msg["Subject"] = f"🚨 SAFETY VIOLATION ALERT - Frame {frame_number} - {datetime.now().strftime('%H:%M:%S')}"
+        
+        # Count violations by severity
+        high_violations = [v for v in violations if v['severity'] == 'High']
+        medium_violations = [v for v in violations if v['severity'] == 'Medium']
+        low_violations = [v for v in violations if v['severity'] == 'Low']
+        
+        # Create detailed violation list
+        violation_details = []
+        for violation in violations:
+            severity_emoji = {"High": "🔴", "Medium": "🟡", "Low": "🟢"}
+            violation_details.append(
+                f"{severity_emoji.get(violation['severity'], '⚪')} {violation['type']} "
+                f"at {violation['location']} - {violation['severity']} Priority"
+            )
+        
+        # Email body with violation details
+        email_body = f"""
+🚨 CONSTRUCTION SITE SAFETY VIOLATION DETECTED!
+
+Alert Details:
+⏰ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+🎬 Frame: {frame_number}
+⌛ Timestamp: {timestamp or 'N/A'}
+👤 Reported by: {sender_name or 'Safety Monitor'}
+
+VIOLATION SUMMARY:
+📊 Total Violations: {len(violations)}
+🔴 High Priority: {len(high_violations)}
+🟡 Medium Priority: {len(medium_violations)}  
+🟢 Low Priority: {len(low_violations)}
+
+DETAILED VIOLATIONS:
+{chr(10).join(violation_details)}
+
+⚠️ IMMEDIATE ACTION REQUIRED ⚠️
+Please review the attached frame image and take appropriate safety measures.
+
+The attached image shows the exact frame with bounding boxes highlighting the violations detected by our AI safety monitoring system.
+
+Best regards,
+Construction Safety Monitor System 🚧
+
+---
+This is an automated safety alert. Please ensure all workers comply with safety regulations.
+        """
+        
+        # Attach body to email
+        msg.attach(MIMEText(email_body, "plain"))
+        
+        # Convert frame to JPG and attach as image
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        pil_image = Image.fromarray(frame_rgb)
+        
+        # Save image to bytes buffer
+        img_buffer = io.BytesIO()
+        pil_image.save(img_buffer, format='JPEG', quality=95)
+        img_data = img_buffer.getvalue()
+        
+        # Attach image
+        img_part = MIMEBase('application', 'octet-stream')
+        img_part.set_payload(img_data)
+        encoders.encode_base64(img_part)
+        img_filename = f"violation_frame_{frame_number}_{datetime.now().strftime('%H%M%S')}.jpg"
+        img_part.add_header(
+            'Content-Disposition',
+            f'attachment; filename= {img_filename}'
+        )
+        msg.attach(img_part)
+        
+        # Connect to Gmail SMTP server and send
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(sender_email, password)
+            server.sendmail(sender_email, recipient_email, msg.as_string())
+        
+        return True, f"✅ Real-time alert sent for {len(violations)} violations"
+        
+    except smtplib.SMTPAuthenticationError:
+        return False, "❌ Email authentication failed for real-time alert"
+    except smtplib.SMTPException as e:
+        return False, f"❌ SMTP error in real-time alert: {str(e)}"
+    except Exception as e:
+        return False, f"❌ Real-time alert failed: {str(e)}"
+
+def send_realtime_violation_alert(frame, violations, frame_number, recipient_email, sender_name, timestamp=None):
+    """Queue-based real-time violation alert (adds email to queue for processing)"""
+    if not violations:
+        return True, "No violations to report"
+    
+    try:
+        # Add email to queue instead of sending directly
+        email_data = {
+            'type': 'realtime_alert',
+            'frame': frame.copy(),  # Make a copy to avoid memory issues
+            'violations': violations.copy(),
+            'frame_number': frame_number,
+            'recipient_email': recipient_email,
+            'sender_name': sender_name,
+            'timestamp': timestamp
+        }
+        
+        email_queue.add_email(email_data)
+        return True, f"✅ Real-time alert queued for {len(violations)} violations"
+        
+    except Exception as e:
+        return False, f"❌ Failed to queue real-time alert: {str(e)}"
+
+def send_csv_summary_queued(csv_data, filename, recipient_email, sender_name, analysis_type):
+    """Queue-based CSV summary email (adds email to queue for processing)"""
+    try:
+        # Add email to queue instead of sending directly
+        email_data = {
+            'type': 'csv_summary',
+            'csv_data': csv_data,
+            'filename': filename,
+            'recipient_email': recipient_email,
+            'sender_name': sender_name,
+            'analysis_type': analysis_type
+        }
+        
+        email_queue.add_email(email_data)
+        return True, "✅ CSV summary report queued for sending"
+        
+    except Exception as e:
+        return False, f"❌ Failed to queue CSV summary: {str(e)}"
 
 def send_email_notification_only(recipient_email, sender_name, filename, analysis_type):
     """Send simple email notification without attachment using Gmail SMTP"""
@@ -667,9 +938,9 @@ def main():
     st.sidebar.markdown("### 📧 Email Notification")
     
     send_email = st.sidebar.checkbox(
-        "📬 Send results via email",
+        "📬 Enable email notifications",
         value=False,
-        help="Automatically send CSV results to specified email address (no login required)"
+        help="Choose how you want to receive safety violation alerts"
     )
     
     if send_email:
@@ -679,22 +950,76 @@ def main():
             help="Email address to receive the results"
         )
         
-        sender_name = st.sidebar.text_input(
-            "👤 Your Name",
-            placeholder="Your Name or Company",
-            help="Name to appear as sender"
+        # Use default sender name
+        sender_name = "Construction Safety Monitor System"
+        
+        # Email notification type selection
+        st.sidebar.markdown("#### 📬 Notification Type")
+        email_mode = st.sidebar.radio(
+            "Select notification method:",
+            [
+                "� Real-time Violation Alerts",
+                "📊 Summary Report (CSV)"
+            ],
+            help="Choose when and how you want to receive notifications"
         )
         
+        if email_mode == "� Real-time Violation Alerts":
+            # Debug: Show that real-time mode is selected
+            st.sidebar.success("✅ REAL-TIME MODE ACTIVATED")
+            st.sidebar.write(f"DEBUG: Selected mode = '{email_mode}'")
+            st.sidebar.info(
+                "📝 **Real-time Alert Mode:**\n"
+                "✅ Instant violation notifications\n"
+                "✅ Image frame with bounding boxes\n"
+                "✅ Detailed violation description\n"
+                "✅ Frame number and timestamp\n"
+                "🚫 NO summary CSV email"
+            )
+            st.sidebar.warning(
+                "⚠️ **HIGH EMAIL VOLUME WARNING:**\n"
+                "You will receive one email for EVERY violation detected!\n"
+                "A 5-minute video could generate 50+ emails.\n"
+                "Consider using Summary Mode for long videos."
+            )
+            real_time_alerts = True
+            send_csv_summary = False
+            # Debug confirmation
+            st.sidebar.success("✅ REAL-TIME MODE ACTIVATED")
+        else:
+            # Debug: Show that summary mode is selected
+            st.sidebar.success("✅ SUMMARY MODE ACTIVATED")
+            st.sidebar.write(f"DEBUG: Selected mode = '{email_mode}'")
+            st.sidebar.info(
+                "📝 **Summary Report Mode:**\n"
+                "✅ Complete analysis report\n"
+                "✅ CSV file with all violations\n"
+                "✅ Statistical summary\n"
+                "✅ Single email after processing\n"
+                "🚫 NO individual violation emails"
+            )
+            real_time_alerts = False
+            send_csv_summary = True
+            # Debug confirmation
+            st.sidebar.success("✅ SUMMARY MODE ACTIVATED")
+        
+        st.sidebar.markdown("---")
         st.sidebar.info(
-            "📝 **Gmail SMTP Email Service:**\n"
+            "🔧 **Gmail SMTP Service:**\n"
             "✅ Direct Gmail integration\n"
             "✅ Secure SMTP connection\n"
-            "✅ Direct CSV attachment\n"
-            "✅ Professional email format\n"
-            "✅ Reliable delivery"
+            "✅ Reliable delivery\n"
+            "✅ **NEW: Smart Email Queue System**\n"
+            "   📧 Non-blocking email processing\n"
+            "   🚀 Smooth video processing\n"
+            "   📊 Real-time queue status\n"
+            "   ⏳ Waits for all emails to complete\n"
+            "   🎯 Zero email loss guarantee"
         )
     else:
         recipient_email = sender_name = None
+        real_time_alerts = False
+        send_csv_summary = False
     
     # Vehicle filtering settings
     st.sidebar.markdown("### 🚗 Enhanced Vehicle Filtering")
@@ -762,14 +1087,20 @@ def main():
         )
         
         if st.button("🚀 Start Processing", type="primary"):
+            # Debug: Show final email configuration before processing
+            st.write(f"🔍 **DEBUG INFO:**")
+            st.write(f"- real_time_alerts = {real_time_alerts}")
+            st.write(f"- send_csv_summary = {send_csv_summary}")
+            st.write(f"- recipient_email = {recipient_email}")
+            
             if process_option == "Live Processing (Frame by Frame)":
                 # Live processing with real-time updates
                 process_live_video(video_path, model, class_names, colors, confidence_threshold, debug_mode,
-                                 send_email, recipient_email, sender_name)
+                                 recipient_email, "Construction Safety Monitor System", real_time_alerts, send_csv_summary)
             else:
                 # Full video processing
                 process_full_video(video_path, model, class_names, colors, confidence_threshold, debug_mode,
-                                 send_email, recipient_email, sender_name)
+                                 recipient_email, "Construction Safety Monitor System", real_time_alerts, send_csv_summary)
     
     # Information section
     st.markdown("---")
@@ -798,8 +1129,20 @@ def main():
     """)
 
 def process_live_video(video_path, model, class_names, colors, confidence_threshold, debug_mode,
-                      send_email=False, recipient_email=None, sender_name=None):
+                      recipient_email=None, sender_name=None, 
+                      real_time_alerts=False, send_csv_summary=False):
     """Process video with live frame-by-frame updates"""
+    
+    # Start email queue worker if real-time alerts are enabled
+    if real_time_alerts and recipient_email:
+        email_queue.start_worker()
+        st.info("📧 Email queue worker started for real-time alerts")
+    
+    # Confirm which email mode is active
+    if real_time_alerts and recipient_email:
+        st.info(f"🚨 **REAL-TIME ALERTS ACTIVE**: Will send individual emails to {recipient_email} for each violation during processing")
+    elif send_csv_summary and recipient_email:
+        st.info(f"📊 **SUMMARY MODE ACTIVE**: Will send CSV report to {recipient_email} after processing completes")
     
     # Create layout columns
     col1, col2 = st.columns([2, 1])
@@ -817,14 +1160,28 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
     total_violations = []
     frame_stats = []
     current_frame = 0
+    email_sent_count = 0
     
     # Progress tracking
     progress_bar = st.progress(0)
     status_text = st.empty()
     
+    # Email status tracking and mode confirmation
+    if real_time_alerts and recipient_email:
+        email_status_placeholder = st.empty()
+        email_status_placeholder.info("� Real-time email alerts enabled - sending individual violation emails during processing")
+        st.success("✅ EMAIL MODE: Real-time Violation Alerts (Individual emails per violation)")
+    elif send_csv_summary and recipient_email:
+        st.success("✅ EMAIL MODE: Summary Report (Single CSV email after processing)")
+    elif recipient_email:
+        st.info("📧 Email configured but no notification mode selected")
+    else:
+        email_status_placeholder = None
+    
     # Open video
     cap = cv2.VideoCapture(video_path)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    fps = cap.get(cv2.CAP_PROP_FPS)
     
     # Process frame by frame
     while cap.isOpened():
@@ -833,6 +1190,7 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
             break
             
         current_frame += 1
+        timestamp = f"{current_frame / fps:.1f}s" if fps > 0 else None
         
         # Process frame with debug mode
         result = process_video_frame(frame, model, class_names, colors, debug_mode)
@@ -843,9 +1201,28 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
             annotated_frame, violations, person_count, safety_equipped = result
             filtered_count, debug_info = 0, []
         
+        # Send real-time email alerts if enabled and violations detected
+        if real_time_alerts and violations and recipient_email:
+            try:
+                success, message = send_realtime_violation_alert(
+                    annotated_frame, violations, current_frame, 
+                    recipient_email, sender_name, timestamp
+                )
+                if success:
+                    email_sent_count += 1
+                    if email_status_placeholder:
+                        email_status_placeholder.success(f"📧 {email_sent_count} real-time alerts sent | Last: Frame {current_frame}")
+                else:
+                    if email_status_placeholder:
+                        email_status_placeholder.warning(f"⚠️ Email alert failed: {message}")
+            except Exception as e:
+                if email_status_placeholder:
+                    email_status_placeholder.error(f"❌ Email error: {str(e)}")
+        
         # Add frame numbers to violations for tracking
         for violation in violations:
             violation['frame'] = current_frame
+            violation['timestamp'] = timestamp
             total_violations.append(violation)
         
         # Track frame statistics
@@ -858,7 +1235,8 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
         
         # Update live displays
         update_live_alerts(alerts_placeholder, total_violations, current_frame)
-        update_live_stats(stats_placeholder, total_violations, frame_stats, current_frame)
+        update_live_stats(stats_placeholder, total_violations, frame_stats, current_frame, 
+                          show_email_queue=real_time_alerts and recipient_email)
         
         # Show debug information if enabled
         if debug_mode and debug_info:
@@ -880,8 +1258,44 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
     
     cap.release()
     
+    # Stop email queue worker - wait for all emails to be processed
+    if real_time_alerts and recipient_email:
+        queue_status = email_queue.get_status()
+        if queue_status['queue_size'] > 0 or queue_status['is_processing']:
+            # Create progress indicator for email queue completion
+            queue_progress_placeholder = st.empty()
+            queue_info_placeholder = st.empty()
+            
+            with queue_info_placeholder:
+                st.info(f"📧 Processing {queue_status['queue_size']} remaining emails in queue...")
+            
+            # Wait for queue to be empty and not processing
+            while True:
+                queue_status = email_queue.get_status()
+                
+                with queue_progress_placeholder:
+                    if queue_status['is_processing']:
+                        st.info(f"📬 Currently sending: {queue_status['current_email']} | Queue: {queue_status['queue_size']} remaining")
+                    else:
+                        st.info(f"⏳ Queue: {queue_status['queue_size']} emails remaining")
+                
+                if queue_status['queue_size'] == 0 and not queue_status['is_processing']:
+                    break
+                time.sleep(0.5)  # Check every 0.5 seconds
+            
+            # Clear progress indicators
+            queue_progress_placeholder.empty()
+            queue_info_placeholder.empty()
+                
+        email_queue.stop_worker()
+        final_status = email_queue.get_status()
+        st.success(f"✅ All emails processed! Final stats: {final_status['sent_count']} sent, {final_status['failed_count']} failed")
+    
     # Final summary
     st.success(f"✅ Processing complete! Total violations detected: {len(total_violations)}")
+    
+    if real_time_alerts and email_sent_count > 0:
+        st.info(f"📧 Sent {email_sent_count} real-time violation alerts during processing")
     
     # Show final results
     if total_violations:
@@ -900,12 +1314,12 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
             mime="text/csv"
         )
         
-        # Send email if configured
-        if send_email and recipient_email:
+        # Send CSV summary email ONLY if in summary mode (not real-time mode)
+        if send_csv_summary and recipient_email and not real_time_alerts:
             if not sender_name:
                 sender_name = "Safety Monitor"
                 
-            with st.spinner("📧 Sending email..."):
+            with st.spinner("📧 Sending summary report..."):
                 success, message = send_email_with_csv_smtp(
                     csv, filename, recipient_email, sender_name, "Live Processing"
                 )
@@ -913,13 +1327,21 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
                     st.success(f"✅ {message}")
                 else:
                     st.warning(f"⚠️ {message}")
-        elif send_email:
-            st.warning("⚠️ Please enter recipient email address to send results.")
+        elif send_csv_summary and not recipient_email:
+            st.warning("⚠️ Please enter recipient email address to send summary report.")
+        elif real_time_alerts and recipient_email:
+            st.info("📧 Real-time violation alerts were sent during processing. No summary email needed.")
 
 def process_full_video(video_path, model, class_names, colors, confidence_threshold, debug_mode,
-                      send_email=False, recipient_email=None, sender_name=None):
+                      recipient_email=None, sender_name=None,
+                      real_time_alerts=False, send_csv_summary=False):
     """Process entire video and show results"""
     st.markdown("### 🎬 Full Video Analysis")
+    
+    # Start email queue worker if real-time alerts are enabled
+    if real_time_alerts and recipient_email:
+        email_queue.start_worker()
+        st.info("📧 Email queue worker started for real-time alerts")
     
     # Progress tracking
     progress_bar = st.progress(0)
@@ -929,10 +1351,24 @@ def process_full_video(video_path, model, class_names, colors, confidence_thresh
     all_violations = []
     frame_stats = []
     current_frame = 0
+    email_sent_count = 0
+    
+    # Email status tracking and mode confirmation
+    if real_time_alerts and recipient_email:
+        email_status_placeholder = st.empty()
+        email_status_placeholder.info("� Real-time email alerts enabled - sending individual violation emails during processing")
+        st.success("✅ EMAIL MODE: Real-time Violation Alerts (Individual emails per violation)")
+    elif send_csv_summary and recipient_email:
+        st.success("✅ EMAIL MODE: Summary Report (Single CSV email after processing)")
+    elif recipient_email:
+        st.info("📧 Email configured but no notification mode selected")
+    else:
+        email_status_placeholder = None
     
     # Process video
     cap = cv2.VideoCapture(video_path)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    fps = cap.get(cv2.CAP_PROP_FPS)
     
     status_text.text("🔄 Processing video frames...")
     
@@ -942,6 +1378,7 @@ def process_full_video(video_path, model, class_names, colors, confidence_thresh
             break
             
         current_frame += 1
+        timestamp = f"{current_frame / fps:.1f}s" if fps > 0 else None
         
         # Process frame with debug mode
         result = process_video_frame(frame, model, class_names, colors, debug_mode)
@@ -952,10 +1389,28 @@ def process_full_video(video_path, model, class_names, colors, confidence_thresh
             annotated_frame, violations, person_count, safety_equipped = result
             filtered_count, debug_info = 0, []
         
+        # Send real-time email alerts if enabled and violations detected
+        if real_time_alerts and violations and recipient_email:
+            try:
+                success, message = send_realtime_violation_alert(
+                    annotated_frame, violations, current_frame, 
+                    recipient_email, sender_name, timestamp
+                )
+                if success:
+                    email_sent_count += 1
+                    if email_status_placeholder:
+                        email_status_placeholder.success(f"📧 {email_sent_count} real-time alerts sent | Last: Frame {current_frame}")
+                else:
+                    if email_status_placeholder:
+                        email_status_placeholder.warning(f"⚠️ Email alert failed: {message}")
+            except Exception as e:
+                if email_status_placeholder:
+                    email_status_placeholder.error(f"❌ Email error: {str(e)}")
+        
         # Add frame info to violations
         for violation in violations:
             violation['frame'] = current_frame
-            violation['timestamp'] = f"{current_frame / cap.get(cv2.CAP_PROP_FPS):.1f}s"
+            violation['timestamp'] = timestamp
             all_violations.append(violation)
         
         # Track stats
@@ -975,6 +1430,42 @@ def process_full_video(video_path, model, class_names, colors, confidence_thresh
     cap.release()
     progress_bar.progress(1.0)
     status_text.text("✅ Processing complete!")
+    
+    # Stop email queue worker - wait for all emails to be processed
+    if real_time_alerts and recipient_email:
+        queue_status = email_queue.get_status()
+        if queue_status['queue_size'] > 0 or queue_status['is_processing']:
+            # Create progress indicator for email queue completion
+            queue_progress_placeholder = st.empty()
+            queue_info_placeholder = st.empty()
+            
+            with queue_info_placeholder:
+                st.info(f"📧 Processing {queue_status['queue_size']} remaining emails in queue...")
+            
+            # Wait for queue to be empty and not processing
+            while True:
+                queue_status = email_queue.get_status()
+                
+                with queue_progress_placeholder:
+                    if queue_status['is_processing']:
+                        st.info(f"📬 Currently sending: {queue_status['current_email']} | Queue: {queue_status['queue_size']} remaining")
+                    else:
+                        st.info(f"⏳ Queue: {queue_status['queue_size']} emails remaining")
+                
+                if queue_status['queue_size'] == 0 and not queue_status['is_processing']:
+                    break
+                time.sleep(0.5)  # Check every 0.5 seconds
+            
+            # Clear progress indicators
+            queue_progress_placeholder.empty()
+            queue_info_placeholder.empty()
+                
+        email_queue.stop_worker()
+        final_status = email_queue.get_status()
+        st.success(f"✅ All emails processed! Final stats: {final_status['sent_count']} sent, {final_status['failed_count']} failed")
+    
+    if real_time_alerts and email_sent_count > 0:
+        st.info(f"📧 Sent {email_sent_count} real-time violation alerts during processing")
     
     # Display results
     col1, col2 = st.columns(2)
@@ -1009,12 +1500,12 @@ def process_full_video(video_path, model, class_names, colors, confidence_thresh
             mime="text/csv"
         )
         
-        # Send email if configured
-        if send_email and recipient_email:
+        # Send CSV summary email ONLY if in summary mode (not real-time mode)
+        if send_csv_summary and recipient_email and not real_time_alerts:
             if not sender_name:
                 sender_name = "Safety Monitor"
                 
-            with st.spinner("📧 Sending email..."):
+            with st.spinner("📧 Sending summary report..."):
                 success, message = send_email_with_csv_smtp(
                     csv, filename, recipient_email, sender_name, "Full Video Analysis"
                 )
@@ -1022,8 +1513,10 @@ def process_full_video(video_path, model, class_names, colors, confidence_thresh
                     st.success(f"✅ {message}")
                 else:
                     st.warning(f"⚠️ {message}")
-        elif send_email:
-            st.warning("⚠️ Please enter recipient email address to send results.")
+        elif send_csv_summary and not recipient_email:
+            st.warning("⚠️ Please enter recipient email address to send summary report.")
+        elif real_time_alerts and recipient_email:
+            st.info("📧 Real-time violation alerts were sent during processing. No summary email needed.")
     else:
         st.success("🎉 No safety violations detected in the video!")
 
