@@ -100,17 +100,16 @@ The app can detect the following 10 classes:
 ## File Structure
 
 ```
-dataset11/
+construction-safety-monitor/
 ├── construction_safety_app.py    # Main Streamlit application
-├── requirements.txt              # Python dependencies
-├── README.md                    # This file
+├── requirements.txt              # Python dependencies with NumPy 1.x compatibility
+├── README.md                    # Project documentation
 ├── data.yaml                    # Dataset configuration
-├── models/                      # Trained models directory
-│   ├── yolov8n.pt              # YOLOv8 nano model
-│   └── yolo11n.pt              # YOLO11 nano model
-├── train/                       # Training dataset
-├── valid/                       # Validation dataset
-└── test/                        # Test dataset
+├── models/                      # Pre-trained YOLO models directory
+│   ├── yolov8n.pt              # YOLOv8 nano model (6.5 MB)
+│   └── yolo11n.pt              # YOLO11 nano model (5.6 MB)
+├── .gitignore                   # Git ignore configuration
+└── construction_safety_env/     # Virtual environment (excluded from git)
 ```
 
 ## Technical Details

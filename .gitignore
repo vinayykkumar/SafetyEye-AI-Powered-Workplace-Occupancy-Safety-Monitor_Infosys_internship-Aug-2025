@@ -54,9 +54,6 @@ Thumbs.db
 
 # Data files (large datasets)
 *.zip
-train/
-valid/
-test/
 
 # Logs
 *.log
