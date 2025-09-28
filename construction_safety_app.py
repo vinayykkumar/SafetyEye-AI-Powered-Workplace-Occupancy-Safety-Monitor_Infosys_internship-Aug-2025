@@ -189,6 +189,22 @@ def get_class_colors():
         9: (255, 20, 147)    # vehicle - Deep Pink (more visible)
     }
 
+
+def display_dataframe(df, **kwargs):
+    """Compatibility wrapper for st.dataframe across Streamlit versions.
+
+    Tries supported kwarg names ('use_container_width' then 'use_column_width') and
+    falls back to calling st.dataframe(df) without width kwargs if neither is accepted.
+    """
+    # Try 'use_container_width' first (newer variants), then 'use_column_width' (older), else fallback
+    try:
+        return st.dataframe(df, **{k: v for k, v in kwargs.items() if k == 'use_container_width'})
+    except TypeError:
+        try:
+            return st.dataframe(df, **{k: v for k, v in kwargs.items() if k == 'use_column_width'})
+        except TypeError:
+            return st.dataframe(df)
+
 def boxes_overlap(box1, box2, threshold=0.3):
     """Check if two bounding boxes overlap significantly"""
     x1_min, y1_min, x1_max, y1_max = box1
@@ -1265,7 +1281,7 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
         
         # Convert frame for display
         annotated_frame_rgb = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
-        video_placeholder.image(annotated_frame_rgb, channels="RGB", use_container_width=True)
+        video_placeholder.image(annotated_frame_rgb, channels="RGB", use_column_width=True)
         
         # Update progress
         progress = current_frame / total_frames
@@ -1320,7 +1336,7 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
     if total_violations:
         st.markdown("### 📋 Final Violation Summary")
         df = pd.DataFrame(total_violations)
-        st.dataframe(df, use_container_width=True)
+        display_dataframe(df, use_container_width=True)
         
         # Download results
         csv = df.to_csv(index=False)
@@ -1506,7 +1522,7 @@ def process_full_video(video_path, model, class_names, colors, confidence_thresh
     if all_violations:
         st.markdown("### 📊 Violation Details")
         df = pd.DataFrame(all_violations)
-        st.dataframe(df, use_container_width=True)
+        display_dataframe(df, use_container_width=True)
         
         # Download results
         csv = df.to_csv(index=False)
