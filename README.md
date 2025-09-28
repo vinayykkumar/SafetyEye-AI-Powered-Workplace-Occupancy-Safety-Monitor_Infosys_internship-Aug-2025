@@ -10,7 +10,7 @@ pinned: false
 license: mit
 ---
 
-# 🚧 Construction Site Safety Monitor
+## 🚧 Construction Site Safety Monitor
 
 A comprehensive Streamlit web application that leverages custom-trained YOLOv8 models to monitor construction site safety by detecting workers and their personal protective equipment (PPE) in real-time video feeds and images.
 
@@ -89,7 +89,7 @@ The application can detect and classify the following 10 object types:
 
 ### Project Structure
 
-```
+``` bash
 construction-safety-monitor/
 ├── construction_safety_app.py    # Main Streamlit application
 ├── image_annotation_app.py       # Image annotation tool
