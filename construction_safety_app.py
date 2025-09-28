@@ -897,17 +897,24 @@ def main():
     
     # Model selection
     model_options = {
-        "YOLOv8n": "models/yolov8n.pt",
-        "YOLO11n": "models/yolo11n.pt"
+        "Custom Trained Model (Recommended)": "models/construction_best.pt",
+        "YOLOv8n (Base Model)": "models/yolov8n.pt"
     }
     
-    selected_model = st.sidebar.selectbox("Select Model", list(model_options.keys()))
+    selected_model = st.sidebar.selectbox("Select Model", list(model_options.keys()), index=0)
     model_path = model_options[selected_model]
     
     # Check if model file exists
     if not os.path.exists(model_path):
         st.error(f"Model file not found: {model_path}")
         st.stop()
+    
+    # Show model information
+    if "Custom Trained" in selected_model:
+        st.sidebar.success("🎯 Using custom trained model (100 epochs)")
+        st.sidebar.info("This model was specifically trained on construction site safety data for optimal performance.")
+    else:
+        st.sidebar.info(f"Using {selected_model}")
     
     # Load model
     model = load_model(model_path)
@@ -929,6 +936,18 @@ def main():
     # Additional sidebar information
     st.sidebar.markdown("### Detection Settings")
     st.sidebar.info("Lower threshold detects more objects but may include false positives")
+    
+    if "Custom Trained" in selected_model:
+        st.sidebar.markdown("### 🚀 Model Training Info")
+        st.sidebar.success("""
+        **Custom Model Details:**
+        - ✅ Trained for 100 epochs
+        - ✅ Optimized for construction site safety
+        - ✅ All 10 classes included:
+          - Safety equipment detection
+          - Violation identification  
+          - Person and vehicle recognition
+        """)
     
     # Debug mode toggle
     debug_mode = st.sidebar.checkbox("🐛 Debug Mode", help="Show filtered detections and debug information")
