@@ -948,6 +948,14 @@ def main():
     
     selected_model = st.sidebar.selectbox("Select Model", list(model_options.keys()), index=0)
     model_path = model_options[selected_model]
+
+    # Analysis mode: Video or Image
+    analysis_mode = st.sidebar.radio(
+        "Analysis Mode",
+        ["Video Analysis", "Image Analysis"],
+        index=0,
+        help="Choose whether to analyze a video or a single image"
+    )
     
     # Check if model file exists
     if not os.path.exists(model_path):
@@ -974,6 +982,63 @@ def main():
     }
     
     colors = get_class_colors()
+
+    # If user selected Image Analysis, show a minimal image annotator UI (reuses model)
+    if analysis_mode == "Image Analysis":
+        st.header("📷 Image Analysis Mode")
+        st.markdown("Upload a single image to run object detection and visualize bounding boxes. This uses the same model as the video pipeline.")
+
+        # Image upload control
+        uploaded_image = st.file_uploader("Upload Image (JPG/PNG/BMP/TIFF)", type=['jpg', 'jpeg', 'png', 'bmp', 'tiff'])
+
+        # Detection confidence for image mode
+        image_conf = st.sidebar.slider("Image Detection Confidence", 0.1, 1.0, 0.25, 0.05)
+
+        if uploaded_image is not None:
+            image = Image.open(uploaded_image)
+            image_array = np.array(image)
+
+            # Convert to BGR for OpenCV processing
+            if len(image_array.shape) == 3:
+                image_bgr = cv2.cvtColor(image_array, cv2.COLOR_RGB2BGR)
+            else:
+                image_bgr = cv2.cvtColor(image_array, cv2.COLOR_GRAY2BGR)
+
+            st.markdown("### Original Image")
+            st.image(image, use_container_width=True)
+
+            with st.spinner("Detecting objects in image..."):
+                results = model(image_bgr)
+
+            if len(results) > 0 and len(results[0].boxes) > 0:
+                detections = results[0].boxes.data.cpu().numpy()
+
+                # Draw boxes for detections above threshold
+                annotated = image_bgr.copy()
+                for det in detections:
+                    x1, y1, x2, y2, conf, cid = det
+                    if conf >= image_conf:
+                        cls_id = int(cid)
+                        color = colors.get(cls_id, (255,255,255))
+                        cv2.rectangle(annotated, (int(x1), int(y1)), (int(x2), int(y2)), color, 2)
+                        label = f"{class_names.get(cls_id, f'cls_{cls_id}')} {conf:.2f}"
+                        cv2.putText(annotated, label, (int(x1), int(y1)-6), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 2)
+
+                annotated_rgb = cv2.cvtColor(annotated, cv2.COLOR_BGR2RGB)
+                st.markdown("### Annotated Image")
+                st.image(annotated_rgb, use_container_width=True)
+
+                # Offer download
+                pil_img = Image.fromarray(annotated_rgb)
+                buf = io.BytesIO()
+                pil_img.save(buf, format='PNG')
+                buf.seek(0)
+                st.download_button("Download Annotated Image", buf, file_name="annotated_image.png", mime="image/png")
+            else:
+                st.warning("No detections found in the image.")
+
+        # Stop here for image analysis
+        st.stop()
     
     # Detection confidence threshold
     confidence_threshold = st.sidebar.slider("Detection Confidence", 0.1, 1.0, 0.4, 0.1)
