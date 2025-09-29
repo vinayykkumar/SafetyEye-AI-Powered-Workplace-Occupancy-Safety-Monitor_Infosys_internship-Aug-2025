@@ -1203,16 +1203,20 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
     elif send_csv_summary and recipient_email:
         st.info(f"📊 **SUMMARY MODE ACTIVE**: Will send CSV report to {recipient_email} after processing completes")
     
-    # Create layout columns
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
+    # Top metrics bar so key stats are always visible without scrolling
+    mcol1, mcol2, mcol3, mcol4 = st.columns([1, 1, 1, 1])
+    metric_placeholders = [mcol1.empty(), mcol2.empty(), mcol3.empty(), mcol4.empty()]
+
+    # Create layout columns: video, stats, alerts (detailed panels)
+    col_video, col_stats, col_alerts = st.columns([2, 0.9, 0.9])
+
+    with col_video:
         st.markdown("### 📹 Live Video Processing")
         video_placeholder = st.empty()
-    
-    with col2:
-        alerts_placeholder = st.empty()
-        stats_placeholder = st.empty()
+
+    # Reserve placeholders inside the right-side columns for detailed views
+    stats_placeholder = col_stats.empty()
+    alerts_placeholder = col_alerts.empty()
     
     # Initialize tracking variables
     total_violations = []
@@ -1224,15 +1228,17 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
     progress_bar = st.progress(0)
     status_text = st.empty()
     
-    # Email status tracking and mode confirmation
+    # Email status tracking and mode confirmation (displayed in stats column)
     if real_time_alerts and recipient_email:
-        email_status_placeholder = st.empty()
-        email_status_placeholder.info("� Real-time email alerts enabled - sending individual violation emails during processing")
-        st.success("✅ EMAIL MODE: Real-time Violation Alerts (Individual emails per violation)")
+        email_status_placeholder = col_stats.empty()
+        email_status_placeholder.info("Real-time alerts enabled — sending individual violation emails during processing")
+        email_status_placeholder.success("EMAIL MODE: Real-time Violation Alerts")
     elif send_csv_summary and recipient_email:
-        st.success("✅ EMAIL MODE: Summary Report (Single CSV email after processing)")
+        email_status_placeholder = col_stats.empty()
+        email_status_placeholder.success("EMAIL MODE: Summary Report (CSV)")
     elif recipient_email:
-        st.info("📧 Email configured but no notification mode selected")
+        email_status_placeholder = col_stats.empty()
+        email_status_placeholder.info("Email configured but no notification mode selected")
     else:
         email_status_placeholder = None
     
@@ -1290,6 +1296,23 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
             'violations': len(violations),
             'safety_equipped': safety_equipped
         })
+        # Update compact top metrics (always visible)
+        total_violations_count = len(total_violations)
+        total_persons = sum(f['persons'] for f in frame_stats)
+        violation_rate = (total_violations_count / total_persons * 100) if total_persons > 0 else 0
+
+        # Update metrics placeholders
+        try:
+            metric_placeholders[0].metric("Total Violations", total_violations_count)
+            metric_placeholders[1].metric("Current Frame", f"{current_frame}/{total_frames}")
+            metric_placeholders[2].metric("Workers This Frame", person_count)
+            metric_placeholders[3].metric("Violation Rate", f"{violation_rate:.1f}%")
+        except Exception:
+            # Fallback: write small texts if metric fails
+            metric_placeholders[0].write(f"Violations: {total_violations_count}")
+            metric_placeholders[1].write(f"Frame: {current_frame}/{total_frames}")
+            metric_placeholders[2].write(f"Workers: {person_count}")
+            metric_placeholders[3].write(f"Rate: {violation_rate:.1f}%")
         
         # Update live displays
         update_live_alerts(alerts_placeholder, total_violations, current_frame)
