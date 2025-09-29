@@ -982,22 +982,7 @@ def main():
     st.sidebar.markdown("### Detection Settings")
     st.sidebar.info("Lower threshold detects more objects but may include false positives")
     
-    if "Custom Trained" in selected_model:
-        st.sidebar.markdown("### 🚀 Model Training Info")
-        st.sidebar.success("""
-        **Custom Model Details:**
-        - ✅ Trained for 100 epochs
-        - ✅ Optimized for construction site safety
-        - ✅ All 10 classes included:
-          - Safety equipment detection
-          - Violation identification  
-          - Person and vehicle recognition
-        """)
-    
-    # Debug mode toggle
-    debug_mode = st.sidebar.checkbox("🐛 Debug Mode", help="Show filtered detections and debug information")
-    
-    # Email configuration
+    # Email configuration (moved above model training info for easier access)
     st.sidebar.markdown("---")
     st.sidebar.markdown("### 📧 Email Notification")
     
@@ -1084,6 +1069,22 @@ def main():
         recipient_email = sender_name = None
         real_time_alerts = False
         send_csv_summary = False
+
+    if "Custom Trained" in selected_model:
+        st.sidebar.markdown("### 🚀 Model Training Info")
+        st.sidebar.success("""
+        **Custom Model Details:**
+        - ✅ Trained for 100 epochs
+        - ✅ Optimized for construction site safety
+        - ✅ All 10 classes included:
+          - Safety equipment detection
+          - Violation identification  
+          - Person and vehicle recognition
+        """)
+    
+    # Debug mode toggle
+    debug_mode = st.sidebar.checkbox("🐛 Debug Mode", help="Show filtered detections and debug information")
+    
     
     # Vehicle filtering settings
     st.sidebar.markdown("### 🚗 Enhanced Vehicle Filtering")
