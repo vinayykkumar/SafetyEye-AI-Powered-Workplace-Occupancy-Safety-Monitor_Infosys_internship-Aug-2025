@@ -1077,50 +1077,25 @@ def main():
         email_mode = st.sidebar.radio(
             "Select notification method:",
             [
-                "� Real-time Violation Alerts",
-                "📊 Summary Report (CSV)"
+                "Real-time Violation Alerts",
+                "Summary Report (CSV)"
             ],
             help="Choose when and how you want to receive notifications"
         )
-        
-        if email_mode == "� Real-time Violation Alerts":
-            # Debug: Show that real-time mode is selected
-            st.sidebar.success("✅ REAL-TIME MODE ACTIVATED")
-            st.sidebar.write(f"DEBUG: Selected mode = '{email_mode}'")
-            st.sidebar.info(
-                "📝 **Real-time Alert Mode:**\n"
-                "✅ Instant violation notifications\n"
-                "✅ Image frame with bounding boxes\n"
-                "✅ Detailed violation description\n"
-                "✅ Frame number and timestamp\n"
-                "🚫 NO summary CSV email"
-            )
-            st.sidebar.warning(
-                "⚠️ **HIGH EMAIL VOLUME WARNING:**\n"
-                "You will receive one email for EVERY violation detected!\n"
-                "A 5-minute video could generate 50+ emails.\n"
-                "Consider using Summary Mode for long videos."
-            )
+
+        if email_mode == "Real-time Violation Alerts":
             real_time_alerts = True
             send_csv_summary = False
-            # Debug confirmation
-            st.sidebar.success("✅ REAL-TIME MODE ACTIVATED")
+            st.sidebar.success("✅ Real-time alerts selected")
+            with st.sidebar.expander("Details (Real-time)", expanded=False):
+                st.write("Instant emails for each detected violation (high volume). Include frame image and details.")
+                st.warning("High email volume — consider Summary Report for long recordings.")
         else:
-            # Debug: Show that summary mode is selected
-            st.sidebar.success("✅ SUMMARY MODE ACTIVATED")
-            st.sidebar.write(f"DEBUG: Selected mode = '{email_mode}'")
-            st.sidebar.info(
-                "📝 **Summary Report Mode:**\n"
-                "✅ Complete analysis report\n"
-                "✅ CSV file with all violations\n"
-                "✅ Statistical summary\n"
-                "✅ Single email after processing\n"
-                "🚫 NO individual violation emails"
-            )
             real_time_alerts = False
             send_csv_summary = True
-            # Debug confirmation
-            st.sidebar.success("✅ SUMMARY MODE ACTIVATED")
+            st.sidebar.success("✅ Summary report selected")
+            with st.sidebar.expander("Details (Summary)", expanded=False):
+                st.write("Single CSV report containing all detected violations after processing.")
         
         st.sidebar.markdown("---")
         st.sidebar.info(
@@ -1140,62 +1115,25 @@ def main():
         real_time_alerts = False
         send_csv_summary = False
 
-    if "Custom Trained" in selected_model:
-        st.sidebar.markdown("### 🚀 Model Training Info")
-        st.sidebar.success("""
-        **Custom Model Details:**
-        - ✅ Trained for 100 epochs
-        - ✅ Optimized for construction site safety
-        - ✅ All 10 classes included:
-          - Safety equipment detection
-          - Violation identification  
-          - Person and vehicle recognition
-        """)
+        if "Custom Trained" in selected_model:
+                with st.sidebar.expander("🚀 Model Training Info", expanded=False):
+                        st.markdown("Custom trained model (100 epochs) optimized for construction site safety. Includes PPE, person, vehicle, and machinery classes.")
     
     # Debug mode toggle
     debug_mode = st.sidebar.checkbox("🐛 Debug Mode", help="Show filtered detections and debug information")
     
     
     # Vehicle filtering settings
-    st.sidebar.markdown("### 🚗 Enhanced Vehicle Filtering")
-    st.sidebar.markdown("""
-    **Multi-Layer False Positive Prevention:**
-    - ✅ Ultra-low overlap thresholds (0.01 IoU)
-    - ✅ 40% expanded filtering zones around vehicles
-    - ✅ 60% super-expanded containment checks
-    - ✅ Size-based filtering (max 200×400px)
-    - ✅ High confidence thresholds (0.6+)
-    - ✅ Complete containment detection
-    
-    **Reduces:** Vehicle/machinery misclassified as violations
-    """)
+    with st.sidebar.expander("🚗 Vehicle Filtering", expanded=False):
+        st.markdown("Multi-layer filtering to reduce vehicle/machinery false positives (IoU + expanded zones + size checks).")
     
     # Safety requirements
-    st.sidebar.markdown("### Safety Requirements")
-    st.sidebar.markdown("""
-    **Required PPE:**
-    - ✅ Hard Hat (High Priority)
-    - ✅ Safety Vest (Medium Priority)  
-    - ✅ Mask (Low Priority)
-    
-    **Alert Generation:**
-    - Person detected WITHOUT required PPE = Violation
-    - Checks for equipment within person's vicinity
-    """)
+    with st.sidebar.expander("👷 Safety Requirements", expanded=False):
+        st.markdown("Required PPE: Hard Hat (High), Safety Vest (Medium), Mask (Low). Violations are generated when required PPE is missing.")
     
     # Color legend
-    st.sidebar.markdown("### 🎨 Detection Colors")
-    st.sidebar.markdown("""
-    **Bounding Box Colors:**
-    - 🟦 **Cyan**: Workers/People
-    - 🟩 **Green**: Safety Equipment  
-    - 🟥 **Red**: Safety Violations
-    - 🟪 **Deep Pink**: Vehicles (thicker boxes)
-    - 🟧 **Dark Orange**: Machinery (thicker boxes)
-    - ⬜ **White**: Safety Cones
-    
-    **Note:** Vehicles & machinery have thicker borders for visibility
-    """)
+    with st.sidebar.expander("🎨 Detection Colors", expanded=False):
+        st.markdown("Cyan: People • Green: Equipment • Red: Violations • Pink/Orange: Vehicles/Machinery")
     
     # Video upload
     uploaded_file = st.file_uploader("Upload Video", type=['mp4', 'avi', 'mov', 'mkv'])
@@ -1237,31 +1175,17 @@ def main():
                 process_full_video(video_path, model, class_names, colors, confidence_threshold, debug_mode,
                                  recipient_email, "Construction Safety Monitor System", real_time_alerts, send_csv_summary)
     
-    # Information section
-    st.markdown("---")
-    st.markdown("### 📋 How Detection Works")
-    
-    st.markdown("""
-    **Detection Process:**
-    1. **Detect People**: Identifies all workers in the construction site
-    2. **Detect Safety Equipment**: Finds hard hats, safety vests, and masks
-    3. **Detect Vehicles/Machinery**: Identifies vehicles and heavy equipment
-    4. **Advanced Filtering**: Filters out vehicle false positives using expanded zones
-    5. **Analyze Proximity**: Checks if detected equipment is near each person
-    6. **Generate Alerts**: Creates violations for missing required PPE
-    
-    **Violation Priorities:**
-    - 🔴 **High Priority**: Person without Hard Hat
-    - 🟡 **Medium Priority**: Person without Safety Vest
-    - 🟢 **Low Priority**: Person without Mask
-    
-    **Visual Elements:**
-    - **Workers** (Cyan boxes): Detected persons requiring PPE
-    - **Safety Equipment** (Green boxes): Hard hats, vests, masks
-    - **Safety Violations** (Red boxes): Workers missing PPE
-    - **Vehicles** (Deep Pink boxes): Cars, trucks, construction vehicles
-    - **Machinery** (Orange boxes): Heavy equipment, excavators, bulldozers
-    """)
+    # Information section (collapsed to reduce clutter)
+    with st.expander("📋 How Detection Works", expanded=False):
+        st.markdown("""
+        Detection process summary and priorities.
+
+        - Detect people, PPE, vehicles and machinery
+        - Filter vehicle/machinery false positives with expanded zones
+        - Associate PPE to nearby persons and flag missing items
+
+        Violation priorities: Hard Hat (High), Safety Vest (Medium), Mask (Low)
+        """)
 
 def process_live_video(video_path, model, class_names, colors, confidence_threshold, debug_mode,
                       recipient_email=None, sender_name=None, 
