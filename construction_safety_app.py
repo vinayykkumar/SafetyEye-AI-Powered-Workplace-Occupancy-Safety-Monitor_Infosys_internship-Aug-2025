@@ -1004,8 +1004,12 @@ def main():
             else:
                 image_bgr = cv2.cvtColor(image_array, cv2.COLOR_GRAY2BGR)
 
-            st.markdown("### Original Image")
-            st.image(image, use_container_width=True)
+            # Show original and annotated images side-by-side
+            # Use two equal-width columns so users can compare images easily
+            col_orig, col_annot = st.columns(2)
+            with col_orig:
+                st.markdown("### Original Image")
+                st.image(image, use_container_width=True)
 
             with st.spinner("Detecting objects in image..."):
                 results = model(image_bgr)
@@ -1025,15 +1029,16 @@ def main():
                         cv2.putText(annotated, label, (int(x1), int(y1)-6), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 2)
 
                 annotated_rgb = cv2.cvtColor(annotated, cv2.COLOR_BGR2RGB)
-                st.markdown("### Annotated Image")
-                st.image(annotated_rgb, use_container_width=True)
+                with col_annot:
+                    st.markdown("### Annotated Image")
+                    st.image(annotated_rgb, use_container_width=True)
 
-                # Offer download
-                pil_img = Image.fromarray(annotated_rgb)
-                buf = io.BytesIO()
-                pil_img.save(buf, format='PNG')
-                buf.seek(0)
-                st.download_button("Download Annotated Image", buf, file_name="annotated_image.png", mime="image/png")
+                    # Offer download
+                    pil_img = Image.fromarray(annotated_rgb)
+                    buf = io.BytesIO()
+                    pil_img.save(buf, format='PNG')
+                    buf.seek(0)
+                    st.download_button("Download Annotated Image", buf, file_name="annotated_image.png", mime="image/png")
             else:
                 st.warning("No detections found in the image.")
 
