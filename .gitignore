@@ -1,6 +1,7 @@
 .venv/
 dataset/
 notebooks/
+outputs/
 tests/
 runs/
 src/yolo11n.pt
