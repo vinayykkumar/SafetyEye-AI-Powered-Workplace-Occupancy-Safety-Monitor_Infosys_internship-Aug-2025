@@ -1,0 +1,10 @@
+numpy
+pandas
+matplotlib
+opencv-python
+tqdm
+ultralytics
+Pillow
+scikit-learn
+albumentations
+PyYAML

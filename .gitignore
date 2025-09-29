@@ -1,0 +1,13 @@
+.venv/
+dataset/
+notebooks/
+outputs/
+tests/
+runs/
+src/yolo11n.pt
+src/yolov8m.pt
+src/yolov8n.pt
+.env
+.vscode/
+Thumbs.db
+docker-compose.yml
