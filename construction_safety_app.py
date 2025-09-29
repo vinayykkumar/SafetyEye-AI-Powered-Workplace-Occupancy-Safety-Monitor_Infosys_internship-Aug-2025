@@ -196,14 +196,23 @@ def display_dataframe(df, **kwargs):
     Tries supported kwarg names ('use_container_width' then 'use_column_width') and
     falls back to calling st.dataframe(df) without width kwargs if neither is accepted.
     """
-    # Try 'use_container_width' first (newer variants), then 'use_column_width' (older), else fallback
-    try:
-        return st.dataframe(df, **{k: v for k, v in kwargs.items() if k == 'use_container_width'})
-    except TypeError:
+    # Prefer use_container_width. If caller passed use_column_width (deprecated), map it.
+    ucw = None
+    if 'use_container_width' in kwargs:
+        ucw = kwargs.get('use_container_width')
+    elif 'use_column_width' in kwargs:
+        # Map older param to the new one. Treat truthy values as True.
+        ucw = bool(kwargs.get('use_column_width'))
+
+    if ucw is not None:
         try:
-            return st.dataframe(df, **{k: v for k, v in kwargs.items() if k == 'use_column_width'})
+            return st.dataframe(df, use_container_width=ucw)
         except TypeError:
+            # In case the installed Streamlit doesn't accept the kwarg, fallback to no-kwarg call
             return st.dataframe(df)
+
+    # No width preference provided — call default
+    return st.dataframe(df)
 
 def boxes_overlap(box1, box2, threshold=0.3):
     """Check if two bounding boxes overlap significantly"""
@@ -304,7 +313,7 @@ def analyze_safety_violations(detections, class_names, debug_mode=False):
     safety_equipped_count = 0
     filtered_count = 0  # Count of filtered detections
     debug_info = []  # Debug information
-    
+
     # Separate detections by class
     person_boxes = []
     hardhat_boxes = []
@@ -315,16 +324,17 @@ def analyze_safety_violations(detections, class_names, debug_mode=False):
     no_mask_boxes = []
     vehicle_boxes = []
     machinery_boxes = []
-    
+
     for detection in detections:
         class_id = int(detection[5])
         class_name = class_names.get(class_id, f"Unknown_{class_id}")
         confidence = detection[4]
-        
-        if confidence > 0.4:  # Lower confidence threshold to catch more detections
+
+        # Collect detections above a base threshold for consideration
+        if confidence > 0.4:
             x1, y1, x2, y2 = detection[:4]
             box = (x1, y1, x2, y2)
-            
+
             if class_name == "Person":
                 person_count += 1
                 person_boxes.append(box)
@@ -339,133 +349,152 @@ def analyze_safety_violations(detections, class_names, debug_mode=False):
             elif class_name == "Mask":
                 mask_boxes.append(box)
             elif class_name == "NO-Hardhat":
-                no_hardhat_boxes.append(box)
+                no_hardhat_boxes.append((box, confidence))
             elif class_name == "NO-Safety Vest":
-                no_vest_boxes.append(box)
+                no_vest_boxes.append((box, confidence))
             elif class_name == "NO-Mask":
-                no_mask_boxes.append(box)
-    
-    # For each detected person, check if they have safety equipment nearby
-    # Only check safety equipment for PERSONS, not vehicles or machinery
+                no_mask_boxes.append((box, confidence))
+
+    # Helper to check IoU-like overlap; reuse boxes_overlap with a reasonable threshold
+    def overlaps(a, b, thr=0.1):
+        return boxes_overlap(a, b, threshold=thr)
+
+    def box_center(box):
+        x1, y1, x2, y2 = box
+        return ((x1 + x2) / 2.0, (y1 + y2) / 2.0)
+
+    def point_in_box(pt, box, expand_x=0.0, expand_y=0.0):
+        x, y = pt
+        x1, y1, x2, y2 = box
+        w = x2 - x1
+        h = y2 - y1
+        ex = expand_x * w
+        ey = expand_y * h
+        return (x >= x1 - ex) and (x <= x2 + ex) and (y >= y1 - ey) and (y <= y2 + ey)
+
+    def is_ppe_on_person(person_box, ppe_box, kind):
+        # Use PPE box center and spatial heuristics per kind, fallback to IoU overlap
+        pcx, pcy = box_center(person_box)
+        wc = person_box[2] - person_box[0]
+        hc = person_box[3] - person_box[1]
+        cx, cy = box_center(ppe_box)
+
+        # Hardhat -> expect at top of person box (upper ~45%) and x inside person x-range
+        if kind == 'hardhat':
+            in_x = (cx >= person_box[0] - 0.05 * wc) and (cx <= person_box[2] + 0.05 * wc)
+            in_y = (cy >= person_box[1] - 0.05 * hc) and (cy <= person_box[1] + 0.45 * hc)
+            if in_x and in_y:
+                return True
+
+        # Vest -> expect roughly middle-lower torso (y between ~35% and 100%)
+        if kind == 'vest':
+            in_x = (cx >= person_box[0] - 0.1 * wc) and (cx <= person_box[2] + 0.1 * wc)
+            in_y = (cy >= person_box[1] + 0.35 * hc) and (cy <= person_box[3] + 0.05 * hc)
+            if in_x and in_y:
+                return True
+
+        # Mask -> expect around face region (upper ~50% but below top)
+        if kind == 'mask':
+            in_x = (cx >= person_box[0] - 0.15 * wc) and (cx <= person_box[2] + 0.15 * wc)
+            in_y = (cy >= person_box[1] + 0.12 * hc) and (cy <= person_box[1] + 0.5 * hc)
+            if in_x and in_y:
+                return True
+
+        # Fallback: IoU overlap
+        return overlaps(person_box, ppe_box, thr=0.12)
+
+    # For each detected person, check if they have safety equipment nearby and record missing items
+    person_missing = []  # list of dicts per person: {'box': box, 'missing': set(...)}
+
     for person_box in person_boxes:
-        # Make sure this person is not overlapping with vehicles or machinery
-        is_near_vehicle = False
-        
-        # Check if person is near/inside a vehicle or machinery
-        for vehicle_box in vehicle_boxes:
-            if boxes_overlap(person_box, vehicle_box, threshold=0.3):
-                is_near_vehicle = True
-                break
-                
-        for machinery_box in machinery_boxes:
-            if boxes_overlap(person_box, machinery_box, threshold=0.3):
-                is_near_vehicle = True
-                break
-        
-        # Skip safety equipment checks for people in/near vehicles or machinery
+        # Skip persons in/near vehicles or machinery
+        is_near_vehicle = any(boxes_overlap(person_box, vb, threshold=0.3) for vb in vehicle_boxes + machinery_boxes)
         if is_near_vehicle:
+            # Do not analyze PPE for people in vehicles/machinery
             continue
-            
-        person_has_hardhat = False
-        person_has_vest = False
-        person_has_mask = False
-        
-        # Check if person has hardhat nearby
-        for hardhat_box in hardhat_boxes:
-            if boxes_overlap(person_box, hardhat_box, threshold=0.1):
-                person_has_hardhat = True
-                break
-                
-        # Check if person has safety vest nearby  
-        for vest_box in vest_boxes:
-            if boxes_overlap(person_box, vest_box, threshold=0.1):
-                person_has_vest = True
-                break
-                
-        # Check if person has mask nearby
-        for mask_box in mask_boxes:
-            if boxes_overlap(person_box, mask_box, threshold=0.1):
-                person_has_mask = True
-                break
-        
-        # Generate violations for missing equipment
+
+        # Check for PPE on this person using spatial heuristics
+        person_has_hardhat = any(is_ppe_on_person(person_box, hb, 'hardhat') for hb in hardhat_boxes)
+        person_has_vest = any(is_ppe_on_person(person_box, vb, 'vest') for vb in vest_boxes)
+        person_has_mask = any(is_ppe_on_person(person_box, mb, 'mask') for mb in mask_boxes)
+
+        missing = set()
         if not person_has_hardhat:
-            violations.append({
-                'type': 'Person Missing Hard Hat',
-                'severity': 'High',
-                'location': f"({int(person_box[0])}, {int(person_box[1])})"
-            })
-        
+            missing.add(('hardhat', 'High'))
         if not person_has_vest:
-            violations.append({
-                'type': 'Person Missing Safety Vest', 
-                'severity': 'Medium',
-                'location': f"({int(person_box[0])}, {int(person_box[1])})"
-            })
-            
+            missing.add(('vest', 'Medium'))
         if not person_has_mask:
-            violations.append({
-                'type': 'Person Missing Mask',
-                'severity': 'Low', 
-                'location': f"({int(person_box[0])}, {int(person_box[1])})"
-            })
-        
+            missing.add(('mask', 'Low'))
+
+        person_missing.append({'box': person_box, 'missing': missing})
+
         # Count as safety equipped if they have at least hardhat and vest
         if person_has_hardhat and person_has_vest:
             safety_equipped_count += 1
-    
-    # Check direct violations (NO-Hardhat, NO-Safety Vest, NO-Mask) with enhanced vehicle/machinery filtering
-    for detection in detections:
-        class_id = int(detection[5])
-        class_name = class_names.get(class_id, f"Unknown_{class_id}")
-        confidence = detection[4]
-        x1, y1, x2, y2 = detection[:4]
-        box = (x1, y1, x2, y2)
-        
-        # Only process NO-equipment detections with high confidence to reduce false positives
-        if confidence > 0.6 and class_name.startswith("NO-"):  # Higher confidence threshold for violation detections
-            is_near_vehicle = is_violation_near_vehicle_machinery(box, vehicle_boxes, machinery_boxes)
-            is_too_large = is_detection_too_large_for_person(box)
-            
-            # Debug information
-            if debug_mode:
-                width, height = x2 - x1, y2 - y1
-                debug_info.append(f"{class_name} (conf: {confidence:.2f}, size: {int(width)}x{int(height)}) - "
-                                f"Near vehicle: {is_near_vehicle}, Too large: {is_too_large}")
-            
-            if class_name == "NO-Hardhat":
-                # Enhanced filtering: check vehicle/machinery proximity AND box size
-                if not is_near_vehicle and not is_too_large:
-                    violations.append({
-                        'type': 'Worker Without Hard Hat Detected',
-                        'severity': 'High',
-                        'location': f"({int(x1)}, {int(y1)})"
-                    })
-                else:
-                    filtered_count += 1
-                    
-            elif class_name == "NO-Safety Vest":
-                # Enhanced filtering: check vehicle/machinery proximity AND box size
-                if not is_near_vehicle and not is_too_large:
-                    violations.append({
-                        'type': 'Worker Without Safety Vest Detected',
-                        'severity': 'Medium',
-                        'location': f"({int(x1)}, {int(y1)})"
-                    })
-                else:
-                    filtered_count += 1
-                    
-            elif class_name == "NO-Mask":
-                # Enhanced filtering: check vehicle/machinery proximity AND box size
-                if not is_near_vehicle and not is_too_large:
-                    violations.append({
-                        'type': 'Worker Without Mask Detected',
-                        'severity': 'Low',
-                        'location': f"({int(x1)}, {int(y1)})"
-                    })
-                else:
-                    filtered_count += 1
-    
+
+    # Create person-based violation entries (one per missing PPE per person)
+    for p in person_missing:
+        bx = p['box']
+        for item, severity in p['missing']:
+            vtype = {
+                'hardhat': 'Person Missing Hard Hat',
+                'vest': 'Person Missing Safety Vest',
+                'mask': 'Person Missing Mask'
+            }[item]
+            violations.append({'type': vtype, 'severity': severity, 'location': f"({int(bx[0])}, {int(bx[1])})", 'box': bx})
+
+    # Now process NO-* detections but avoid duplicates: if a NO-* overlaps a person who already has that missing PPE, skip it.
+    def add_no_violation(box, kind, severity, confidence):
+        nonlocal filtered_count
+        # filter by confidence
+        if confidence <= 0.6:
+            filtered_count += 1
+            return
+
+        # vehicle/machinery proximity and size checks
+        is_near_vehicle = is_violation_near_vehicle_machinery(box, vehicle_boxes, machinery_boxes)
+        is_too_large = is_detection_too_large_for_person(box)
+        if is_near_vehicle or is_too_large:
+            filtered_count += 1
+            return
+
+        # If overlaps a person who already has a person-based missing violation for this kind, skip
+        for p in person_missing:
+            if overlaps(p['box'], box, thr=0.12):
+                kind_map = {'NO-Hardhat': 'hardhat', 'NO-Safety Vest': 'vest', 'NO-Mask': 'mask'}
+                mapped = kind_map.get(kind, None)
+                if mapped and any(mapped == miss[0] for miss in p['missing']):
+                    # person-based violation already created, skip
+                    return
+
+        # Deduplicate against existing NO-* violations by spatial overlap
+        for existing in violations:
+            if 'box' in existing and boxes_overlap(existing['box'], box, threshold=0.5) and existing['type'].lower().find(kind.split('-')[-1].lower()) != -1:
+                # similar existing violation, skip
+                return
+
+        # Add NO-* violation
+        vlabel = {
+            'NO-Hardhat': ('Worker Without Hard Hat Detected', 'High'),
+            'NO-Safety Vest': ('Worker Without Safety Vest Detected', 'Medium'),
+            'NO-Mask': ('Worker Without Mask Detected', 'Low')
+        }.get(kind, (f'Worker Without {kind} Detected', 'Low'))
+
+        violations.append({'type': vlabel[0], 'severity': vlabel[1], 'location': f"({int(box[0])}, {int(box[1])})", 'box': box})
+
+    # Add NO-* boxes
+    for box, conf in no_hardhat_boxes:
+        add_no_violation(box, 'NO-Hardhat', 'High', conf)
+    for box, conf in no_vest_boxes:
+        add_no_violation(box, 'NO-Safety Vest', 'Medium', conf)
+    for box, conf in no_mask_boxes:
+        add_no_violation(box, 'NO-Mask', 'Low', conf)
+
+    # Remove 'box' keys from violations for external use
+    for v in violations:
+        if 'box' in v:
+            v.pop('box')
+
     if debug_mode:
         return violations, person_count, safety_equipped_count, filtered_count, debug_info
     else:
@@ -1187,7 +1216,6 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
         video_placeholder = st.empty()
     
     with col2:
-        st.markdown("### 📊 Live Dashboard")
         alerts_placeholder = st.empty()
         stats_placeholder = st.empty()
     
@@ -1281,7 +1309,7 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
         
         # Convert frame for display
         annotated_frame_rgb = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
-        video_placeholder.image(annotated_frame_rgb, channels="RGB", use_column_width=True)
+        video_placeholder.image(annotated_frame_rgb, channels="RGB", use_container_width=True)
         
         # Update progress
         progress = current_frame / total_frames
