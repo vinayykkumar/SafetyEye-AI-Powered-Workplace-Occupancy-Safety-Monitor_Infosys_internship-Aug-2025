@@ -532,20 +532,12 @@ def analyze_safety_violations(detections, class_names, debug_mode=False):
         if 'box' in v:
             v.pop('box')
 
-    if debug_mode:
-        return violations, person_count, safety_equipped_count, filtered_count, debug_info
-    else:
-        return violations, person_count, safety_equipped_count
+    # Always return filtered_count for developer mode
+    return violations, person_count, safety_equipped_count, filtered_count
 
 def draw_detections(frame, detections, class_names, colors, debug_mode=False):
     """Draw bounding boxes and labels on frame"""
-    result = analyze_safety_violations(detections, class_names, debug_mode)
-    
-    if debug_mode:
-        violations, person_count, safety_equipped, filtered_count, debug_info = result
-    else:
-        violations, person_count, safety_equipped = result
-        filtered_count, debug_info = 0, []
+    violations, person_count, safety_equipped, filtered_count = analyze_safety_violations(detections, class_names, debug_mode)
     
     for detection in detections:
         x1, y1, x2, y2, conf, class_id = detection
@@ -584,10 +576,8 @@ def draw_detections(frame, detections, class_names, colors, debug_mode=False):
             cv2.putText(frame, label, (int(x1), int(y1) - 5),
                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
     
-    if debug_mode:
-        return frame, violations, person_count, safety_equipped, filtered_count, debug_info
-    else:
-        return frame, violations, person_count, safety_equipped
+    # Always return filtered_count for developer mode
+    return frame, violations, person_count, safety_equipped, filtered_count
 
 def process_video_frame(frame, model, class_names, colors, debug_mode=False):
     """Process a single video frame"""
@@ -595,24 +585,19 @@ def process_video_frame(frame, model, class_names, colors, debug_mode=False):
     
     if len(results) > 0 and len(results[0].boxes) > 0:
         detections = results[0].boxes.data.cpu().numpy()
-        result = draw_detections(frame, detections, class_names, colors, debug_mode)
-        
-        if debug_mode:
-            annotated_frame, violations, person_count, safety_equipped, filtered_count, debug_info = result
-        else:
-            annotated_frame, violations, person_count, safety_equipped = result
-            filtered_count, debug_info = 0, []
+        # Always returns: annotated_frame, violations, person_count, safety_equipped, filtered_count
+        annotated_frame, violations, person_count, safety_equipped, filtered_count = draw_detections(
+            frame, detections, class_names, colors, debug_mode
+        )
     else:
         annotated_frame = frame
         violations = []
         person_count = 0
         safety_equipped = 0
-        filtered_count, debug_info = 0, []
+        filtered_count = 0
     
-    if debug_mode:
-        return annotated_frame, violations, person_count, safety_equipped, filtered_count, debug_info
-    else:
-        return annotated_frame, violations, person_count, safety_equipped
+    # Always return filtered_count for developer mode
+    return annotated_frame, violations, person_count, safety_equipped, filtered_count
 
 def update_live_alerts(placeholder, violations, current_frame):
     """Update live alerts display using Streamlit components - COMPACT VERSION"""
@@ -2189,7 +2174,7 @@ def main():
         """)
     
     # Debug mode toggle
-    debug_mode = st.sidebar.checkbox("🐛 Debug Mode", help="Show filtered detections and debug information")
+    debug_mode = st.sidebar.checkbox("�‍💻 Developer Mode", help="Show detailed technical information for developers (model metrics, detection details, processing stats)")
     
     
     # Vehicle filtering settings - Expandable
@@ -2258,12 +2243,27 @@ def main():
         )
         
         if st.button("🚀 Start Processing", type="primary"):
-            # Debug: Show final email configuration before processing (only in debug mode)
+            # Developer Mode: Show technical configuration before processing
             if debug_mode:
-                st.write(f"🔍 **DEBUG INFO:**")
-                st.write(f"- real_time_alerts = {real_time_alerts}")
-                st.write(f"- send_csv_summary = {send_csv_summary}")
-                st.write(f"- recipient_email = {recipient_email}")
+                st.info("**👨‍💻 Developer Mode Enabled** - Technical details will be shown during processing")
+                with st.expander("� Configuration Details"):
+                    st.json({
+                        "email_config": {
+                            "real_time_alerts": real_time_alerts,
+                            "send_csv_summary": send_csv_summary,
+                            "recipient_email": recipient_email if recipient_email else "Not configured"
+                        },
+                        "model_config": {
+                            "model_path": model_path,
+                            "confidence_threshold": confidence_threshold,
+                            "processing_mode": process_option
+                        },
+                        "video_info": {
+                            "total_frames": total_frames,
+                            "fps": fps,
+                            "duration_seconds": round(duration, 2)
+                        }
+                    })
             
             if process_option == "Live Processing (Frame by Frame)":
                 # Live processing with real-time updates
@@ -2371,14 +2371,10 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
         current_frame += 1
         timestamp = f"{current_frame / fps:.1f}s" if fps > 0 else None
         
-        # Process frame with debug mode
-        result = process_video_frame(frame, model, class_names, colors, debug_mode)
-        
-        if debug_mode:
-            annotated_frame, violations, person_count, safety_equipped, filtered_count, debug_info = result
-        else:
-            annotated_frame, violations, person_count, safety_equipped = result
-            filtered_count, debug_info = 0, []
+        # Process frame (always returns filtered_count for developer mode)
+        annotated_frame, violations, person_count, safety_equipped, filtered_count = process_video_frame(
+            frame, model, class_names, colors, debug_mode
+        )
         
         # Send real-time email alerts if enabled and violations detected
         if real_time_alerts and violations and recipient_email:
@@ -2418,11 +2414,38 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
                           show_email_queue=real_time_alerts and recipient_email)
         update_detailed_stats(detailed_stats_placeholder, total_violations, frame_stats, current_frame)
         
-        # Show debug information if enabled
-        if debug_mode and debug_info:
-            with st.expander(f"🐛 Debug Info - Frame {current_frame} ({filtered_count} detections filtered)"):
-                for info in debug_info:
-                    st.text(info)
+        # Show developer information if enabled
+        if debug_mode:
+            with st.expander(f"👨‍💻 Developer Info - Frame {current_frame}", expanded=False):
+                dev_col1, dev_col2, dev_col3 = st.columns(3)
+                
+                with dev_col1:
+                    st.markdown("**🎯 Detection Stats**")
+                    st.metric("Persons Detected", person_count)
+                    st.metric("Violations Found", len(violations))
+                    st.metric("Safety Equipped", safety_equipped)
+                    st.metric("Filtered Objects", filtered_count)
+                
+                with dev_col2:
+                    st.markdown("**⚙️ Processing Info**")
+                    st.metric("Current Frame", current_frame)
+                    st.metric("Total Frames", total_frames)
+                    st.metric("Progress", f"{(current_frame/total_frames*100):.1f}%")
+                    st.metric("Timestamp", f"{timestamp}" if timestamp else "N/A")
+                
+                with dev_col3:
+                    st.markdown("**📊 Model Metrics**")
+                    st.metric("FPS", f"{fps:.1f}")
+                    st.metric("Confidence Threshold", confidence_threshold)
+                    total_detections = person_count + len(violations) + safety_equipped
+                    st.metric("Total Detections", total_detections)
+                    st.metric("Email Alerts Sent", email_sent_count)
+                
+                # Violation details if any
+                if violations:
+                    st.markdown("**🚨 Current Frame Violations:**")
+                    for i, v in enumerate(violations, 1):
+                        st.text(f"{i}. {v['type']} | Severity: {v['severity']} | Location: {v.get('location', 'N/A')}")
         
         # Convert frame for display
         annotated_frame_rgb = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
@@ -2594,14 +2617,10 @@ def process_full_video(video_path, model, class_names, colors, confidence_thresh
         current_frame += 1
         timestamp = f"{current_frame / fps:.1f}s" if fps > 0 else None
         
-        # Process frame with debug mode
-        result = process_video_frame(frame, model, class_names, colors, debug_mode)
-        
-        if debug_mode:
-            annotated_frame, violations, person_count, safety_equipped, filtered_count, debug_info = result
-        else:
-            annotated_frame, violations, person_count, safety_equipped = result
-            filtered_count, debug_info = 0, []
+        # Process frame (always returns filtered_count for developer mode)
+        annotated_frame, violations, person_count, safety_equipped, filtered_count = process_video_frame(
+            frame, model, class_names, colors, debug_mode
+        )
         
         # Send real-time email alerts if enabled and violations detected
         if real_time_alerts and violations and recipient_email:
