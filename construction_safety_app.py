@@ -2256,11 +2256,12 @@ def main():
         )
         
         if st.button("🚀 Start Processing", type="primary"):
-            # Debug: Show final email configuration before processing
-            st.write(f"🔍 **DEBUG INFO:**")
-            st.write(f"- real_time_alerts = {real_time_alerts}")
-            st.write(f"- send_csv_summary = {send_csv_summary}")
-            st.write(f"- recipient_email = {recipient_email}")
+            # Debug: Show final email configuration before processing (only in debug mode)
+            if debug_mode:
+                st.write(f"🔍 **DEBUG INFO:**")
+                st.write(f"- real_time_alerts = {real_time_alerts}")
+                st.write(f"- send_csv_summary = {send_csv_summary}")
+                st.write(f"- recipient_email = {recipient_email}")
             
             if process_option == "Live Processing (Frame by Frame)":
                 # Live processing with real-time updates
