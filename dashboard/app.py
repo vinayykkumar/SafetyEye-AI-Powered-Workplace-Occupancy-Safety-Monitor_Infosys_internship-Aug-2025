@@ -169,18 +169,29 @@ class RealSafetyMonitor:
                 ph = max(1, y2 - y1)
                 expanded_pbox = [x1, max(0, int(y1 - self.head_expand * ph)), x2, y2]
 
+                # --- PPE confidence calculation ---
                 best_h_conf = 0.0
                 for hi in helmet_idx:
-                    hbox = boxes[hi]; hconf = confs[hi]
+                    hbox = boxes[hi]
+                    hconf = confs[hi]
                     hcenter = center(hbox)
                     if point_in_box(hcenter, expanded_pbox) and hconf > best_h_conf:
                         best_h_conf = hconf
 
                 best_v_conf = 0.0
                 for vi in vest_idx:
-                    vbox = boxes[vi]; vconf = confs[vi]
-                    if iou(pbox, vbox) > self.iou_threshold and vconf > best_v_conf:
-                        best_v_conf = vconf
+                    vbox = boxes[vi]
+                    vconf = confs[vi]
+                    label = self.model.names[classes[vi]].lower()
+
+                    # Allow both "vest" and "safety" keywords
+                    if "vest" in label or "safety" in label:
+                        overlap = iou(pbox, vbox)
+                        if overlap > 0.05:  # Lowered threshold to 0.05 for testing
+                            if vconf > best_v_conf:
+                                best_v_conf = vconf
+
+
 
                 helmet_present = best_h_conf >= self.ppe_conf_min
                 vest_present = best_v_conf >= self.ppe_conf_min
@@ -629,30 +640,32 @@ def capture_loop(src):
                 if not isinstance(v, dict):
                     continue
                 person_id = v["person_id"]
+                helmet_conf = v.get("helmet_conf", 0.0)
+                vest_conf = v.get("vest_conf", 0.0)
                 for violation_type in v["types"]:
                     if (person_id, violation_type) not in detected_violations_session:
                         detected_violations_session.append((person_id, violation_type))
                         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
                         filename = f'violation_{timestamp}.jpg'
                         image_path_full = os.path.join(violations_dir, filename)
+
                         try:
                             cv2.imwrite(image_path_full, latest_processed_frame if latest_processed_frame is not None else frame)
-
                         except Exception as e:
                             print(f"❌ Failed to save violation image: {e}")
                             continue
+
                         image_url = f"/violations/{filename}"
                         log_violation_to_csv(
-                            violation_type=violation_type,
-                            confidence=max(v['helmet_conf'], v['vest_conf']),
+                            violation_type,
                             image_path=image_url,
                             person_id=person_id,
                             frame_id=frame_count,
-                            helmet_conf=v.get('helmet_conf', 0.0),
-                            vest_conf=v.get('vest_conf', 0.0)
+                            helmet_conf=helmet_conf,
+                            vest_conf=vest_conf
                         )
+                        print(f"⚠️ New violation logged: {violation_type} | Helmet={helmet_conf:.2f} | Vest={vest_conf:.2f}")
 
-                        print(f"⚠️ New violation logged: {violation_type} for person {person_id}")
         except Exception as e:
             print(f"❌ Error handling violations: {e}")
 
