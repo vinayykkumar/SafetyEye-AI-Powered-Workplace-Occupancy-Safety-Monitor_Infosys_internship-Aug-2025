@@ -44,3 +44,20 @@ timestamp,frame,person_id,violation_type,image_path,helmet_conf,vest_conf
 2025-10-07 00:02:41,37,12,no_helmet,/violations/violation_20251007_000241_735728.jpg,0.00,0.43
 2025-10-07 00:02:43,60,19,no_vest,/violations/violation_20251007_000243_367905.jpg,0.76,0.00
 2025-10-07 00:02:45,89,21,no_vest,/violations/violation_20251007_000245_376042.jpg,0.66,0.00
+2025-10-07 00:12:46,5,2,no_vest,/violations/violation_20251007_001246_502659.jpg,0.45,0.00
+2025-10-07 00:12:48,20,3,no_helmet,/violations/violation_20251007_001248_073664.jpg,0.00,0.32
+2025-10-07 00:12:49,37,12,no_helmet,/violations/violation_20251007_001249_896973.jpg,0.00,0.43
+2025-10-07 00:12:52,60,19,no_vest,/violations/violation_20251007_001252_374029.jpg,0.76,0.00
+2025-10-07 00:12:55,89,21,no_vest,/violations/violation_20251007_001255_482497.jpg,0.66,0.00
+2025-10-07 00:24:18,3,23,"no_helmet, no_vest",/violations/violation_20251007_002418_314224.jpg,0.00,0.00
+2025-10-07 00:24:27,63,27,"no_helmet, no_vest",/violations/violation_20251007_002427_639435.jpg,0.00,0.00
+2025-10-07 00:24:30,78,32,"no_helmet, no_vest",/violations/violation_20251007_002430_131741.jpg,0.00,0.00
+2025-10-07 00:24:31,87,33,"no_helmet, no_vest",/violations/violation_20251007_002431_746379.jpg,0.00,0.00
+2025-10-07 00:24:33,94,35,"no_helmet, no_vest",/violations/violation_20251007_002433_017749.jpg,0.00,0.00
+2025-10-07 00:24:33,97,36,"no_helmet, no_vest",/violations/violation_20251007_002433_498745.jpg,0.00,0.00
+2025-10-07 01:16:06,5,2,no_vest,/violations/violation_20251007_011606_190912.jpg,0.45,0.00
+2025-10-07 01:16:07,20,3,no_helmet,/violations/violation_20251007_011607_193111.jpg,0.00,0.32
+2025-10-07 01:16:08,37,12,no_helmet,/violations/violation_20251007_011608_312731.jpg,0.00,0.43
+2025-10-07 01:16:09,60,19,no_vest,/violations/violation_20251007_011609_867864.jpg,0.76,0.00
+2025-10-07 01:16:11,89,21,no_vest,/violations/violation_20251007_011611_849017.jpg,0.66,0.00
+2025-10-07 01:16:39,5,23,no_helmet,/violations/violation_20251007_011639_983501.jpg,0.00,0.72
