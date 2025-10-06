@@ -172,7 +172,7 @@ function setupModalControls() {
 // Start auto-updates
 function startAutoUpdates() {
     // Update stats every 5 seconds
-    statsUpdateInterval = setInterval(updateStats, 5000);
+    statsUpdateInterval = setInterval(updateStats, 3000);
     
     // Update violations every 3 seconds
     violationsUpdateInterval = setInterval(updateViolations, 3000);
@@ -508,6 +508,7 @@ function initializeCharts() {
 
 // Update charts with new data
 function updateCharts(stats) {
+    // 🟣 Violations by Type (already working)
     if (window.violationsChart) {
         window.violationsChart.data.datasets[0].data = [
             stats.violations_by_type?.no_helmet || 0,
@@ -515,6 +516,16 @@ function updateCharts(stats) {
             stats.violations_by_type?.other || 0
         ];
         window.violationsChart.update();
+    }
+
+    // 🟢 Compliance Trend (now dynamic)
+    if (window.complianceChart && stats.compliance_trend) {
+        const labels = stats.compliance_trend.timestamps || [];
+        const values = stats.compliance_trend.values || [];
+
+        window.complianceChart.data.labels = labels;
+        window.complianceChart.data.datasets[0].data = values;
+        window.complianceChart.update();
     }
 }
 

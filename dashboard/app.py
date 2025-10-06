@@ -307,35 +307,41 @@ def init_violations_system():
 VIOLATIONS_CSV_PATH = os.path.join(violations_dir, 'violations_log.csv')
 
 def _ensure_violations_csv():
-    """Create CSV with header if missing."""
-    if not os.path.exists(violations_dir):
-        os.makedirs(violations_dir, exist_ok=True)
     if not os.path.exists(VIOLATIONS_CSV_PATH):
         with open(VIOLATIONS_CSV_PATH, 'w', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow(["timestamp", "frame", "person_id", "reason", "image_path", "helmet_conf", "vest_conf"])
+            writer.writerow([
+                "timestamp",
+                "violation_type",
+                "person_id",
+                "frame",
+                "helmet_conf",
+                "vest_conf",
+                "image_path"
+            ])
 
-def log_violation_to_csv(violation_type, confidence=0.95, image_path="", person_id="0", frame_id="0", helmet_conf=None, vest_conf=None):
-    """Append a violation row to CSV with correct confidence fields."""
+def log_violation_to_csv(violation_type, confidence=0.95, image_path="", person_id="0", frame_id="0",
+                         helmet_conf=None, vest_conf=None):
+    """Append a violation row to CSV with clean formatting and handle multi-type safely."""
     try:
         _ensure_violations_csv()
 
-        # Assign correct confidences
-        if helmet_conf is None and "helmet" in violation_type.lower():
-            helmet_conf = confidence
-        elif helmet_conf is None:
-            helmet_conf = 0.0
+        # Normalize multi-type violations
+        if isinstance(violation_type, (list, tuple)):
+            # Join into comma-separated string for display
+            violation_type = ", ".join(str(v) for v in violation_type)
+        elif isinstance(violation_type, dict):
+            # Handle weird YOLO dict input (bug fallback)
+            violation_type = violation_type.get('type', 'unknown')
 
-        if vest_conf is None and "vest" in violation_type.lower():
-            vest_conf = confidence
-        elif vest_conf is None:
-            vest_conf = 0.0
-
-        # Ensure float formatting
-        helmet_conf = float(helmet_conf)
-        vest_conf = float(vest_conf)
+        # Determine confidences properly
+        if helmet_conf is None:
+            helmet_conf = confidence if "helmet" in str(violation_type).lower() else 0.0
+        if vest_conf is None:
+            vest_conf = confidence if "vest" in str(violation_type).lower() else 0.0
 
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
         with open(VIOLATIONS_CSV_PATH, 'a', newline='') as f:
             writer = csv.writer(f)
             writer.writerow([
@@ -347,47 +353,68 @@ def log_violation_to_csv(violation_type, confidence=0.95, image_path="", person_
                 f"{helmet_conf:.2f}",
                 f"{vest_conf:.2f}"
             ])
+
         print(f"🟢 Logged {violation_type} | Helmet={helmet_conf:.2f} | Vest={vest_conf:.2f}")
         return True
+
     except Exception as e:
         print(f"❌ Failed to log violation to CSV: {e}")
         return False
 
 
+
 def get_violations_from_csv(limit=1000):
-    """Read violations and return dict list (newest first)."""
+    """Read violations safely and return a list of dicts (newest first)."""
     try:
         _ensure_violations_csv()
         violations = []
+
         with open(VIOLATIONS_CSV_PATH, 'r', newline='') as f:
             reader = list(csv.DictReader(f))
             idx = 0
+
             for row in reversed(reader):
                 if idx >= limit:
                     break
+
+                # 🛑 Skip malformed rows (like when entire dict got written as one string)
+                if len(row.keys()) == 1 and list(row.keys())[0].startswith("{"):
+                    print(f"⚠️ Skipping malformed CSV row: {row}")
+                    continue
+
                 try:
                     ts = (row.get('timestamp') or '').strip()
                     if not ts:
                         continue
+
+                    # Ensure numeric conversions
                     helmet_conf = float(row.get('helmet_conf', 0) or 0)
                     vest_conf = float(row.get('vest_conf', 0) or 0)
+
                     violations.append({
                         'id': idx + 1,
                         'timestamp': ts,
                         'frame': row.get('frame', ''),
                         'person_id': row.get('person_id', ''),
-                        'violation_type': row.get('violation_type', '') or row.get('reason', ''),
+                        'violation_type': (
+                            row.get('violation_type', '') or row.get('reason', '')
+                        ),
                         'image_path': row.get('image_path', ''),
                         'helmet_conf': helmet_conf,
                         'vest_conf': vest_conf
                     })
                     idx += 1
-                except Exception:
+
+                except Exception as inner_err:
+                    print(f"⚠️ Skipped malformed row: {inner_err} — {row}")
                     continue
+
         return violations
+
     except Exception as e:
-        print(f"❌ Error reading CSV: {e}")
+        print(f"❌ Error reading violations: {e}")
         return []
+
 
 
 def get_violations_by_date_range(start_date, end_date):
@@ -711,7 +738,6 @@ def close_capture():
             camera = None
 
 def capture_loop(src):
-    """Thread loop: read frame -> run detection -> store latest processed frame -> log violations"""
     global latest_raw_frame, latest_processed_frame, detected_violations_session
     print(f"🎬 Capture loop started for source: {src}")
     cap_ok = open_capture(src)
@@ -720,6 +746,13 @@ def capture_loop(src):
         return
 
     frame_count = 0
+
+    # 🕒 Get FPS-based frame delay
+    fps = camera.get(cv2.CAP_PROP_FPS)
+    if fps == 0 or fps != fps:  # handle zero or NaN
+        fps = 25.0
+    frame_delay = 1.0 / fps
+
     while not capture_thread_stop.is_set():
         with camera_lock:
             if camera is None:
@@ -727,14 +760,13 @@ def capture_loop(src):
                 break
             ret, frame = camera.read()
         if not ret:
-            # For file sources, reaching EOF should stop or optionally loop.
             print("📹 End of stream or failed to read frame")
             break
 
         frame_count += 1
         latest_raw_frame = frame.copy()
 
-        # Run detection (safe - either real or mock inside safety_monitor)
+        # Run YOLO detection
         try:
             processed_frame, violations = safety_monitor.process_frame(frame.copy())
         except Exception as e:
@@ -743,61 +775,59 @@ def capture_loop(src):
             violations = []
 
         latest_processed_frame = processed_frame
-        global total_detections_today, current_occupancy_estimate
-        total_detections_today += 1
 
-        # Estimate current occupancy based on number of unique tracked persons
-        if hasattr(safety_monitor, 'tracker') and safety_monitor.tracker.objects:
-            current_occupancy_estimate = len(safety_monitor.tracker.objects)
-
-        # Count each processed frame as one detection batch
-        total_detections_today += 1
-
-
-        # Handle violations (log & save snapshot)
-        # Handle violations (log & save snapshot)
+        # ✅ Log each violation properly
         try:
-            for v in violations:
-                if not isinstance(v, dict):
+            for violation in violations:
+                if not isinstance(violation, dict):
+                    print(f"⚠️ Skipping invalid violation: {violation}")
                     continue
-                person_id = v["person_id"]
-                helmet_conf = v.get("helmet_conf", 0.0)
-                vest_conf = v.get("vest_conf", 0.0)
-                for violation_type in v["types"]:
-                    if (person_id, violation_type) not in detected_violations_session:
-                        detected_violations_session.append((person_id, violation_type))
-                        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-                        filename = f'violation_{timestamp}.jpg'
-                        image_path_full = os.path.join(violations_dir, filename)
 
-                        try:
-                            cv2.imwrite(image_path_full, latest_processed_frame if latest_processed_frame is not None else frame)
-                        except Exception as e:
-                            print(f"❌ Failed to save violation image: {e}")
-                            continue
+                person_id = violation.get('person_id', 'N/A')
+                helmet_conf = violation.get('helmet_conf', 0.0)
+                vest_conf = violation.get('vest_conf', 0.0)
+                types = violation.get('types', [])
 
-                        image_url = f"/violations/{filename}"
-                        log_violation_to_csv(
-                            violation_type,
-                            image_path=image_url,
-                            person_id=person_id,
-                            frame_id=frame_count,
-                            helmet_conf=helmet_conf,
-                            vest_conf=vest_conf
-                        )
-                        print(f"⚠️ New violation logged: {violation_type} | Helmet={helmet_conf:.2f} | Vest={vest_conf:.2f}")
+                # Create a readable string for the violation type(s)
+                violation_type_str = ', '.join(types) if isinstance(types, list) else str(types)
+
+                # Avoid duplicate logging
+                key = (person_id, violation_type_str)
+                if key not in detected_violations_session:
+                    detected_violations_session.append(key)
+
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+                    image_filename = f"violation_{timestamp}.jpg"
+                    image_path = os.path.join(violations_dir, image_filename)
+                    cv2.imwrite(image_path, processed_frame)
+
+                    # ✅ Store web-accessible relative path
+                    public_image_path = f"/violations/{image_filename}"
+
+        
+
+                    # ✅ Log violation with all details
+                    log_violation_to_csv(
+                        violation_type=violation_type_str,
+                        confidence=0.95,
+                        image_path=public_image_path,
+                        person_id=person_id,
+                        frame_id=frame_count,
+                        helmet_conf=helmet_conf,
+                        vest_conf=vest_conf
+                    )
+
+                    print(f"⚠️ New violation logged: {violation} for person {person_id}")
 
         except Exception as e:
             print(f"❌ Error handling violations: {e}")
 
+        # 🕐 Sleep according to video’s real FPS
+        time.sleep(frame_delay)
 
-        # Limiting loop speed for CPU (optional)
-        # For live webcam: aim for ~15-25 FPS; for files, process as fast as possible
-        time.sleep(0.02)
-
-    # cleanup at thread end
     close_capture()
     print("✅ Capture loop exiting")
+
 
 def start_capture_thread(src):
     global capture_thread, capture_thread_stop, active_source, detected_violations_session
@@ -974,11 +1004,76 @@ def api_upload_video():
         print(f"❌ upload_video error: {e}")
         return jsonify({'error': f'Upload failed: {str(e)}'}), 500
 
-@app.route('/api/violations')
-def get_violations_api():
-    dashboard_data = DashboardData()
-    dashboard_data.update_stats()
-    return jsonify(dashboard_data.violations_data)
+@app.route('/api/violations/all', methods=['GET'])
+def get_violations():
+    """Return all logged violations as proper JSON list."""
+    try:
+        violations = []
+
+        # ✅ Read CSV file and convert rows into dicts
+        if os.path.exists(VIOLATIONS_CSV_PATH):
+            with open(VIOLATIONS_CSV_PATH, 'r', newline='') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    # Ensure numeric types are converted back
+                    violations.append({
+                        'timestamp': row.get('timestamp', ''),
+                        'violation_type': row.get('violation_type', ''),
+                        'person_id': row.get('person_id', ''),
+                        'frame': int(row.get('frame', 0)),
+                        'helmet_conf': float(row.get('helmet_conf', 0.0)),
+                        'vest_conf': float(row.get('vest_conf', 0.0)),
+                        'image_path': row.get('image_path', '')
+                    })
+
+        return jsonify(violations)
+
+    except Exception as e:
+        print(f"❌ Error reading violations: {e}")
+        return jsonify([])
+
+@app.route('/api/violations', methods=['GET'])
+    
+def get_recent_violations():
+    """Return only the 10 most recent valid violations for dashboard display."""
+    try:
+        violations = []
+
+        if os.path.exists(VIOLATIONS_CSV_PATH):
+            with open(VIOLATIONS_CSV_PATH, 'r', newline='') as f:
+                reader = list(csv.DictReader(f))
+
+                for row in reversed(reader):  # newest first
+                    # Skip empty or invalid rows
+                    vtype = (row.get('violation_type') or '').strip()
+                    if not vtype or vtype.lower() == 'unknown':
+                        continue
+
+                    try:
+                        violations.append({
+                            'timestamp': row.get('timestamp', ''),
+                            'violation_type': vtype,
+                            'person_id': row.get('person_id', ''),
+                            'frame': int(float(row.get('frame', 0))),
+                            'helmet_conf': float(row.get('helmet_conf', 0.0)),
+                            'vest_conf': float(row.get('vest_conf', 0.0)),
+                            'image_path': row.get('image_path', '')
+                        })
+                    except Exception as parse_err:
+                        print(f"⚠️ Skipping malformed row: {parse_err} — {row}")
+                        continue
+
+                    if len(violations) >= 10:
+                        break
+
+        print(f"📡 Returning {len(violations)} recent violations to dashboard")
+        return jsonify(violations)
+
+    except Exception as e:
+        print(f"❌ Error reading recent violations: {e}")
+        return jsonify([])
+
+
 
 @app.route('/api/violations/date-range')
 def get_violations_by_date():
@@ -1018,29 +1113,64 @@ def download_csv():
     return send_file(csv_path, as_attachment=True, download_name=csv_filename)
 
 
+# --------------------------------------------
+# 📊 Dashboard Stats API — with compliance trend
+# --------------------------------------------
+from collections import deque
+
+# Store last 10 compliance readings (global in-memory cache)
+compliance_history = deque(maxlen=10)
+compliance_timestamps = deque(maxlen=10)
+
 @app.route('/api/stats')
 def get_stats():
     dashboard_data = DashboardData()
     dashboard_data.update_stats()
+
+    # Record compliance rate trend (every call adds a new point)
+    now_label = datetime.now().strftime("%H:%M")
+    compliance_history.append(dashboard_data.compliance_rate)
+    compliance_timestamps.append(now_label)
+
     stats = {
         'violation_count_today': dashboard_data.violation_count_today,
         'compliance_rate': round(dashboard_data.compliance_rate, 1),
         'current_occupancy': dashboard_data.current_occupancy,
         'detection_mode': 'REAL' if safety_monitor.model_loaded else 'MOCK',
         'processing_status': 'active' if capture_thread and capture_thread.is_alive() else 'inactive',
-        'current_violations': len(get_violations_from_csv(limit=1000)),
         'violations_by_type': {
             'no_helmet': sum(1 for v in dashboard_data.violations_data if 'no_helmet' in v['violation_type'].lower()),
             'no_vest': sum(1 for v in dashboard_data.violations_data if 'no_vest' in v['violation_type'].lower()),
             'other': 0
+        },
+        # ✅ New section for chart
+        'compliance_trend': {
+            'timestamps': list(compliance_timestamps),
+            'values': list(compliance_history)
         }
     }
+
     return jsonify(stats)
+
 
 @app.route('/violations/<path:filename>')
 def serve_violation_image(filename):
     try:
-        return send_file(os.path.join(violations_dir, filename))
+        # Handle both absolute and relative Windows paths
+        filename = filename.replace("\\", "/")  # normalize slashes
+
+        if os.path.isabs(filename):
+            abs_path = filename
+        else:
+            # Allow nested subpaths like "violations/violation_123.jpg"
+            abs_path = os.path.join(violations_dir, os.path.basename(filename))
+
+        if not os.path.exists(abs_path):
+            print(f"⚠️ Snapshot not found: {abs_path}")
+            abort(404)
+
+        return send_file(abs_path)
+
     except Exception as e:
         print(f"❌ Could not serve image: {e}")
         abort(404)
