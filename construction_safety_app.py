@@ -2272,14 +2272,14 @@ def main():
             st.dataframe(filtered_df, use_container_width=True, height=400)
             
             # Download filtered data
-            st.markdown("### 📥 Download Filtered Data")
-            col_d1, col_d2 = st.columns(2)
+            st.markdown("### 📥 Download Reports")
+            col_d1, col_d2, col_d3, col_d4 = st.columns(4)
             
             with col_d1:
                 csv_data = filtered_df.to_csv(index=False)
                 filename = f"filtered_violations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
                 st.download_button(
-                    label="📊 Download Filtered CSV",
+                    label="📊 Filtered CSV",
                     data=csv_data,
                     file_name=filename,
                     mime="text/csv",
@@ -2287,14 +2287,67 @@ def main():
                 )
             
             with col_d2:
+                # Generate HTML report for filtered data
+                # Convert filtered_df to violations list format
+                filtered_violations = []
+                for _, row in filtered_df.iterrows():
+                    filtered_violations.append({
+                        'frame': row.get('frame', 0),
+                        'type': row.get('type', 'Unknown'),
+                        'severity': row.get('severity', 'Low'),
+                        'location': row.get('location', 'N/A'),
+                        'timestamp': row.get('timestamp', 'N/A')
+                    })
+                
+                # Create dummy frame_stats for HTML generation
+                frame_count = len(filtered_df['frame'].unique()) if 'frame' in filtered_df.columns else len(filtered_df)
+                frame_stats = [{'frame': i, 'violations': 0, 'persons': 0, 'safety_equipped': 0} for i in range(frame_count)]
+                
+                html_content = generate_html_report_with_graphs(filtered_violations, frame_stats)
+                html_filename = f"filtered_violations_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
+                st.download_button(
+                    label="📄 Filtered HTML",
+                    data=html_content,
+                    file_name=html_filename,
+                    mime="text/html",
+                    use_container_width=True
+                )
+            
+            with col_d3:
                 # Download full master CSV
                 full_csv = df.to_csv(index=False)
                 full_filename = f"master_violations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
                 st.download_button(
-                    label="📁 Download Full History CSV",
+                    label="📁 Full CSV",
                     data=full_csv,
                     file_name=full_filename,
                     mime="text/csv",
+                    use_container_width=True
+                )
+            
+            with col_d4:
+                # Generate HTML report for full data
+                full_violations = []
+                for _, row in df.iterrows():
+                    full_violations.append({
+                        'frame': row.get('frame', 0),
+                        'type': row.get('type', 'Unknown'),
+                        'severity': row.get('severity', 'Low'),
+                        'location': row.get('location', 'N/A'),
+                        'timestamp': row.get('timestamp', 'N/A')
+                    })
+                
+                # Create dummy frame_stats for HTML generation
+                full_frame_count = len(df['frame'].unique()) if 'frame' in df.columns else len(df)
+                full_frame_stats = [{'frame': i, 'violations': 0, 'persons': 0, 'safety_equipped': 0} for i in range(full_frame_count)]
+                
+                html_full_content = generate_html_report_with_graphs(full_violations, full_frame_stats)
+                html_full_filename = f"master_violations_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
+                st.download_button(
+                    label="📄 Full HTML",
+                    data=html_full_content,
+                    file_name=html_full_filename,
+                    mime="text/html",
                     use_container_width=True
                 )
             
