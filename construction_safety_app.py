@@ -1969,7 +1969,6 @@ def generate_html_report_with_graphs(total_violations, frame_stats):
 
 def main():
     st.title("🚧 Construction Site Safety Monitor")
-    st.markdown("Upload a video to monitor construction site safety and detect PPE violations")
     
     # Sidebar configuration
     st.sidebar.header("Configuration")
@@ -1990,6 +1989,12 @@ def main():
         index=0,
         help="Choose whether to analyze a video or a single image"
     )
+    
+    # Show mode-specific description
+    if analysis_mode == "Video Analysis":
+        st.markdown("Upload a video to monitor construction site safety and detect PPE violations")
+    else:
+        st.markdown("Upload an image to detect PPE violations and safety equipment")
     
     # Check if model file exists
     if not os.path.exists(model_path):
@@ -2019,9 +2024,6 @@ def main():
 
     # If user selected Image Analysis, show a minimal image annotator UI (reuses model)
     if analysis_mode == "Image Analysis":
-        st.header("📷 Image Analysis Mode")
-        st.markdown("Upload a single image to run object detection and visualize bounding boxes. This uses the same model as the video pipeline.")
-
         # Image upload control
         uploaded_image = st.file_uploader("Upload Image (JPG/PNG/BMP/TIFF)", type=['jpg', 'jpeg', 'png', 'bmp', 'tiff'])
 
