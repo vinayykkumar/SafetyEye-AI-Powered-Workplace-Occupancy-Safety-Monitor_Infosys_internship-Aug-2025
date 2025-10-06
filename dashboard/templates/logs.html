@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Violation Logs - SafetyEye{% endblock %}
+
+{% block content %}
+<div class="logs-container">
+    <!-- Header -->
+    <div class="logs-header">
+        <h1><i class="fas fa-clipboard-list"></i> Violation Logs</h1>
+        <p>Comprehensive history of all safety violations</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-panel">
+        <div class="filter-card">
+            <h3><i class="fas fa-filter"></i> Filter Violations</h3>
+            <div class="filter-controls">
+                <div class="date-range">
+                    <div class="date-input">
+                        <label>Start Date:</label>
+                        <input type="date" id="start-date" class="date-picker">
+                    </div>
+                    <div class="date-input">
+                        <label>End Date:</label>
+                        <input type="date" id="end-date" class="date-picker">
+                    </div>
+                    <button id="apply-filter" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Apply Filter
+                    </button>
+                    <button id="reset-filter" class="btn btn-secondary">
+                        <i class="fas fa-refresh"></i> Reset
+                    </button>
+                </div>
+                <div class="violation-type-filter">
+                    <label>Violation Type:</label>
+                    <select id="type-filter">
+                        <option value="all">All Types</option>
+                       <option value="no_hardhat">No Hardhat</option>
+                        <option value="no_vest">No Vest</option>
+                        <option value="both">No Hardhat & No Vest</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="summary-card">
+            <h3><i class="fas fa-chart-pie"></i> Summary</h3>
+            <div class="summary-stats">
+                <div class="summary-item">
+                    <div class="summary-value" id="total-violations">0</div>
+                    <div class="summary-label">Total Violations</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value" id="no-helmet-count">0</div>
+                    <div class="summary-label">No Helmet</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value" id="no-vest-count">0</div>
+                    <div class="summary-label">No Vest</div>
+                </div>
+            </div>
+            <button id="download-csv" class="btn btn-success" disabled>
+                <i class="fas fa-download"></i> Download CSV
+            </button>
+        </div>
+    </div>
+
+    <!-- Violations Table -->
+    <div class="violations-table-section">
+        <div class="section-header">
+            <h3><i class="fas fa-table"></i> Violation Records</h3>
+            <div class="table-actions">
+                <button id="refresh-table" class="btn btn-secondary">
+                    <i class="fas fa-sync"></i> Refresh
+                </button>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table class="violations-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Timestamp</th>
+                        <th>Violation Type</th>
+                        <th>Person ID</th>
+                        <th>Frame</th>
+                        <th>Helmet Conf</th>
+                        <th>Vest Conf</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="violations-table-body">
+                    <tr>
+                        <td colspan="8" class="no-data">No violations found for selected date range</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+            <button id="prev-page" class="btn btn-secondary" disabled>
+                <i class="fas fa-chevron-left"></i> Previous
+            </button>
+            <span class="page-info">Page <span id="current-page">1</span> of <span id="total-pages">1</span></span>
+            <button id="next-page" class="btn btn-secondary" disabled>
+                Next <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Log Detail Modal -->
+<div id="log-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-info-circle"></i> Violation Details</h3>
+            <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Violation ID:</label>
+                    <span id="log-id">-</span>
+                </div>
+                <div class="detail-item">
+                    <label>Timestamp:</label>
+                    <span id="log-timestamp">-</span>
+                </div>
+                <div class="detail-item">
+                    <label>Violation Type:</label>
+                    <span id="log-type" class="violation-badge">-</span>
+                </div>
+                <div class="detail-item">
+                    <label>Person ID:</label>
+                    <span id="log-person-id">-</span>
+                </div>
+                <div class="detail-item">
+                    <label>Frame Number:</label>
+                    <span id="log-frame">-</span>
+                </div>
+                <div class="detail-item">
+                    <label>Helmet Confidence:</label>
+                    <span id="log-helmet-conf">-</span>
+                </div>
+                <div class="detail-item">
+                    <label>Vest Confidence:</label>
+                    <span id="log-vest-conf">-</span>
+                </div>
+                <div class="detail-item">
+                    <label>Image Path:</label>
+                    <span id="log-image-path">-</span>
+                </div>
+            </div>
+            <div class="violation-image">
+                <h4>Violation Snapshot</h4>
+                <img id="log-image" src="" alt="Violation Snapshot" onerror="this.style.display='none'">
+                <div id="no-image" class="no-image-message">
+                    <i class="fas fa-image"></i>
+                    <p>No image available for this violation</p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="log-send-email" class="btn btn-primary">
+                <i class="fas fa-envelope"></i> Send Email
+            </button>
+            <button class="btn btn-secondary close-modal">Close</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Pagination variables
+    let currentPage = 1;
+    const itemsPerPage = 10;
+    let currentViolations = [];
+</script>
+{% endblock %}

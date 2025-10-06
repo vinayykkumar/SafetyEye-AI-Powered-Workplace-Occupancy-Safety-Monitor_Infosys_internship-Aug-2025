@@ -94,3 +94,69 @@
 2025-09-25 10:40:30,033 INFO PPE VIOLATION: NO_VEST | id=21 frame=182 helmet=0.71 vest=0.40 | violations\violation_20250925_104030_f182_id21.jpg
 2025-09-25 10:40:30,875 INFO Stream ended / can't get frame.
 2025-09-25 10:40:30,938 INFO Finished.
+2025-09-25 11:10:34,858 INFO Model classes: {0: 'hardhat', 1: 'vest', 2: 'worker'}
+2025-09-25 11:10:35,010 INFO Starting strict PPE monitor... press 'q' to exit.
+2025-09-25 11:10:36,713 INFO PPE VIOLATION: NO_VEST | id=2 frame=12 helmet=0.34 vest=0.00 | violations\violation_20250925_111036_f12_id2.jpg
+2025-09-25 11:10:42,110 INFO PPE VIOLATION: NO_HARDHAT | id=12 frame=74 helmet=0.00 vest=0.43 | violations\violation_20250925_111042_f74_id12.jpg
+2025-09-25 11:10:46,619 INFO PPE VIOLATION: NO_VEST | id=19 frame=126 helmet=0.67 vest=0.00 | violations\violation_20250925_111046_f126_id19.jpg
+2025-09-25 11:10:51,462 INFO PPE VIOLATION: NO_VEST | id=21 frame=182 helmet=0.71 vest=0.40 | violations\violation_20250925_111051_f182_id21.jpg
+2025-09-25 11:10:52,335 INFO Stream ended / can't get frame.
+2025-09-25 11:10:52,402 INFO Finished.
+2025-09-25 17:31:39,826 INFO Model classes: {0: 'hardhat', 1: 'vest', 2: 'worker'}
+2025-09-25 17:31:39,985 INFO Starting strict PPE monitor... press 'q' to exit.
+2025-09-25 17:31:42,015 INFO PPE VIOLATION: NO_VEST | id=2 frame=12 helmet=0.34 vest=0.00 | violations\violation_20250925_173141_f12_id2.jpg
+2025-09-25 17:31:48,080 INFO PPE VIOLATION: NO_HARDHAT | id=12 frame=74 helmet=0.00 vest=0.43 | violations\violation_20250925_173148_f74_id12.jpg
+2025-09-25 17:31:53,143 INFO PPE VIOLATION: NO_VEST | id=19 frame=126 helmet=0.67 vest=0.00 | violations\violation_20250925_173153_f126_id19.jpg
+2025-09-25 17:31:58,515 INFO PPE VIOLATION: NO_VEST | id=21 frame=182 helmet=0.71 vest=0.40 | violations\violation_20250925_173158_f182_id21.jpg
+2025-09-25 17:31:59,558 INFO Stream ended / can't get frame.
+2025-09-25 17:31:59,677 INFO Finished.
+2025-09-25 17:32:25,246 INFO Model classes: {0: 'hardhat', 1: 'vest', 2: 'worker'}
+2025-09-25 17:32:25,295 INFO Starting strict PPE monitor... press 'q' to exit.
+2025-09-25 17:32:29,583 INFO PPE VIOLATION: NO_HARDHAT | id=8 frame=34 helmet=0.00 vest=0.57 | violations\violation_20250925_173229_f34_id8.jpg
+2025-09-25 17:32:33,829 INFO PPE VIOLATION: NO_HARDHAT | id=10 frame=75 helmet=0.00 vest=0.88 | violations\violation_20250925_173233_f75_id10.jpg
+2025-09-25 17:32:45,848 INFO Stream ended / can't get frame.
+2025-09-25 17:32:45,970 INFO Finished.
+2025-09-25 17:36:55,067 INFO Model classes: {0: 'hardhat', 1: 'vest', 2: 'worker'}
+2025-09-25 17:36:55,250 INFO Starting strict PPE monitor... press 'q' to exit.
+2025-09-25 17:36:57,466 INFO PPE VIOLATION: NO_VEST | id=3 frame=10 helmet=0.57 vest=0.26 | violations\violation_20250925_173657_f10_id3.jpg
+2025-09-25 17:36:59,971 INFO Webhook delivered for id 3
+2025-09-25 17:36:59,988 INFO PPE VIOLATION: NO_VEST | id=1 frame=10 helmet=0.76 vest=0.00 | violations\violation_20250925_173659_f10_id1.jpg
+2025-09-25 17:37:01,481 INFO Webhook delivered for id 1
+2025-09-25 17:37:09,503 INFO PPE VIOLATION: NO_VEST | id=1 frame=84 helmet=0.77 vest=0.00 | violations\violation_20250925_173709_f84_id1.jpg
+2025-09-25 17:37:10,909 INFO Webhook delivered for id 1
+2025-09-25 17:37:11,219 INFO PPE VIOLATION: NO_HARDHAT | id=3 frame=86 helmet=0.29 vest=0.64 | violations\violation_20250925_173711_f86_id3.jpg
+2025-09-25 17:37:12,596 INFO Webhook delivered for id 3
+2025-09-25 17:37:23,914 INFO Stream ended / can't get frame.
+2025-09-25 17:37:23,997 INFO Finished.
+2025-09-25 19:18:24,107 INFO Model classes: {0: 'hardhat', 1: 'vest', 2: 'worker'}
+2025-09-25 19:18:24,220 INFO Starting strict PPE monitor... press 'q' to exit.
+2025-09-25 19:18:28,754 INFO PPE VIOLATION: NO_HARDHAT | id=8 frame=34 helmet=0.00 vest=0.57 | violations\violation_20250925_191828_f34_id8.jpg
+2025-09-25 19:18:30,162 INFO Webhook delivered for id 8
+2025-09-25 19:18:34,629 INFO PPE VIOLATION: NO_HARDHAT | id=10 frame=75 helmet=0.00 vest=0.88 | violations\violation_20250925_191834_f75_id10.jpg
+2025-09-25 19:18:35,915 INFO Webhook delivered for id 10
+2025-09-25 19:18:49,408 INFO Stream ended / can't get frame.
+2025-09-25 19:18:49,572 INFO Finished.
+2025-09-29 12:42:55,010 INFO Model classes: {0: 'hardhat', 1: 'vest', 2: 'worker'}
+2025-09-29 12:42:55,326 INFO Starting strict PPE monitor... press 'q' to exit.
+2025-09-29 12:42:59,759 INFO PPE VIOLATION: NO_HARDHAT | id=8 frame=34 helmet=0.00 vest=0.57 | violations\violation_20250929_124259_f34_id8.jpg
+2025-09-29 12:43:01,688 INFO Webhook delivered for id 8
+2025-09-29 12:43:05,745 INFO PPE VIOLATION: NO_HARDHAT | id=10 frame=75 helmet=0.00 vest=0.88 | violations\violation_20250929_124305_f75_id10.jpg
+2025-09-29 12:43:07,420 INFO Webhook delivered for id 10
+2025-09-29 12:43:19,125 INFO Stream ended / can't get frame.
+2025-09-29 12:43:19,188 INFO Finished.
+2025-10-05 20:15:45,142 INFO Model classes: {0: 'hardhat', 1: 'vest', 2: 'worker'}
+2025-10-05 20:15:45,984 INFO Starting strict PPE monitor... press 'q' to exit.
+2025-10-05 20:15:50,340 INFO PPE VIOLATION: NO_HARDHAT | id=8 frame=34 helmet=0.00 vest=0.57 | violations\violation_20251005_201550_f34_id8.jpg
+2025-10-05 20:15:54,643 INFO PPE VIOLATION: NO_HARDHAT | id=10 frame=75 helmet=0.00 vest=0.88 | violations\violation_20251005_201554_f75_id10.jpg
+2025-10-05 20:16:06,644 INFO Stream ended / can't get frame.
+2025-10-05 20:16:06,719 INFO Finished.
+2025-10-06 00:28:56,722 INFO Model classes: {0: 'hardhat', 1: 'vest', 2: 'worker'}
+2025-10-06 00:28:57,286 INFO Starting strict PPE monitor... press 'q' to exit.
+2025-10-06 00:31:57,653 INFO Model classes: {0: 'hardhat', 1: 'vest', 2: 'worker'}
+2025-10-06 00:31:57,699 INFO Starting strict PPE monitor... press 'q' to exit.
+2025-10-06 00:33:49,339 INFO Model classes: {0: 'hardhat', 1: 'vest', 2: 'worker'}
+2025-10-06 00:33:49,560 INFO Starting strict PPE monitor... press 'q' to exit.
+2025-10-06 00:33:54,118 INFO PPE VIOLATION: NO_HARDHAT | id=8 frame=34 helmet=0.00 vest=0.57 | violations\violation_20251006_003354_f34_id8.jpg
+2025-10-06 00:33:58,511 INFO PPE VIOLATION: NO_HARDHAT | id=10 frame=75 helmet=0.00 vest=0.88 | violations\violation_20251006_003358_f75_id10.jpg
+2025-10-06 00:34:10,398 INFO Stream ended / can't get frame.
+2025-10-06 00:34:10,490 INFO Finished.
