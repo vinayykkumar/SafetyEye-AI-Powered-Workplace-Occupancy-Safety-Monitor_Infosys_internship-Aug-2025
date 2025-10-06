@@ -20,6 +20,9 @@ from email import encoders
 import threading
 import queue
 from collections import deque
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend
+import matplotlib.pyplot as plt
 
 # Email Queue System
 class EmailQueue:
@@ -1320,6 +1323,650 @@ For questions or support, contact: safety@construction-monitor.com
     
     return report
 
+def generate_html_report_with_graphs(total_violations, frame_stats):
+    """Generate a comprehensive HTML report with embedded graphs"""
+    
+    # Set style for better-looking plots
+    plt.style.use('seaborn-v0_8-darkgrid')
+    
+    # Calculate all metrics
+    total_violations_count = len(total_violations)
+    high_violations = [v for v in total_violations if v['severity'] == 'High']
+    medium_violations = [v for v in total_violations if v['severity'] == 'Medium']
+    low_violations = [v for v in total_violations if v['severity'] == 'Low']
+    
+    total_persons = sum(f['persons'] for f in frame_stats)
+    total_safety_equipped = sum(f['safety_equipped'] for f in frame_stats)
+    compliance_rate = (total_safety_equipped / total_persons * 100) if total_persons > 0 else 0
+    
+    violation_types = {}
+    for v in total_violations:
+        vtype = v['type']
+        violation_types[vtype] = violation_types.get(vtype, 0) + 1
+    
+    # Calculate advanced metrics
+    avg_violations_per_frame = total_violations_count / len(frame_stats) if frame_stats else 0
+    risk_score = (len(high_violations) * 3 + len(medium_violations) * 2 + len(low_violations) * 1)
+    max_risk = total_violations_count * 3
+    risk_percentage = (risk_score / max_risk * 100) if max_risk > 0 else 0
+    violation_density = (total_violations_count / total_persons) if total_persons > 0 else 0
+    high_severity_rate = (len(high_violations) / total_violations_count * 100) if total_violations_count > 0 else 0
+    frames_with_violations = len([f for f in frame_stats if f['violations'] > 0])
+    violation_frame_rate = (frames_with_violations / len(frame_stats) * 100) if frame_stats else 0
+    avg_workers = sum(f['persons'] for f in frame_stats) / len(frame_stats) if frame_stats else 0
+    
+    # Generate graphs as base64 encoded images
+    graphs = {}
+    
+    # Graph 1: Violations Over Time
+    fig, ax = plt.subplots(figsize=(10, 4))
+    frames = [f['frame'] for f in frame_stats]
+    violations_per_frame = [f['violations'] for f in frame_stats]
+    ax.plot(frames, violations_per_frame, color='#e74c3c', linewidth=2, marker='o', markersize=3)
+    ax.fill_between(frames, violations_per_frame, alpha=0.3, color='#e74c3c')
+    ax.set_xlabel('Frame Number', fontsize=10, fontweight='bold')
+    ax.set_ylabel('Violations', fontsize=10, fontweight='bold')
+    ax.set_title('Violations Over Time', fontsize=12, fontweight='bold')
+    ax.grid(True, alpha=0.3)
+    plt.tight_layout()
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', dpi=100, bbox_inches='tight')
+    buf.seek(0)
+    graphs['violations_timeline'] = base64.b64encode(buf.read()).decode()
+    plt.close()
+    
+    # Graph 2: Severity Distribution Pie Chart
+    fig, ax = plt.subplots(figsize=(6, 6))
+    sizes = [len(high_violations), len(medium_violations), len(low_violations)]
+    labels = ['High', 'Medium', 'Low']
+    colors = ['#e74c3c', '#f39c12', '#2ecc71']
+    explode = (0.1, 0.05, 0)
+    ax.pie(sizes, explode=explode, labels=labels, colors=colors, autopct='%1.1f%%',
+           shadow=True, startangle=90, textprops={'fontsize': 12, 'fontweight': 'bold'})
+    ax.set_title('Violation Severity Distribution', fontsize=14, fontweight='bold', pad=20)
+    plt.tight_layout()
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', dpi=100, bbox_inches='tight')
+    buf.seek(0)
+    graphs['severity_pie'] = base64.b64encode(buf.read()).decode()
+    plt.close()
+    
+    # Graph 3: Workers Detected Over Time
+    fig, ax = plt.subplots(figsize=(10, 4))
+    persons = [f['persons'] for f in frame_stats]
+    ax.fill_between(frames, persons, alpha=0.4, color='#3498db')
+    ax.plot(frames, persons, color='#2980b9', linewidth=2)
+    ax.set_xlabel('Frame Number', fontsize=10, fontweight='bold')
+    ax.set_ylabel('Number of Workers', fontsize=10, fontweight='bold')
+    ax.set_title('Workers Detected Over Time', fontsize=12, fontweight='bold')
+    ax.grid(True, alpha=0.3)
+    plt.tight_layout()
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', dpi=100, bbox_inches='tight')
+    buf.seek(0)
+    graphs['workers_timeline'] = base64.b64encode(buf.read()).decode()
+    plt.close()
+    
+    # Graph 4: Top Violation Types Bar Chart
+    if violation_types:
+        sorted_violations = sorted(violation_types.items(), key=lambda x: x[1], reverse=True)[:10]
+        fig, ax = plt.subplots(figsize=(10, 6))
+        types = [v[0][:40] for v in sorted_violations]  # Truncate long names
+        counts = [v[1] for v in sorted_violations]
+        bars = ax.barh(types, counts, color='#9b59b6')
+        ax.set_xlabel('Count', fontsize=10, fontweight='bold')
+        ax.set_ylabel('Violation Type', fontsize=10, fontweight='bold')
+        ax.set_title('Top 10 Violation Types', fontsize=12, fontweight='bold')
+        ax.invert_yaxis()
+        
+        # Add value labels on bars
+        for i, (bar, count) in enumerate(zip(bars, counts)):
+            ax.text(count, i, f' {count}', va='center', fontsize=9, fontweight='bold')
+        
+        plt.tight_layout()
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png', dpi=100, bbox_inches='tight')
+        buf.seek(0)
+        graphs['violation_types'] = base64.b64encode(buf.read()).decode()
+        plt.close()
+    
+    # Graph 5: Compliance Trend
+    fig, ax = plt.subplots(figsize=(10, 4))
+    compliance_data = []
+    for f in frame_stats:
+        if f['persons'] > 0:
+            compliance = (f['safety_equipped'] / f['persons'] * 100)
+            compliance_data.append(compliance)
+        else:
+            compliance_data.append(0)
+    
+    ax.plot(frames, compliance_data, color='#27ae60', linewidth=2, marker='o', markersize=3)
+    ax.fill_between(frames, compliance_data, alpha=0.3, color='#27ae60')
+    ax.set_xlabel('Frame Number', fontsize=10, fontweight='bold')
+    ax.set_ylabel('Compliance %', fontsize=10, fontweight='bold')
+    ax.set_title('Safety Compliance Trend', fontsize=12, fontweight='bold')
+    ax.set_ylim(0, 105)
+    ax.axhline(y=80, color='orange', linestyle='--', label='Target: 80%', linewidth=1.5)
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+    plt.tight_layout()
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', dpi=100, bbox_inches='tight')
+    buf.seek(0)
+    graphs['compliance_trend'] = base64.b64encode(buf.read()).decode()
+    plt.close()
+    
+    # Generate HTML report
+    html_report = f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Construction Safety Analytics Report</title>
+    <style>
+        body {{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }}
+        .container {{
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }}
+        h1 {{
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 4px solid #3498db;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }}
+        h2 {{
+            color: #34495e;
+            border-left: 5px solid #3498db;
+            padding-left: 15px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }}
+        h3 {{
+            color: #7f8c8d;
+            margin-top: 25px;
+        }}
+        .header {{
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }}
+        .metrics-grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }}
+        .metric-card {{
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }}
+        .metric-card:hover {{
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }}
+        .metric-value {{
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }}
+        .metric-label {{
+            font-size: 0.9em;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }}
+        .graph-container {{
+            margin: 30px 0;
+            text-align: center;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }}
+        .graph-container img {{
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }}
+        table {{
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }}
+        th {{
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }}
+        td {{
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+        }}
+        tr:hover {{
+            background-color: #f5f5f5;
+        }}
+        .severity-high {{
+            color: #e74c3c;
+            font-weight: bold;
+        }}
+        .severity-medium {{
+            color: #f39c12;
+            font-weight: bold;
+        }}
+        .severity-low {{
+            color: #2ecc71;
+            font-weight: bold;
+        }}
+        .alert {{
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            border-left: 5px solid;
+        }}
+        .alert-danger {{
+            background-color: #f8d7da;
+            border-color: #e74c3c;
+            color: #721c24;
+        }}
+        .alert-warning {{
+            background-color: #fff3cd;
+            border-color: #f39c12;
+            color: #856404;
+        }}
+        .alert-success {{
+            background-color: #d4edda;
+            border-color: #2ecc71;
+            color: #155724;
+        }}
+        .footer {{
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            background: #34495e;
+            color: white;
+            border-radius: 10px;
+        }}
+        .timestamp {{
+            color: #7f8c8d;
+            font-style: italic;
+            text-align: center;
+            margin: 20px 0;
+        }}
+        .filter-btn {{
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }}
+        .filter-btn:hover {{
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }}
+        #searchInput {{
+            transition: border-color 0.3s;
+        }}
+        #searchInput:focus {{
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }}
+        .data-row {{
+            transition: background-color 0.2s;
+        }}
+        .data-row:hover {{
+            background-color: #f0f0f0 !important;
+        }}
+        th {{
+            user-select: none;
+            position: relative;
+        }}
+        th:hover {{
+            background: linear-gradient(135deg, #5568d3 0%, #653a8b 100%);
+        }}
+        @media print {{
+            body {{
+                background: white;
+            }}
+            .container {{
+                box-shadow: none;
+            }}
+            .filter-btn, #searchInput {{
+                display: none;
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚧 CONSTRUCTION SAFETY ANALYTICS REPORT</h1>
+            <p class="timestamp">Generated on {datetime.now().strftime('%B %d, %Y at %I:%M %p')}</p>
+        </div>
+
+        <h2>📊 Executive Summary</h2>
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">Total Frames</div>
+                <div class="metric-value">{len(frame_stats)}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Total Violations</div>
+                <div class="metric-value">{total_violations_count}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Total Workers</div>
+                <div class="metric-value">{total_persons}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Safety Compliance</div>
+                <div class="metric-value">{compliance_rate:.1f}%</div>
+            </div>
+        </div>
+
+        <h2>⚠️ Violation Breakdown</h2>
+        <div class="metrics-grid">
+            <div class="metric-card" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">
+                <div class="metric-label">High Priority</div>
+                <div class="metric-value">{len(high_violations)}</div>
+                <div class="metric-label">{len(high_violations)/total_violations_count*100 if total_violations_count > 0 else 0:.1f}%</div>
+            </div>
+            <div class="metric-card" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
+                <div class="metric-label">Medium Priority</div>
+                <div class="metric-value">{len(medium_violations)}</div>
+                <div class="metric-label">{len(medium_violations)/total_violations_count*100 if total_violations_count > 0 else 0:.1f}%</div>
+            </div>
+            <div class="metric-card" style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);">
+                <div class="metric-label">Low Priority</div>
+                <div class="metric-value">{len(low_violations)}</div>
+                <div class="metric-label">{len(low_violations)/total_violations_count*100 if total_violations_count > 0 else 0:.1f}%</div>
+            </div>
+        </div>
+
+        <div class="graph-container">
+            <h3>Severity Distribution</h3>
+            <img src="data:image/png;base64,{graphs.get('severity_pie', '')}" alt="Severity Pie Chart">
+        </div>
+
+        <h2>📈 Temporal Analysis</h2>
+        
+        <div class="graph-container">
+            <h3>Violations Over Time</h3>
+            <img src="data:image/png;base64,{graphs.get('violations_timeline', '')}" alt="Violations Timeline">
+        </div>
+
+        <div class="graph-container">
+            <h3>Workers Detected Over Time</h3>
+            <img src="data:image/png;base64,{graphs.get('workers_timeline', '')}" alt="Workers Timeline">
+        </div>
+
+        <div class="graph-container">
+            <h3>Safety Compliance Trend</h3>
+            <img src="data:image/png;base64,{graphs.get('compliance_trend', '')}" alt="Compliance Trend">
+        </div>
+
+        <h2>🎯 Key Performance Indicators</h2>
+        <div class="metrics-grid">
+            <div class="metric-card" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);">
+                <div class="metric-label">Risk Score</div>
+                <div class="metric-value">{risk_percentage:.1f}%</div>
+            </div>
+            <div class="metric-card" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
+                <div class="metric-label">Avg Violations/Frame</div>
+                <div class="metric-value">{avg_violations_per_frame:.2f}</div>
+            </div>
+            <div class="metric-card" style="background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);">
+                <div class="metric-label">Violations/Worker</div>
+                <div class="metric-value">{violation_density:.2f}</div>
+            </div>
+            <div class="metric-card" style="background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);">
+                <div class="metric-label">Frames w/ Violations</div>
+                <div class="metric-value">{violation_frame_rate:.1f}%</div>
+            </div>
+        </div>
+
+        <h2>🏆 Top Violation Types</h2>
+        {'<div class="graph-container"><img src="data:image/png;base64,' + graphs.get('violation_types', '') + '" alt="Top Violations"></div>' if 'violation_types' in graphs else ''}
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Violation Type</th>
+                    <th>Count</th>
+                    <th>Percentage</th>
+                </tr>
+            </thead>
+            <tbody>
+"""
+    
+    # Add top violations to table
+    sorted_violations = sorted(violation_types.items(), key=lambda x: x[1], reverse=True)[:10]
+    for i, (vtype, count) in enumerate(sorted_violations, 1):
+        percentage = (count / total_violations_count * 100) if total_violations_count > 0 else 0
+        html_report += f"""
+                <tr>
+                    <td>{i}</td>
+                    <td>{vtype}</td>
+                    <td><strong>{count}</strong></td>
+                    <td>{percentage:.1f}%</td>
+                </tr>
+"""
+    
+    html_report += """
+            </tbody>
+        </table>
+
+        <h2>🔥 Safety Hotspots</h2>
+        <p>Frames with the highest number of violations:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Frame</th>
+                    <th>Violations</th>
+                    <th>Workers</th>
+                    <th>Safety Equipped</th>
+                </tr>
+            </thead>
+            <tbody>
+"""
+    
+    # Add hotspot frames
+    hotspot_frames = sorted(frame_stats, key=lambda x: x['violations'], reverse=True)[:5]
+    for f in hotspot_frames:
+        if f['violations'] > 0:
+            html_report += f"""
+                <tr>
+                    <td><strong>#{f['frame']}</strong></td>
+                    <td class="severity-high">{f['violations']}</td>
+                    <td>{f['persons']}</td>
+                    <td>{f['safety_equipped']}</td>
+                </tr>
+"""
+    
+    html_report += f"""
+        <h2>📊 Interactive Violation Data</h2>
+        <p>Search, filter, and sort through all violation records:</p>
+        
+        <div style="margin: 20px 0;">
+            <input type="text" id="searchInput" placeholder="🔍 Search violations..." 
+                   style="width: 100%; padding: 12px 20px; font-size: 16px; border: 2px solid #3498db; 
+                          border-radius: 5px; box-sizing: border-box;">
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <label style="margin-right: 15px; font-weight: bold;">Filter by Severity:</label>
+            <button class="filter-btn" onclick="filterTable('all')" style="margin: 5px;">All</button>
+            <button class="filter-btn" onclick="filterTable('High')" style="margin: 5px;">🔴 High</button>
+            <button class="filter-btn" onclick="filterTable('Medium')" style="margin: 5px;">🟡 Medium</button>
+            <button class="filter-btn" onclick="filterTable('Low')" style="margin: 5px;">🟢 Low</button>
+        </div>
+        
+        <div style="overflow-x: auto;">
+            <table id="violationTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)" style="cursor: pointer;">Frame ↕</th>
+                        <th onclick="sortTable(1)" style="cursor: pointer;">Violation Type ↕</th>
+                        <th onclick="sortTable(2)" style="cursor: pointer;">Severity ↕</th>
+                        <th onclick="sortTable(3)" style="cursor: pointer;">Location ↕</th>
+                        <th onclick="sortTable(4)" style="cursor: pointer;">Timestamp ↕</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+"""
+    
+    # Add all violations to table
+    for v in total_violations:
+        severity_class = f"severity-{v['severity'].lower()}"
+        html_report += f"""
+                    <tr class="data-row" data-severity="{v['severity']}">
+                        <td><strong>#{v['frame']}</strong></td>
+                        <td>{v['type']}</td>
+                        <td class="{severity_class}">{v['severity']}</td>
+                        <td>{v.get('location', 'N/A')}</td>
+                        <td>{v.get('timestamp', 'N/A')}</td>
+                    </tr>
+"""
+    
+    html_report += """
+                </tbody>
+            </table>
+        </div>
+        
+        <p style="margin-top: 20px; color: #7f8c8d; font-style: italic;">
+            💡 <strong>Tip:</strong> Click on column headers to sort. Use the search box to find specific violations.
+        </p>
+        
+        <script>
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('keyup', function() {
+                var input = this.value.toLowerCase();
+                var rows = document.querySelectorAll('#tableBody tr');
+                
+                rows.forEach(function(row) {
+                    var text = row.textContent.toLowerCase();
+                    if (text.includes(input)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Filter by severity
+            function filterTable(severity) {
+                var rows = document.querySelectorAll('.data-row');
+                
+                rows.forEach(function(row) {
+                    if (severity === 'all' || row.dataset.severity === severity) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+                
+                // Highlight active filter button
+                document.querySelectorAll('.filter-btn').forEach(function(btn) {
+                    btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                    btn.style.color = 'white';
+                });
+                event.target.style.background = '#2ecc71';
+            }
+            
+            // Sort table
+            function sortTable(n) {
+                var table = document.getElementById("violationTable");
+                var rows = Array.from(table.querySelectorAll('tbody tr'));
+                var ascending = true;
+                
+                rows.sort(function(a, b) {
+                    var x = a.cells[n].textContent.toLowerCase();
+                    var y = b.cells[n].textContent.toLowerCase();
+                    
+                    // Try to parse as numbers for frame column
+                    if (n === 0) {
+                        x = parseInt(x.replace('#', '')) || 0;
+                        y = parseInt(y.replace('#', '')) || 0;
+                    }
+                    
+                    if (x < y) return ascending ? -1 : 1;
+                    if (x > y) return ascending ? 1 : -1;
+                    return 0;
+                });
+                
+                var tbody = table.querySelector('tbody');
+                rows.forEach(function(row) {
+                    tbody.appendChild(row);
+                });
+            }
+        </script>
+
+        <h2>💡 Recommendations</h2>
+"""
+    
+    # Add recommendations
+    recommendations = []
+    if high_severity_rate > 50:
+        recommendations.append('<div class="alert alert-danger">⚠️ <strong>CRITICAL:</strong> Over 50% of violations are HIGH severity. Immediate corrective action required!</div>')
+    if compliance_rate < 50:
+        recommendations.append('<div class="alert alert-danger">⚠️ <strong>WARNING:</strong> Safety compliance below 50%. Enhanced safety training programs needed.</div>')
+    if violation_density > 1:
+        recommendations.append('<div class="alert alert-warning">⚠️ <strong>ALERT:</strong> More than 1 violation per worker on average. Review and strengthen safety protocols.</div>')
+    if violation_frame_rate > 75:
+        recommendations.append('<div class="alert alert-warning">⚠️ <strong>CONCERN:</strong> Violations detected in over 75% of frames. Site-wide safety audit recommended.</div>')
+    
+    if high_severity_rate <= 20 and compliance_rate >= 80:
+        recommendations.append('<div class="alert alert-success">✅ <strong>GOOD:</strong> Low high-severity rate and high compliance. Maintain current safety standards.</div>')
+    
+    if sorted_violations:
+        top_violation_type = sorted_violations[0][0]
+        recommendations.append(f'<div class="alert alert-warning">📌 <strong>Focus Area:</strong> "{top_violation_type}" is the most common violation. Consider targeted training and enhanced monitoring for this specific issue.</div>')
+    
+    for rec in recommendations:
+        html_report += rec + '\n'
+    
+    html_report += f"""
+        <div class="footer">
+            <h3>Construction Safety Monitor v1.0</h3>
+            <p>This report was automatically generated by AI-powered safety monitoring system</p>
+            <p><small>Report ID: {datetime.now().strftime('%Y%m%d%H%M%S')} | © 2025 Construction Safety Monitor</small></p>
+        </div>
+    </div>
+</body>
+</html>
+"""
+    
+    return html_report
+
 def main():
     st.title("🚧 Construction Site Safety Monitor")
     st.markdown("Upload a video to monitor construction site safety and detect PPE violations")
@@ -1835,7 +2482,7 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
         
         # Download results - CSV and Detailed Analytics
         st.markdown("### 📥 Download Reports")
-        col1, col2 = st.columns(2)
+        col1, col2, col3 = st.columns(3)
         
         with col1:
             csv = df.to_csv(index=False)
@@ -1847,6 +2494,22 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
                 file_name=filename,
                 mime="text/csv",
                 use_container_width=True
+            )
+        
+        
+        with col3:
+            # Generate HTML report with graphs
+            with st.spinner("Generating visual report..."):
+                html_report = generate_html_report_with_graphs(total_violations, frame_stats)
+                html_filename = f"safety_analytics_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
+            
+            st.download_button(
+                label="🎨 Download Visual Report (HTML)",
+                data=html_report,
+                file_name=html_filename,
+                mime="text/html",
+                use_container_width=True,
+                help="Interactive HTML report with embedded graphs"
             )
         
         with col2:
@@ -2039,7 +2702,7 @@ def process_full_video(video_path, model, class_names, colors, confidence_thresh
         
         # Download results - CSV and Detailed Analytics
         st.markdown("### 📥 Download Reports")
-        col1, col2 = st.columns(2)
+        col1, col2, col3 = st.columns(3)
         
         with col1:
             csv = df.to_csv(index=False)
@@ -2051,6 +2714,22 @@ def process_full_video(video_path, model, class_names, colors, confidence_thresh
                 file_name=filename,
                 mime="text/csv",
                 use_container_width=True
+            )
+        
+        
+        with col3:
+            # Generate HTML report with graphs
+            with st.spinner("Generating visual report..."):
+                html_report = generate_html_report_with_graphs(all_violations, frame_stats)
+                html_filename = f"safety_analytics_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
+            
+            st.download_button(
+                label="🎨 Download Visual Report (HTML)",
+                data=html_report,
+                file_name=html_filename,
+                mime="text/html",
+                use_container_width=True,
+                help="Interactive HTML report with embedded graphs"
             )
         
         with col2:
