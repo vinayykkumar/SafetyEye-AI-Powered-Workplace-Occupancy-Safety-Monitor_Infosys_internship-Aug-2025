@@ -2190,46 +2190,46 @@ def main():
     debug_mode = st.sidebar.checkbox("🐛 Debug Mode", help="Show filtered detections and debug information")
     
     
-    # Vehicle filtering settings
-    st.sidebar.markdown("### 🚗 Enhanced Vehicle Filtering")
-    st.sidebar.markdown("""
-    **Multi-Layer False Positive Prevention:**
-    - ✅ Ultra-low overlap thresholds (0.01 IoU)
-    - ✅ 40% expanded filtering zones around vehicles
-    - ✅ 60% super-expanded containment checks
-    - ✅ Size-based filtering (max 200×400px)
-    - ✅ High confidence thresholds (0.6+)
-    - ✅ Complete containment detection
+    # Vehicle filtering settings - Expandable
+    with st.sidebar.expander("🚗 Enhanced Vehicle Filtering"):
+        st.markdown("""
+        **Multi-Layer False Positive Prevention:**
+        - ✅ Ultra-low overlap thresholds (0.01 IoU)
+        - ✅ 40% expanded filtering zones around vehicles
+        - ✅ 60% super-expanded containment checks
+        - ✅ Size-based filtering (max 200×400px)
+        - ✅ High confidence thresholds (0.6+)
+        - ✅ Complete containment detection
+        
+        **Reduces:** Vehicle/machinery misclassified as violations
+        """)
     
-    **Reduces:** Vehicle/machinery misclassified as violations
-    """)
+    # Safety requirements - Expandable
+    with st.sidebar.expander("Safety Requirements"):
+        st.markdown("""
+        **Required PPE:**
+        - ✅ Hard Hat (High Priority)
+        - ✅ Safety Vest (Medium Priority)  
+        - ✅ Mask (Low Priority)
+        
+        **Alert Generation:**
+        - Person detected WITHOUT required PPE = Violation
+        - Checks for equipment within person's vicinity
+        """)
     
-    # Safety requirements
-    st.sidebar.markdown("### Safety Requirements")
-    st.sidebar.markdown("""
-    **Required PPE:**
-    - ✅ Hard Hat (High Priority)
-    - ✅ Safety Vest (Medium Priority)  
-    - ✅ Mask (Low Priority)
-    
-    **Alert Generation:**
-    - Person detected WITHOUT required PPE = Violation
-    - Checks for equipment within person's vicinity
-    """)
-    
-    # Color legend
-    st.sidebar.markdown("### 🎨 Detection Colors")
-    st.sidebar.markdown("""
-    **Bounding Box Colors:**
-    - 🟦 **Cyan**: Workers/People
-    - 🟩 **Green**: Safety Equipment  
-    - 🟥 **Red**: Safety Violations
-    - 🟪 **Deep Pink**: Vehicles (thicker boxes)
-    - 🟧 **Dark Orange**: Machinery (thicker boxes)
-    - ⬜ **White**: Safety Cones
-    
-    **Note:** Vehicles & machinery have thicker borders for visibility
-    """)
+    # Color legend - Expandable
+    with st.sidebar.expander("🎨 Detection Colors"):
+        st.markdown("""
+        **Bounding Box Colors:**
+        - 🟦 **Cyan**: Workers/People
+        - 🟩 **Green**: Safety Equipment  
+        - 🟥 **Red**: Safety Violations
+        - 🟪 **Deep Pink**: Vehicles (thicker boxes)
+        - 🟧 **Dark Orange**: Machinery (thicker boxes)
+        - ⬜ **White**: Safety Cones
+        
+        **Note:** Vehicles & machinery have thicker borders for visibility
+        """)
     
     # Video upload
     uploaded_file = st.file_uploader("Upload Video", type=['mp4', 'avi', 'mov', 'mkv'])
