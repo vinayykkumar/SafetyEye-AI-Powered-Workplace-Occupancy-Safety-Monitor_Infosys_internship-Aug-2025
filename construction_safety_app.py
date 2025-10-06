@@ -2104,7 +2104,7 @@ def main():
     # Analysis mode: Video or Image or History
     analysis_mode = st.sidebar.radio(
         "Analysis Mode",
-        ["Video Analysis", "Image Analysis", "📊 Violation History"],
+        ["Video Analysis", "Image Analysis", "Violation History"],
         index=0,
         help="Choose whether to analyze a video, image, or view historical violation data"
     )
