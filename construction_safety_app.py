@@ -2203,10 +2203,8 @@ def main():
         st.stop()
     
     # If user selected Violation History, show the history dashboard
-    elif analysis_mode == "📊 Violation History":
-        st.markdown("### 📊 Violation History Dashboard")
-        st.markdown("View and analyze all historical violation data from previous sessions")
-        
+    elif analysis_mode == "Violation History":
+
         # Load master CSV
         df, message = load_master_csv()
         
