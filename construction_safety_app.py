@@ -161,6 +161,40 @@ st.markdown("""
         text-align: center;
         margin: 10px 0;
     }
+    
+    /* Compact dashboard layout */
+    .stImage {
+        max-height: 55vh !important;
+        object-fit: contain;
+    }
+    
+    /* Compact metrics */
+    [data-testid="stMetricValue"] {
+        font-size: 1.2rem !important;
+    }
+    
+    [data-testid="stMetricLabel"] {
+        font-size: 0.8rem !important;
+    }
+    
+    /* Reduce padding in containers */
+    .block-container {
+        padding-top: 2rem !important;
+        padding-bottom: 1rem !important;
+    }
+    
+    /* Make alerts more compact */
+    .stAlert {
+        padding: 0.5rem 1rem !important;
+        margin: 0.25rem 0 !important;
+    }
+    
+    /* Compact headings */
+    h3 {
+        margin-top: 0.5rem !important;
+        margin-bottom: 0.5rem !important;
+        font-size: 1.2rem !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -578,29 +612,33 @@ def process_video_frame(frame, model, class_names, colors, debug_mode=False):
         return annotated_frame, violations, person_count, safety_equipped
 
 def update_live_alerts(placeholder, violations, current_frame):
-    """Update live alerts display using Streamlit components"""
+    """Update live alerts display using Streamlit components - COMPACT VERSION"""
     if not violations:
-        placeholder.success("✅ No recent safety violations detected")
+        placeholder.success("✅ No violations")
         return
     
-    # Get recent violations (last 5)
-    recent_violations = violations[-5:] if len(violations) > 5 else violations
+    # Get recent violations (last 4 for compact view)
+    recent_violations = violations[-4:] if len(violations) > 4 else violations
     
-    # Create container for alerts
+    # Create container for alerts - more compact
     with placeholder.container():
-        st.markdown("### 🚨 Live Safety Alerts")
-        
         for violation in recent_violations:
-            # Use Streamlit's native alert components
+            # Use compact alert format
+            severity_icon = {"High": "🔴", "Medium": "🟡", "Low": "🟢"}
+            icon = severity_icon.get(violation['severity'], "⚪")
+            
+            # Shorter message format
+            msg = f"{icon} **{violation['type'][:30]}** - F{violation['frame']}"
+            
             if violation['severity'] == 'High':
-                st.error(f"🚨 **{violation['type']} Violation** - Frame {violation['frame']} | **HIGH SEVERITY**")
+                st.error(msg, icon="🚨")
             elif violation['severity'] == 'Medium':
-                st.warning(f"⚠️ **{violation['type']} Violation** - Frame {violation['frame']} | **MEDIUM SEVERITY**")
-            else:  # Low
-                st.info(f"ℹ️ **{violation['type']} Violation** - Frame {violation['frame']} | **LOW SEVERITY**")
+                st.warning(msg, icon="⚠️")
+            else:
+                st.info(msg, icon="ℹ️")
 
 def update_live_stats(placeholder, total_violations, frame_stats, current_frame, show_email_queue=False):
-    """Update live statistics display using Streamlit components with optional email queue status"""
+    """Update live statistics display using Streamlit components with optional email queue status - COMPACT VERSION"""
     if not frame_stats:
         return
     
@@ -618,71 +656,260 @@ def update_live_stats(placeholder, total_violations, frame_stats, current_frame,
     # Calculate rates
     violation_rate = (total_violations_count / total_persons * 100) if total_persons > 0 else 0
     
-    # Display with Streamlit components
+    # Display with Streamlit components - COMPACT LAYOUT
     with placeholder.container():
-        # Alert level
-        if high_violations > 5:
-            st.error("🔴 HIGH RISK")
-        elif medium_violations > 3:
-            st.warning("🟡 MEDIUM RISK")
-        else:
-            st.success("🟢 LOW RISK")
+        # Single row with all key metrics
+        col1, col2, col3, col4, col5, col6 = st.columns(6)
         
-        st.markdown("### 📊 Live Statistics")
-        
-        # Main metrics in columns
-        col1, col2 = st.columns(2)
         with col1:
-            st.metric("Total Violations", total_violations_count)
-        with col2:
-            st.metric("Current Frame", current_frame)
-        
-        # Email queue status (if enabled)
-        if show_email_queue:
-            st.markdown("#### 📧 Email Queue Status")
-            queue_status = email_queue.get_status()
-            
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric("Queued", queue_status['queue_size'])
-            with col2:
-                st.metric("Sent", queue_status['sent_count'], delta=None)
-            with col3:
-                st.metric("Failed", queue_status['failed_count'], delta=None)
-            
-            # Processing status
-            if queue_status['is_processing']:
-                st.info(f"📤 Currently processing: {queue_status['current_email']}")
-            elif queue_status['queue_size'] > 0:
-                st.warning(f"⏳ {queue_status['queue_size']} emails waiting in queue")
+            # Alert level indicator
+            if high_violations > 5:
+                st.metric("Status", "🔴 HIGH")
+            elif medium_violations > 3:
+                st.metric("Status", "🟡 MED")
             else:
-                st.success("✅ Email queue is empty")
-            
-            # Recent email logs
-            if queue_status['recent_logs']:
-                st.markdown("**Recent Email Activity:**")
-                for log in queue_status['recent_logs']:
-                    st.text(log)
+                st.metric("Status", "🟢 LOW")
         
-        # Violation breakdown
-        st.markdown("#### Violation Breakdown")
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("HIGH", high_violations, delta=None)
         with col2:
-            st.metric("MEDIUM", medium_violations, delta=None)
+            st.metric("Total", total_violations_count)
+        
         with col3:
-            st.metric("LOW", low_violations, delta=None)
+            st.metric("Frame", current_frame)
         
-        # Additional stats
-        st.markdown("#### Performance Metrics")
+        with col4:
+            st.metric("HIGH", high_violations)
+        
+        with col5:
+            st.metric("MED", medium_violations)
+        
+        with col6:
+            st.metric("LOW", low_violations)
+        
+        # Second row: Additional metrics (if email queue enabled, show it; otherwise show performance)
+        if show_email_queue:
+            queue_status = email_queue.get_status()
+            col1, col2, col3, col4 = st.columns(4)
+            
+            with col1:
+                st.metric("📧 Queued", queue_status['queue_size'])
+            with col2:
+                st.metric("📧 Sent", queue_status['sent_count'])
+            with col3:
+                st.metric("📧 Failed", queue_status['failed_count'])
+            with col4:
+                if queue_status['is_processing']:
+                    st.metric("📧 Status", "Sending...")
+                else:
+                    st.metric("📧 Status", "Idle")
+        else:
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                st.metric("Avg Workers", f"{avg_persons:.1f}")
+            with col2:
+                st.metric("Total Workers", total_persons)
+            with col3:
+                st.metric("Violation Rate", f"{violation_rate:.1f}%")
+
+def update_detailed_stats(placeholder, total_violations, frame_stats, current_frame):
+    """Update detailed statistics with graphs and analytics in an expandable section"""
+    if not frame_stats or len(frame_stats) < 2:
+        return
+    
+    with placeholder.expander("📊 **Detailed Analytics & Graphs** (Click to expand)", expanded=False):
+        # Calculate additional metrics
+        total_violations_count = len(total_violations)
+        high_violations = [v for v in total_violations if v['severity'] == 'High']
+        medium_violations = [v for v in total_violations if v['severity'] == 'Medium']
+        low_violations = [v for v in total_violations if v['severity'] == 'Low']
+        
+        # Violation type breakdown
+        violation_types = {}
+        for v in total_violations:
+            vtype = v['type']
+            violation_types[vtype] = violation_types.get(vtype, 0) + 1
+        
+        # Create two columns for graphs
         col1, col2 = st.columns(2)
-        with col1:
-            st.metric("Workers/Frame", f"{avg_persons:.1f}")
-        with col2:
-            st.metric("Violation Rate", f"{violation_rate:.1f}%")
         
-        st.info(f"📈 {total_persons} total workers processed")
+        with col1:
+            st.markdown("#### 📈 Violations Over Time")
+            # Prepare data for violations over time
+            if len(frame_stats) > 1:
+                frames = [f['frame'] for f in frame_stats]
+                violations_per_frame = [f['violations'] for f in frame_stats]
+                
+                # Create simple chart data
+                chart_data = pd.DataFrame({
+                    'Frame': frames,
+                    'Violations': violations_per_frame
+                })
+                st.line_chart(chart_data.set_index('Frame'), height=200)
+            
+            st.markdown("#### 🎯 Violation Type Distribution")
+            if violation_types:
+                type_df = pd.DataFrame(
+                    list(violation_types.items()),
+                    columns=['Type', 'Count']
+                ).sort_values('Count', ascending=False).head(5)
+                st.bar_chart(type_df.set_index('Type'), height=200)
+        
+        with col2:
+            st.markdown("#### 👷 Workers Detected Over Time")
+            # Prepare data for workers over time
+            if len(frame_stats) > 1:
+                frames = [f['frame'] for f in frame_stats]
+                persons = [f['persons'] for f in frame_stats]
+                
+                chart_data = pd.DataFrame({
+                    'Frame': frames,
+                    'Workers': persons
+                })
+                st.area_chart(chart_data.set_index('Frame'), height=200)
+            
+            st.markdown("#### 🔢 Severity Distribution")
+            severity_data = pd.DataFrame({
+                'Severity': ['High', 'Medium', 'Low'],
+                'Count': [len(high_violations), len(medium_violations), len(low_violations)]
+            })
+            st.bar_chart(severity_data.set_index('Severity'), height=200)
+        
+        # Additional statistics in a row
+        st.markdown("---")
+        st.markdown("#### 📋 Key Performance Indicators")
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            avg_violations_per_frame = total_violations_count / len(frame_stats) if frame_stats else 0
+            st.metric("Avg Violations/Frame", f"{avg_violations_per_frame:.2f}")
+        
+        with col2:
+            total_persons = sum(f['persons'] for f in frame_stats)
+            total_safety_equipped = sum(f['safety_equipped'] for f in frame_stats)
+            compliance_rate = (total_safety_equipped / total_persons * 100) if total_persons > 0 else 0
+            st.metric("Safety Compliance", f"{compliance_rate:.1f}%")
+        
+        with col3:
+            max_violations_frame = max(frame_stats, key=lambda x: x['violations']) if frame_stats else None
+            if max_violations_frame:
+                st.metric("Peak Violations Frame", f"#{max_violations_frame['frame']} ({max_violations_frame['violations']})")
+        
+        with col4:
+            max_workers_frame = max(frame_stats, key=lambda x: x['persons']) if frame_stats else None
+            if max_workers_frame:
+                st.metric("Peak Workers Frame", f"#{max_workers_frame['frame']} ({max_workers_frame['persons']})")
+        
+        # More detailed metrics
+        st.markdown("---")
+        st.markdown("#### 🔍 Advanced Analytics")
+        
+        col1, col2, col3, col4, col5 = st.columns(5)
+        
+        with col1:
+            # Risk score calculation (weighted by severity)
+            risk_score = (len(high_violations) * 3 + len(medium_violations) * 2 + len(low_violations) * 1)
+            max_risk = total_violations_count * 3
+            risk_percentage = (risk_score / max_risk * 100) if max_risk > 0 else 0
+            st.metric("Risk Score", f"{risk_percentage:.1f}%", 
+                     delta=f"{risk_score}/{max_risk}" if max_risk > 0 else "0/0")
+        
+        with col2:
+            # Violation density (violations per worker)
+            violation_density = (total_violations_count / total_persons) if total_persons > 0 else 0
+            st.metric("Violations/Worker", f"{violation_density:.2f}")
+        
+        with col3:
+            # High severity rate
+            high_severity_rate = (len(high_violations) / total_violations_count * 100) if total_violations_count > 0 else 0
+            st.metric("High Severity Rate", f"{high_severity_rate:.1f}%")
+        
+        with col4:
+            # Frames with violations
+            frames_with_violations = len([f for f in frame_stats if f['violations'] > 0])
+            violation_frame_rate = (frames_with_violations / len(frame_stats) * 100) if frame_stats else 0
+            st.metric("Frames w/ Violations", f"{violation_frame_rate:.1f}%")
+        
+        with col5:
+            # Average workers per frame
+            avg_workers = sum(f['persons'] for f in frame_stats) / len(frame_stats) if frame_stats else 0
+            st.metric("Avg Workers/Frame", f"{avg_workers:.1f}")
+        
+        # Time-based analysis
+        st.markdown("---")
+        st.markdown("#### ⏱️ Temporal Analysis")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            # First violation frame
+            first_violation = next((v for v in total_violations), None)
+            if first_violation:
+                st.metric("First Violation", f"Frame {first_violation['frame']}")
+            else:
+                st.metric("First Violation", "N/A")
+        
+        with col2:
+            # Last violation frame
+            last_violation = total_violations[-1] if total_violations else None
+            if last_violation:
+                st.metric("Latest Violation", f"Frame {last_violation['frame']}")
+            else:
+                st.metric("Latest Violation", "N/A")
+        
+        with col3:
+            # Violation frequency (violations per 100 frames)
+            violation_frequency = (total_violations_count / len(frame_stats) * 100) if frame_stats else 0
+            st.metric("Violations/100 Frames", f"{violation_frequency:.1f}")
+        
+        # Top violation types table
+        if violation_types:
+            st.markdown("---")
+            st.markdown("#### 🏆 Top Violation Types")
+            top_violations_df = pd.DataFrame(
+                list(violation_types.items()),
+                columns=['Violation Type', 'Count']
+            ).sort_values('Count', ascending=False).head(10)
+            
+            # Add percentage column
+            top_violations_df['Percentage'] = (top_violations_df['Count'] / total_violations_count * 100).round(1)
+            top_violations_df['Percentage'] = top_violations_df['Percentage'].astype(str) + '%'
+            
+            display_dataframe(top_violations_df, use_container_width=True)
+        
+        # Safety hotspots - frames with most issues
+        st.markdown("---")
+        st.markdown("#### 🔥 Safety Hotspots (Frames with Most Violations)")
+        
+        hotspot_frames = sorted(frame_stats, key=lambda x: x['violations'], reverse=True)[:5]
+        if hotspot_frames and hotspot_frames[0]['violations'] > 0:
+            hotspot_df = pd.DataFrame([
+                {
+                    'Frame': f['frame'],
+                    'Violations': f['violations'],
+                    'Workers': f['persons'],
+                    'Safety Equipped': f['safety_equipped']
+                } for f in hotspot_frames
+            ])
+            display_dataframe(hotspot_df, use_container_width=True)
+        else:
+            st.info("No violation hotspots detected")
+        
+        # Compliance trends
+        st.markdown("---")
+        st.markdown("#### 📉 Safety Compliance Trend")
+        
+        if len(frame_stats) > 1:
+            # Calculate rolling compliance rate
+            compliance_data = []
+            for f in frame_stats:
+                if f['persons'] > 0:
+                    compliance = (f['safety_equipped'] / f['persons'] * 100)
+                    compliance_data.append({'Frame': f['frame'], 'Compliance %': compliance})
+            
+            if compliance_data:
+                compliance_df = pd.DataFrame(compliance_data)
+                st.line_chart(compliance_df.set_index('Frame'), height=200)
 
 def send_email_with_csv_smtp(csv_data, filename, recipient_email, sender_name, analysis_type="Video Analysis"):
     """Send email with CSV attachment using Gmail SMTP"""
@@ -932,6 +1159,166 @@ Construction Safety Monitor 🚧
         return False, f"❌ SMTP error occurred: {str(e)}"
     except Exception as e:
         return False, f"❌ Email notification failed: {str(e)}"
+
+def generate_detailed_analytics_report(total_violations, frame_stats):
+    """Generate a comprehensive analytics report as a formatted text/markdown file"""
+    
+    # Calculate all metrics
+    total_violations_count = len(total_violations)
+    high_violations = [v for v in total_violations if v['severity'] == 'High']
+    medium_violations = [v for v in total_violations if v['severity'] == 'Medium']
+    low_violations = [v for v in total_violations if v['severity'] == 'Low']
+    
+    total_persons = sum(f['persons'] for f in frame_stats)
+    total_safety_equipped = sum(f['safety_equipped'] for f in frame_stats)
+    compliance_rate = (total_safety_equipped / total_persons * 100) if total_persons > 0 else 0
+    
+    violation_types = {}
+    for v in total_violations:
+        vtype = v['type']
+        violation_types[vtype] = violation_types.get(vtype, 0) + 1
+    
+    # Calculate advanced metrics
+    avg_violations_per_frame = total_violations_count / len(frame_stats) if frame_stats else 0
+    risk_score = (len(high_violations) * 3 + len(medium_violations) * 2 + len(low_violations) * 1)
+    max_risk = total_violations_count * 3
+    risk_percentage = (risk_score / max_risk * 100) if max_risk > 0 else 0
+    violation_density = (total_violations_count / total_persons) if total_persons > 0 else 0
+    high_severity_rate = (len(high_violations) / total_violations_count * 100) if total_violations_count > 0 else 0
+    frames_with_violations = len([f for f in frame_stats if f['violations'] > 0])
+    violation_frame_rate = (frames_with_violations / len(frame_stats) * 100) if frame_stats else 0
+    avg_workers = sum(f['persons'] for f in frame_stats) / len(frame_stats) if frame_stats else 0
+    violation_frequency = (total_violations_count / len(frame_stats) * 100) if frame_stats else 0
+    
+    # Generate report
+    report = f"""
+╔══════════════════════════════════════════════════════════════════════╗
+║        CONSTRUCTION SAFETY MONITORING - DETAILED ANALYTICS REPORT     ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+Report Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+═══════════════════════════════════════════════════════════════════════
+                        EXECUTIVE SUMMARY
+═══════════════════════════════════════════════════════════════════════
+
+Total Frames Analyzed:      {len(frame_stats)}
+Total Violations Detected:  {total_violations_count}
+Total Workers Processed:    {total_persons}
+Overall Safety Compliance:  {compliance_rate:.1f}%
+
+RISK ASSESSMENT:
+  Risk Score:               {risk_percentage:.1f}% ({risk_score}/{max_risk})
+  High Severity Rate:       {high_severity_rate:.1f}%
+  Violation Density:        {violation_density:.2f} violations per worker
+
+═══════════════════════════════════════════════════════════════════════
+                     VIOLATION BREAKDOWN BY SEVERITY
+═══════════════════════════════════════════════════════════════════════
+
+🔴 HIGH Priority Violations:     {len(high_violations):>6}  ({len(high_violations)/total_violations_count*100 if total_violations_count > 0 else 0:.1f}%)
+🟡 MEDIUM Priority Violations:   {len(medium_violations):>6}  ({len(medium_violations)/total_violations_count*100 if total_violations_count > 0 else 0:.1f}%)
+🟢 LOW Priority Violations:      {len(low_violations):>6}  ({len(low_violations)/total_violations_count*100 if total_violations_count > 0 else 0:.1f}%)
+
+═══════════════════════════════════════════════════════════════════════
+                     KEY PERFORMANCE INDICATORS
+═══════════════════════════════════════════════════════════════════════
+
+Average Violations per Frame:    {avg_violations_per_frame:.2f}
+Frames with Violations:          {violation_frame_rate:.1f}% ({frames_with_violations}/{len(frame_stats)})
+Average Workers per Frame:       {avg_workers:.1f}
+Violation Frequency:             {violation_frequency:.1f} per 100 frames
+
+═══════════════════════════════════════════════════════════════════════
+                     TOP VIOLATION TYPES
+═══════════════════════════════════════════════════════════════════════
+
+"""
+    
+    # Add top violation types
+    sorted_violations = sorted(violation_types.items(), key=lambda x: x[1], reverse=True)
+    for i, (vtype, count) in enumerate(sorted_violations[:10], 1):
+        percentage = (count / total_violations_count * 100) if total_violations_count > 0 else 0
+        report += f"{i:2d}. {vtype:<50} {count:>6} ({percentage:>5.1f}%)\n"
+    
+    report += f"""
+═══════════════════════════════════════════════════════════════════════
+                     SAFETY HOTSPOTS (TOP 5 FRAMES)
+═══════════════════════════════════════════════════════════════════════
+
+"""
+    
+    # Add hotspot frames
+    hotspot_frames = sorted(frame_stats, key=lambda x: x['violations'], reverse=True)[:5]
+    report += f"{'Frame':<10} {'Violations':<15} {'Workers':<15} {'Safety Equipped':<15}\n"
+    report += f"{'-'*55}\n"
+    for f in hotspot_frames:
+        if f['violations'] > 0:
+            report += f"#{f['frame']:<9} {f['violations']:<15} {f['persons']:<15} {f['safety_equipped']:<15}\n"
+    
+    # Temporal analysis
+    first_violation = next((v for v in total_violations), None)
+    last_violation = total_violations[-1] if total_violations else None
+    
+    report += f"""
+═══════════════════════════════════════════════════════════════════════
+                     TEMPORAL ANALYSIS
+═══════════════════════════════════════════════════════════════════════
+
+First Violation Detected:   Frame {first_violation['frame'] if first_violation else 'N/A'}
+Latest Violation Detected:   Frame {last_violation['frame'] if last_violation else 'N/A'}
+
+═══════════════════════════════════════════════════════════════════════
+                     RECOMMENDATIONS
+═══════════════════════════════════════════════════════════════════════
+
+"""
+    
+    # Add recommendations based on analysis
+    if high_severity_rate > 50:
+        report += "⚠️  CRITICAL: Over 50% violations are HIGH severity. Immediate action required!\n"
+    if compliance_rate < 50:
+        report += "⚠️  WARNING: Safety compliance below 50%. Enhance safety training programs.\n"
+    if violation_density > 1:
+        report += "⚠️  ALERT: More than 1 violation per worker on average. Review safety protocols.\n"
+    if violation_frame_rate > 75:
+        report += "⚠️  CONCERN: Violations detected in over 75% of frames. Site-wide safety audit needed.\n"
+    
+    if high_severity_rate <= 20 and compliance_rate >= 80:
+        report += "✅  GOOD: Low high-severity rate and high compliance. Maintain current standards.\n"
+    
+    # Add top violation recommendations
+    if sorted_violations:
+        top_violation_type = sorted_violations[0][0]
+        report += f"\n📌 Focus Area: '{top_violation_type}' is the most common violation.\n"
+        report += "   Consider targeted training and enhanced monitoring for this specific issue.\n"
+    
+    report += f"""
+═══════════════════════════════════════════════════════════════════════
+                     DETAILED VIOLATION LOG
+═══════════════════════════════════════════════════════════════════════
+
+"""
+    
+    # Add detailed violation log (limited to first 50 for readability)
+    report += f"{'Frame':<10} {'Severity':<12} {'Type':<45} {'Location':<20}\n"
+    report += f"{'-'*87}\n"
+    for v in total_violations[:50]:
+        report += f"#{v['frame']:<9} {v['severity']:<12} {v['type']:<45} {v.get('location', 'N/A'):<20}\n"
+    
+    if len(total_violations) > 50:
+        report += f"\n... and {len(total_violations) - 50} more violations (see CSV for complete list)\n"
+    
+    report += f"""
+═══════════════════════════════════════════════════════════════════════
+                     END OF REPORT
+═══════════════════════════════════════════════════════════════════════
+
+Generated by Construction Safety Monitor v1.0
+For questions or support, contact: safety@construction-monitor.com
+"""
+    
+    return report
 
 def main():
     st.title("🚧 Construction Site Safety Monitor")
@@ -1279,16 +1666,24 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
     elif send_csv_summary and recipient_email:
         st.info(f"📊 **SUMMARY MODE ACTIVE**: Will send CSV report to {recipient_email} after processing completes")
     
-    # Create layout columns
-    col1, col2 = st.columns([2, 1])
+    # Create compact dashboard layout - everything in single view
+    # Top row: Video (60%) + Alerts (40%)
+    col1, col2 = st.columns([3, 2])
     
     with col1:
-        st.markdown("### 📹 Live Video Processing")
+        st.markdown("### 📹 Live Video")
         video_placeholder = st.empty()
     
     with col2:
+        st.markdown("### 🚨 Live Alerts")
         alerts_placeholder = st.empty()
-        stats_placeholder = st.empty()
+    
+    # Bottom row: Compact statistics (full width)
+    st.markdown("### 📊 Live Statistics")
+    stats_placeholder = st.empty()
+    
+    # Expandable section for detailed analytics
+    detailed_stats_placeholder = st.empty()
     
     # Initialize tracking variables
     total_violations = []
@@ -1371,6 +1766,7 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
         update_live_alerts(alerts_placeholder, total_violations, current_frame)
         update_live_stats(stats_placeholder, total_violations, frame_stats, current_frame, 
                           show_email_queue=real_time_alerts and recipient_email)
+        update_detailed_stats(detailed_stats_placeholder, total_violations, frame_stats, current_frame)
         
         # Show debug information if enabled
         if debug_mode and debug_info:
@@ -1437,16 +1833,34 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
         df = pd.DataFrame(total_violations)
         display_dataframe(df, use_container_width=True)
         
-        # Download results
-        csv = df.to_csv(index=False)
-        filename = f"live_safety_violations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        # Download results - CSV and Detailed Analytics
+        st.markdown("### 📥 Download Reports")
+        col1, col2 = st.columns(2)
         
-        st.download_button(
-            label="📥 Download Results (CSV)",
-            data=csv,
-            file_name=filename,
-            mime="text/csv"
-        )
+        with col1:
+            csv = df.to_csv(index=False)
+            filename = f"live_safety_violations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+            
+            st.download_button(
+                label="� Download Violations Data (CSV)",
+                data=csv,
+                file_name=filename,
+                mime="text/csv",
+                use_container_width=True
+            )
+        
+        with col2:
+            # Generate detailed analytics report
+            detailed_report = generate_detailed_analytics_report(total_violations, frame_stats)
+            report_filename = f"detailed_analytics_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+            
+            st.download_button(
+                label="📈 Download Detailed Analytics Report (TXT)",
+                data=detailed_report,
+                file_name=report_filename,
+                mime="text/plain",
+                use_container_width=True
+            )
         
         # Send CSV summary email ONLY if in summary mode (not real-time mode)
         if send_csv_summary and recipient_email and not real_time_alerts:
@@ -1623,16 +2037,34 @@ def process_full_video(video_path, model, class_names, colors, confidence_thresh
         df = pd.DataFrame(all_violations)
         display_dataframe(df, use_container_width=True)
         
-        # Download results
-        csv = df.to_csv(index=False)
-        filename = f"safety_violations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        # Download results - CSV and Detailed Analytics
+        st.markdown("### 📥 Download Reports")
+        col1, col2 = st.columns(2)
         
-        st.download_button(
-            label="📥 Download Results (CSV)",
-            data=csv,
-            file_name=filename,
-            mime="text/csv"
-        )
+        with col1:
+            csv = df.to_csv(index=False)
+            filename = f"safety_violations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+            
+            st.download_button(
+                label="� Download Violations Data (CSV)",
+                data=csv,
+                file_name=filename,
+                mime="text/csv",
+                use_container_width=True
+            )
+        
+        with col2:
+            # Generate detailed analytics report
+            detailed_report = generate_detailed_analytics_report(all_violations, frame_stats)
+            report_filename = f"detailed_analytics_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+            
+            st.download_button(
+                label="📈 Download Detailed Analytics Report (TXT)",
+                data=detailed_report,
+                file_name=report_filename,
+                mime="text/plain",
+                use_container_width=True
+            )
         
         # Send CSV summary email ONLY if in summary mode (not real-time mode)
         if send_csv_summary and recipient_email and not real_time_alerts:
