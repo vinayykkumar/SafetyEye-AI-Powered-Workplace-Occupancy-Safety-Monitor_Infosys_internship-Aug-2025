@@ -961,6 +961,67 @@ Construction Safety Monitor System 🚧
     except Exception as e:
         return False, f"❌ Email sending failed: {str(e)}"
 
+def send_email_with_html_smtp(html_content, recipient_email, sender_name, analysis_type="Video Analysis"):
+    """Send email with HTML report using Gmail SMTP"""
+    try:
+        # Gmail SMTP configuration
+        sender_email = "safetyeyeteam8@gmail.com"
+        password = "dtwmwimtbqquqwda"  # App Password for Gmail
+        
+        # Create email message
+        msg = MIMEMultipart()
+        msg["From"] = sender_email
+        msg["To"] = recipient_email
+        msg["Subject"] = f"🚧 Construction Safety HTML Report - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        
+        # Email body (text version)
+        email_body = f"""
+Construction Safety Analysis Complete!
+
+Analysis Details:
+📊 Type: {analysis_type}
+⏰ Completed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+👤 Sent by: {sender_name or 'Safety Monitor'}
+
+This email contains your interactive HTML report with:
+• Visual graphs and charts
+• Interactive data table with search and filter
+• Violation timeline and statistics
+• Safety compliance trends
+
+Please open the HTML attachment in your web browser to view the full report.
+
+Best regards,
+Construction Safety Monitor System 🚧
+        """
+        
+        # Attach plain text body
+        msg.attach(MIMEText(email_body, "plain"))
+        
+        # Add HTML attachment
+        html_part = MIMEBase('application', 'octet-stream')
+        html_part.set_payload(html_content.encode('utf-8'))
+        encoders.encode_base64(html_part)
+        html_part.add_header(
+            'Content-Disposition',
+            f'attachment; filename= safety_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.html'
+        )
+        msg.attach(html_part)
+        
+        # Connect to Gmail SMTP server and send
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(sender_email, password)
+            server.sendmail(sender_email, recipient_email, msg.as_string())
+        
+        return True, "✅ HTML Report email sent successfully! 📧 (Check spam folder if needed)"
+        
+    except smtplib.SMTPAuthenticationError:
+        return False, "❌ Email authentication failed. Please check Gmail App Password settings."
+    except smtplib.SMTPException as e:
+        return False, f"❌ SMTP error occurred: {str(e)}"
+    except Exception as e:
+        return False, f"❌ Email sending failed: {str(e)}"
+
 def send_realtime_violation_alert_direct(frame, violations, frame_number, recipient_email, sender_name, timestamp=None):
     """Direct email sending function for queue worker (same as send_realtime_violation_alert but without queue)"""
     if not violations:
@@ -2099,7 +2160,8 @@ def main():
             "Select notification method:",
             [
                 "� Real-time Violation Alerts",
-                "📊 Summary Report (CSV)"
+                "📊 Summary Report (CSV)",
+                "📄 Summary Report (HTML)"
             ],
             help="Choose when and how you want to receive notifications"
         )
@@ -2126,14 +2188,14 @@ def main():
             send_csv_summary = False
             # Debug confirmation
             st.sidebar.success("✅ REAL-TIME MODE ACTIVATED")
-        else:
-            # Debug: Show that summary mode is selected
-            st.sidebar.success("✅ SUMMARY MODE ACTIVATED")
+        elif email_mode == "📊 Summary Report (CSV)":
+            # Debug: Show that CSV summary mode is selected
+            st.sidebar.success("✅ CSV SUMMARY MODE ACTIVATED")
             st.sidebar.write(f"DEBUG: Selected mode = '{email_mode}'")
             st.sidebar.info(
-                "📝 **Summary Report Mode:**\n"
-                "✅ Complete analysis report\n"
-                "✅ CSV file with all violations\n"
+                "📝 **CSV Summary Report Mode:**\n"
+                "✅ Complete CSV data file\n"
+                "✅ All violations with details\n"
                 "✅ Statistical summary\n"
                 "✅ Single email after processing\n"
                 "🚫 NO individual violation emails"
@@ -2141,7 +2203,24 @@ def main():
             real_time_alerts = False
             send_csv_summary = True
             # Debug confirmation
-            st.sidebar.success("✅ SUMMARY MODE ACTIVATED")
+            st.sidebar.success("✅ CSV SUMMARY MODE ACTIVATED")
+        else:  # HTML Summary Report
+            # Debug: Show that HTML summary mode is selected
+            st.sidebar.success("✅ HTML SUMMARY MODE ACTIVATED")
+            st.sidebar.write(f"DEBUG: Selected mode = '{email_mode}'")
+            st.sidebar.info(
+                "📝 **HTML Summary Report Mode:**\n"
+                "✅ Visual HTML report with graphs\n"
+                "✅ Interactive data table\n"
+                "✅ Embedded violation charts\n"
+                "✅ Filter & search capabilities\n"
+                "✅ Single email after processing\n"
+                "🚫 NO individual violation emails"
+            )
+            real_time_alerts = False
+            send_csv_summary = "html"  # Special flag for HTML report
+            # Debug confirmation
+            st.sidebar.success("✅ HTML SUMMARY MODE ACTIVATED")
         
         st.sidebar.markdown("---")
         st.sidebar.info(
@@ -2551,19 +2630,32 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
                 use_container_width=True
             )
         
-        # Send CSV summary email ONLY if in summary mode (not real-time mode)
+        # Send summary email ONLY if in summary mode (not real-time mode)
         if send_csv_summary and recipient_email and not real_time_alerts:
             if not sender_name:
                 sender_name = "Safety Monitor"
-                
-            with st.spinner("📧 Sending summary report..."):
-                success, message = send_email_with_csv_smtp(
-                    csv, filename, recipient_email, sender_name, "Live Processing"
-                )
-                if success:
-                    st.success(f"✅ {message}")
-                else:
-                    st.warning(f"⚠️ {message}")
+            
+            if send_csv_summary == "html":
+                # Send HTML report
+                with st.spinner("📧 Generating and sending HTML report..."):
+                    html_report = generate_html_report_with_graphs(total_violations, frame_stats)
+                    success, message = send_email_with_html_smtp(
+                        html_report, recipient_email, sender_name, "Live Processing"
+                    )
+                    if success:
+                        st.success(f"✅ {message}")
+                    else:
+                        st.warning(f"⚠️ {message}")
+            else:
+                # Send CSV report
+                with st.spinner("📧 Sending CSV summary report..."):
+                    success, message = send_email_with_csv_smtp(
+                        csv, filename, recipient_email, sender_name, "Live Processing"
+                    )
+                    if success:
+                        st.success(f"✅ {message}")
+                    else:
+                        st.warning(f"⚠️ {message}")
         elif send_csv_summary and not recipient_email:
             st.warning("⚠️ Please enter recipient email address to send summary report.")
         elif real_time_alerts and recipient_email:
@@ -2596,7 +2688,10 @@ def process_full_video(video_path, model, class_names, colors, confidence_thresh
         email_status_placeholder.info("� Real-time email alerts enabled - sending individual violation emails during processing")
         st.success("✅ EMAIL MODE: Real-time Violation Alerts (Individual emails per violation)")
     elif send_csv_summary and recipient_email:
-        st.success("✅ EMAIL MODE: Summary Report (Single CSV email after processing)")
+        if send_csv_summary == "html":
+            st.success("✅ EMAIL MODE: HTML Summary Report (Single HTML email after processing)")
+        else:
+            st.success("✅ EMAIL MODE: CSV Summary Report (Single CSV email after processing)")
     elif recipient_email:
         st.info("📧 Email configured but no notification mode selected")
     else:
@@ -2767,19 +2862,31 @@ def process_full_video(video_path, model, class_names, colors, confidence_thresh
                 use_container_width=True
             )
         
-        # Send CSV summary email ONLY if in summary mode (not real-time mode)
+        # Send summary email ONLY if in summary mode (not real-time mode)
         if send_csv_summary and recipient_email and not real_time_alerts:
             if not sender_name:
                 sender_name = "Safety Monitor"
-                
-            with st.spinner("📧 Sending summary report..."):
-                success, message = send_email_with_csv_smtp(
-                    csv, filename, recipient_email, sender_name, "Full Video Analysis"
-                )
-                if success:
-                    st.success(f"✅ {message}")
-                else:
-                    st.warning(f"⚠️ {message}")
+            
+            if send_csv_summary == "html":
+                # Send HTML report
+                with st.spinner("📧 Generating and sending HTML report..."):
+                    success, message = send_email_with_html_smtp(
+                        html_report, recipient_email, sender_name, "Full Video Analysis"
+                    )
+                    if success:
+                        st.success(f"✅ {message}")
+                    else:
+                        st.warning(f"⚠️ {message}")
+            else:
+                # Send CSV report
+                with st.spinner("📧 Sending CSV summary report..."):
+                    success, message = send_email_with_csv_smtp(
+                        csv, filename, recipient_email, sender_name, "Full Video Analysis"
+                    )
+                    if success:
+                        st.success(f"✅ {message}")
+                    else:
+                        st.warning(f"⚠️ {message}")
         elif send_csv_summary and not recipient_email:
             st.warning("⚠️ Please enter recipient email address to send summary report.")
         elif real_time_alerts and recipient_email:
