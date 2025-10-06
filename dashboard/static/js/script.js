@@ -765,76 +765,72 @@ function refreshTable() {
     applyDateFilter();
 }
 
-// Settings Page Functions
+// 💾 Save Email Settings from Admin Dashboard
 async function saveEmailSettings(event) {
     event.preventDefault();
-    
+
     const formData = new FormData(event.target);
-    const settings = Object.fromEntries(formData);
-    
+    const settings = Object.fromEntries(formData.entries());
+
     try {
+        console.log("📤 Sending updated email settings to backend:", settings);
+
         const response = await fetch('/api/settings/email', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(settings)
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
-            showNotification('Email settings saved successfully', 'success');
+            showNotification('✅ Email settings saved successfully', 'success');
         } else {
-            showNotification('Failed to save email settings', 'error');
+            showNotification(`⚠️ Failed to save settings: ${result.message}`, 'warning');
         }
+
     } catch (error) {
-        console.error('Error saving email settings:', error);
+        console.error('❌ Error saving email settings:', error);
         showNotification('Error saving email settings', 'error');
     }
 }
 
+// 📧 Open test email modal
 function openTestEmailModal() {
-    document.getElementById('test-email-modal').style.display = 'block';
+    const modal = document.getElementById('test-email-modal');
+    if (modal) modal.style.display = 'block';
 }
 
+// 📬 Send a real test email using updated settings
 async function sendTestEmail() {
-    const recipient = document.getElementById('test-recipient').value;
-    
+    const recipient = document.getElementById('test-recipient').value.trim();
+
     if (!recipient) {
-        showNotification('Please enter recipient email', 'warning');
+        showNotification('Please enter a recipient email before testing', 'warning');
         return;
     }
-    
+
     try {
-        // Create test violation data
-        const testViolation = {
-            violation_type: 'TEST_VIOLATION',
-            timestamp: new Date().toISOString(),
-            person_id: 'TEST',
-            frame: '0',
-            helmet_conf: 0.0,
-            vest_conf: 0.0
-        };
-        
-        const response = await fetch('/api/violations/send-email', {
+        console.log("📤 Sending test email to:", recipient);
+        const response = await fetch('/api/test-email', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(testViolation)
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recipient })
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
-            showNotification('Test email sent successfully', 'success');
-            document.getElementById('test-email-modal').style.display = 'none';
+            showNotification('✅ Test email sent successfully!', 'success');
         } else {
-            showNotification('Failed to send test email', 'error');
+            showNotification(`❌ Failed to send test email: ${result.message || 'Unknown error'}`, 'error');
         }
+
+        // Close modal in all cases
+        document.getElementById('test-email-modal').style.display = 'none';
+
     } catch (error) {
-        console.error('Error sending test email:', error);
+        console.error('❌ Error sending test email:', error);
         showNotification('Error sending test email', 'error');
     }
 }

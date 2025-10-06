@@ -415,96 +415,217 @@ def get_violations_by_date_range(start_date, end_date):
         return []
 
 # -----------------------
-# Email Functions
+# Email Configuration (Persistent)
+# -----------------------
+import json
+
+EMAIL_CONFIG_FILE = os.path.join(current_dir, 'email_settings.json')
+
+# Default email configuration
+email_config = {
+    'smtp_server': 'smtp.gmail.com',
+    'smtp_port': 587,
+    'sender_email': '',
+    'sender_password': '',
+    'recipient_email': ''
+}
+
+# ✅ Load saved configuration if available
+if os.path.exists(EMAIL_CONFIG_FILE):
+    try:
+        with open(EMAIL_CONFIG_FILE, 'r') as f:
+            saved_config = json.load(f)
+            email_config.update(saved_config)
+            print(f"📩 Loaded saved email configuration for {email_config.get('sender_email', 'N/A')}")
+    except Exception as e:
+        print(f"⚠️ Failed to load saved email config: {e}")
+
+
+# -----------------------
+# Email Utility Functions
+# -----------------------
+# -----------------------
+# Email Functions (with image attachment)
 # -----------------------
 def send_violation_email(violation_data):
+    """
+    Sends an email alert with violation details and attaches the snapshot image.
+    """
     try:
         msg = MIMEMultipart()
         msg['From'] = email_config['sender_email']
         msg['To'] = email_config['recipient_email']
-        msg['Subject'] = f"Safety Violation Alert - {violation_data.get('violation_type','')}"
+        msg['Subject'] = f"🚨 SafetyEye Alert: {violation_data.get('violation_type', '').upper()}"
+
+        # --- Email Body ---
         body = f"""
-SafetyEye Violation Alert
+        ⚠️ SafetyEye Violation Alert ⚠️
 
-Violation Type: {violation_data.get('violation_type','')}
-Timestamp: {violation_data.get('timestamp','')}
-Person ID: {violation_data.get('person_id','')}
-Frame: {violation_data.get('frame','')}
-Helmet Confidence: {violation_data.get('helmet_conf',0.0):.2f}
-Vest Confidence: {violation_data.get('vest_conf',0.0):.2f}
+        Violation Type: {violation_data.get('violation_type', '')}
+        Timestamp: {violation_data.get('timestamp', '')}
+        Person ID: {violation_data.get('person_id', '')}
+        Frame: {violation_data.get('frame', '')}
+        Helmet Confidence: {float(violation_data.get('helmet_conf', 0.0)):.2f}
+        Vest Confidence: {float(violation_data.get('vest_conf', 0.0)):.2f}
 
-This is an automated safety alert from SafetyEye System.
-"""
+        📷 Attached below is the snapshot of the violation for review.
+        """
+
         msg.attach(MIMEText(body, 'plain'))
-        image_path = violation_data.get('image_path','')
-        if image_path and os.path.exists(image_path):
-            with open(image_path, 'rb') as f:
-                img = MIMEImage(f.read())
-                img.add_header('Content-Disposition', 'attachment', filename=os.path.basename(image_path))
-                msg.attach(img)
+
+        # --- Attach Snapshot Image ---
+        image_path = violation_data.get('image_path', '')
+        if image_path:
+            # Handle relative or absolute paths
+            abs_path = image_path
+            if image_path.startswith("/violations/"):
+                abs_path = os.path.join(os.getcwd(), image_path.lstrip("/"))
+
+            if os.path.exists(abs_path):
+                with open(abs_path, 'rb') as f:
+                    img = MIMEImage(f.read(), name=os.path.basename(abs_path))
+                    img.add_header('Content-Disposition', 'attachment', filename=os.path.basename(abs_path))
+                    msg.attach(img)
+                print(f"📎 Attached image: {abs_path}")
+            else:
+                print(f"⚠️ Image not found for attachment: {abs_path}")
+
+        # --- Send Email ---
         server = smtplib.SMTP(email_config['smtp_server'], email_config['smtp_port'])
         server.starttls()
         server.login(email_config['sender_email'], email_config['sender_password'])
         server.send_message(msg)
         server.quit()
+
+        print(f"✅ Email sent successfully to {email_config['recipient_email']}")
         return True
+
     except Exception as e:
         print(f"❌ Failed to send email: {e}")
         return False
 
 def send_daily_report():
+    """Send a daily CSV summary of all violations."""
     try:
         today = datetime.now().strftime("%Y-%m-%d")
         violations = get_violations_by_date_range(today, today)
         if not violations:
+            print("ℹ️ No violations found for daily report.")
             return False
+
         csv_filename = f"violations_report_{today}.csv"
         csv_path = os.path.join(app.config['UPLOAD_FOLDER'], csv_filename)
+
         with open(csv_path, 'w', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(["Timestamp", "Violation Type", "Person ID", "Frame", "Helmet Conf", "Vest Conf"])
-            for violation in violations:
+            for v in violations:
                 writer.writerow([
-                    violation['timestamp'],
-                    violation['violation_type'],
-                    violation['person_id'],
-                    violation['frame'],
-                    violation['helmet_conf'],
-                    violation['vest_conf']
+                    v['timestamp'],
+                    v['violation_type'],
+                    v['person_id'],
+                    v['frame'],
+                    v['helmet_conf'],
+                    v['vest_conf']
                 ])
+
         msg = MIMEMultipart()
         msg['From'] = email_config['sender_email']
         msg['To'] = email_config['recipient_email']
         msg['Subject'] = f"SafetyEye Daily Report - {today}"
+
         body = f"""
 SafetyEye Daily Violation Report
 
 Date: {today}
 Total Violations: {len(violations)}
 
-Please find the detailed report attached.
+Please find the detailed CSV report attached.
 """
         msg.attach(MIMEText(body, 'plain'))
+
         with open(csv_path, 'rb') as f:
             part = MIMEBase('application', 'octet-stream')
             part.set_payload(f.read())
             encoders.encode_base64(part)
             part.add_header('Content-Disposition', f'attachment; filename="{csv_filename}"')
             msg.attach(part)
+
         server = smtplib.SMTP(email_config['smtp_server'], email_config['smtp_port'])
         server.starttls()
         server.login(email_config['sender_email'], email_config['sender_password'])
         server.send_message(msg)
         server.quit()
+
         os.remove(csv_path)
+        print(f"✅ Daily report sent successfully to {email_config['recipient_email']}")
         return True
     except Exception as e:
         print(f"❌ Failed to send daily report: {e}")
         return False
 
+
 # -----------------------
-# Dashboard Data Helper
+# Email Settings API (Dashboard Integration)
 # -----------------------
+@app.route('/api/settings/email', methods=['POST'])
+def update_email_settings():
+    """Update email configuration dynamically via dashboard and persist to disk."""
+    global email_config
+    try:
+        data = request.json
+        if not data:
+            return jsonify({'success': False, 'message': 'Missing JSON body'}), 400
+
+        email_config.update({
+            'smtp_server': data.get('smtp_server', 'smtp.gmail.com'),
+            'smtp_port': int(data.get('smtp_port', 587)),
+            'sender_email': data.get('sender_email', ''),
+            'sender_password': data.get('sender_password', ''),
+            'recipient_email': data.get('recipient_email', '')
+        })
+
+        # ✅ Save to JSON
+        with open(EMAIL_CONFIG_FILE, 'w') as f:
+            json.dump(email_config, f, indent=4)
+
+        print(f"✅ Email configuration updated for {email_config['sender_email']} → {email_config['recipient_email']}")
+        return jsonify({'success': True, 'message': 'Email settings saved successfully'})
+
+    except Exception as e:
+        print(f"❌ Error saving email settings: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/test-email', methods=['POST'])
+def send_test_email():
+    """Send a test email using the current saved configuration."""
+    try:
+        data = request.json or {}
+        test_recipient = data.get('recipient') or email_config.get('recipient_email')
+
+        msg = MIMEMultipart()
+        msg['From'] = email_config['sender_email']
+        msg['To'] = test_recipient
+        msg['Subject'] = "✅ SafetyEye Test Email"
+        msg.attach(MIMEText(
+            "This is a test email from SafetyEye. Your email settings are working correctly!",
+            'plain'
+        ))
+
+        server = smtplib.SMTP(email_config['smtp_server'], email_config['smtp_port'])
+        server.starttls()
+        server.login(email_config['sender_email'], email_config['sender_password'])
+        server.send_message(msg)
+        server.quit()
+
+        print(f"✅ Test email sent successfully to {test_recipient}")
+        return jsonify({'success': True, 'message': f'Test email sent to {test_recipient}'})
+    except Exception as e:
+        print(f"❌ Failed to send test email: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+
 # -----------------------
 # Dashboard Data Helper
 # -----------------------
@@ -896,17 +1017,6 @@ def download_csv():
             ])
     return send_file(csv_path, as_attachment=True, download_name=csv_filename)
 
-@app.route('/api/settings/email', methods=['POST'])
-def update_email_settings():
-    global email_config
-    try:
-        data = request.json
-        if not data:
-            return jsonify({'success': False, 'message': 'Missing JSON body'}), 400
-        email_config.update(data)
-        return jsonify({'success': True, 'message': 'Email settings updated'})
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/api/stats')
 def get_stats():
