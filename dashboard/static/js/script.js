@@ -8,6 +8,9 @@ let violationsUpdateInterval;
 
 // Initialize dashboard when page loads
 // Initialize dashboard only if dashboard elements exist
+
+
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Initializing SafetyEye Dashboard...');
 
@@ -54,33 +57,57 @@ function initializeDashboard() {
 
 // Setup all event listeners
 function setupEventListeners() {
-    // Dashboard controls
-    document.getElementById('start-webcam').addEventListener('click', startWebcam);
-    document.getElementById('stop-processing').addEventListener('click', stopProcessing);
-    document.getElementById('upload-trigger').addEventListener('click', triggerVideoUpload);
-    document.getElementById('video-upload').addEventListener('change', handleVideoUpload);
-    
-    // Modal controls
+    console.log("🎯 Setting up event listeners...");
+
+    // ✅ DASHBOARD CONTROLS (safe attachment)
+    const startBtn = document.getElementById('start-webcam');
+    if (startBtn) startBtn.addEventListener('click', startWebcam);
+
+    const stopBtn = document.getElementById('stop-processing');
+    if (stopBtn) stopBtn.addEventListener('click', stopProcessing);
+
+    const uploadTrigger = document.getElementById('upload-trigger');
+    if (uploadTrigger) uploadTrigger.addEventListener('click', triggerVideoUpload);
+
+    const videoUpload = document.getElementById('video-upload');
+    if (videoUpload) videoUpload.addEventListener('change', handleVideoUpload);
+
+    // ✅ MODAL CONTROLS (fix close button issue)
     setupModalControls();
-    
-    // Logs page controls
-    console.log("🔍 Checking for log page buttons...");
 
-    if (document.getElementById('apply-filter')) {
-        console.log("✅ Found log page buttons, attaching listeners...");
+    // ✅ LOGS PAGE CONTROLS
+    const applyBtn = document.getElementById('apply-filter');
+    if (applyBtn) {
+        console.log("✅ Logs page detected — attaching filter listeners...");
 
-        document.getElementById('apply-filter').addEventListener('click', applyDateFilter);
-        document.getElementById('reset-filter').addEventListener('click', resetFilters);
-        document.getElementById('download-csv').addEventListener('click', downloadCSV);
-        document.getElementById('refresh-table').addEventListener('click', refreshTable);
-        document.getElementById('prev-page').addEventListener('click', previousPage);
-        document.getElementById('next-page').addEventListener('click', nextPage);
-        document.getElementById('type-filter').addEventListener('change', applyTypeFilter);
+        applyBtn.addEventListener('click', () => {
+            console.log("📅 Apply Filter clicked!");
+            applyDateFilter();
+        });
+
+        const resetBtn = document.getElementById('reset-filter');
+        if (resetBtn) resetBtn.addEventListener('click', resetFilters);
+
+        const downloadBtn = document.getElementById('download-csv');
+        if (downloadBtn) downloadBtn.addEventListener('click', downloadCSV);
+
+        const refreshBtn = document.getElementById('refresh-table');
+        if (refreshBtn) refreshBtn.addEventListener('click', refreshTable);
+
+        const prevBtn = document.getElementById('prev-page');
+        if (prevBtn) prevBtn.addEventListener('click', previousPage);
+
+        const nextBtn = document.getElementById('next-page');
+        if (nextBtn) nextBtn.addEventListener('click', nextPage);
+
+        const typeFilter = document.getElementById('type-filter');
+        if (typeFilter) typeFilter.addEventListener('change', applyTypeFilter);
     }
-    
-    // Settings page controls
-    if (document.getElementById('email-settings-form')) {
-        document.getElementById('email-settings-form').addEventListener('submit', saveEmailSettings);
+
+    // ✅ SETTINGS PAGE CONTROLS
+    const emailSettingsForm = document.getElementById('email-settings-form');
+    if (emailSettingsForm) {
+        emailSettingsForm.addEventListener('submit', saveEmailSettings);
         document.getElementById('test-email').addEventListener('click', openTestEmailModal);
         document.getElementById('confirm-test-email').addEventListener('click', sendTestEmail);
         document.getElementById('save-system-settings').addEventListener('click', saveSystemSettings);
@@ -88,24 +115,40 @@ function setupEventListeners() {
         document.getElementById('reset-system').addEventListener('click', confirmResetSystem);
         document.getElementById('confirm-action').addEventListener('click', handleConfirmAction);
     }
-    
-    // Email buttons
+
+    // ✅ EMAIL BUTTONS
     const emailButtons = document.querySelectorAll('#send-email-btn, #log-send-email');
     emailButtons.forEach(btn => {
-        if (btn) {
-            btn.addEventListener('click', sendViolationEmail);
-        }
+        if (btn) btn.addEventListener('click', sendViolationEmail);
     });
 }
+
 
 // Setup modal controls
 function setupModalControls() {
     // Close modals when clicking X
-    document.querySelectorAll('.close-modal').forEach(closeBtn => {
-        closeBtn.addEventListener('click', function() {
-            this.closest('.modal').style.display = 'none';
-        });
+    // Improved modal close handling
+    document.addEventListener('click', function (event) {
+        if (event.target.classList.contains('close-modal')) {
+            const modal = event.target.closest('.modal');
+            if (modal) {
+                modal.style.display = 'none';
+                console.log("🧱 Modal closed.");
+            }
+        }
     });
+
+    // Also close if you click outside modal content
+    window.addEventListener('click', function (event) {
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+                console.log("💨 Closed modal by clicking outside.");
+            }
+        });
+});
+
     
     // Close modals when clicking outside
     window.addEventListener('click', function(event) {
@@ -475,10 +518,10 @@ function updateCharts(stats) {
     }
 }
 
-// Logs Page Functions
 async function applyDateFilter() {
     const startDate = document.getElementById('start-date').value;
     const endDate = document.getElementById('end-date').value;
+    const typeFilter = document.getElementById('type-filter').value;
 
     if (!startDate || !endDate) {
         showNotification('Please select both start and end dates', 'warning');
@@ -486,25 +529,27 @@ async function applyDateFilter() {
     }
 
     try {
-        console.log("📡 Fetching violations from:", `/api/violations/date-range?start=${startDate}&end=${endDate}`);
+        console.log(`📡 Fetching filtered violations: start=${startDate}, end=${endDate}, type=${typeFilter}`);
         const response = await fetch(`/api/violations/date-range?start=${startDate}&end=${endDate}`);
         const violations = await response.json();
-        console.log("✅ Received violations:", violations);
 
+        // Always store violations
         currentViolations = violations;
         currentPage = 1;
 
+        // Apply type filter immediately
+        applyTypeFilter();
+
         if (violations.length === 0) {
-            showNotification('No violations found for this range', 'warning');
+            showNotification('No violations found for selected range', 'warning');
         } else {
             showNotification(`Loaded ${violations.length} violations`, 'success');
         }
 
-        updateViolationsTable();
         updateSummaryStats(violations);
-
-        // Enable/disable CSV button
         document.getElementById('download-csv').disabled = violations.length === 0;
+
+        console.log("✅ Violations after filter:", violations);
 
     } catch (error) {
         console.error('❌ Error applying date filter:', error);
@@ -515,18 +560,15 @@ async function applyDateFilter() {
 
 
 function resetFilters() {
-    document.getElementById('start-date').value = '';
-    document.getElementById('end-date').value = '';
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('start-date').value = today;
+    document.getElementById('end-date').value = today;
     document.getElementById('type-filter').value = 'all';
     
-    currentViolations = [];
-    currentPage = 1;
-    updateViolationsTable();
-    updateSummaryStats([]);
-    
-    document.getElementById('download-csv').disabled = true;
-    showNotification('Filters reset — showing all violations', 'info');
+    applyDateFilter(); // reload data for today
+    showNotification('Filters reset — showing today’s violations', 'info');
 }
+
 
 function updateViolationsTable() {
     const tableBody = document.getElementById('violations-table-body');
@@ -628,14 +670,32 @@ function applyTypeFilter() {
 }
 
 function updateSummaryStats(violations) {
+    if (!violations || violations.length === 0) {
+        document.getElementById('total-violations').textContent = 0;
+        document.getElementById('no-helmet-count').textContent = 0;
+        document.getElementById('no-vest-count').textContent = 0;
+        return;
+    }
+
     const totalViolations = violations.length;
-    const noHelmetCount = violations.filter(v => v.violation_type.includes('HELMET')).length;
-    const noVestCount = violations.filter(v => v.violation_type.includes('VEST')).length;
-    
+
+    // ✅ Normalize case for accurate counting
+    const noHelmetCount = violations.filter(v =>
+        v.violation_type && v.violation_type.toLowerCase().includes('no_helmet')
+    ).length;
+
+    const noVestCount = violations.filter(v =>
+        v.violation_type && v.violation_type.toLowerCase().includes('no_vest')
+    ).length;
+
+    // ✅ Update summary section
     document.getElementById('total-violations').textContent = totalViolations;
     document.getElementById('no-helmet-count').textContent = noHelmetCount;
     document.getElementById('no-vest-count').textContent = noVestCount;
+
+    console.log(`📊 Summary updated — Total: ${totalViolations}, No Helmet: ${noHelmetCount}, No Vest: ${noVestCount}`);
 }
+
 
 function showLogDetails(violation) {
     currentViolationData = violation;
@@ -968,5 +1028,20 @@ window.addEventListener('beforeunload', function() {
     if (statsUpdateInterval) clearInterval(statsUpdateInterval);
     if (violationsUpdateInterval) clearInterval(violationsUpdateInterval);
 });
+
+// 🧾 Auto-load violations when on Logs page
+document.addEventListener("DOMContentLoaded", () => {
+    const logsPage = document.getElementById("violations-table-body");
+    if (logsPage) {
+        console.log("🧾 Logs page detected — loading today's violations...");
+
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('start-date').value = today;
+        document.getElementById('end-date').value = today;
+
+        applyDateFilter(); // auto-fetch violations from backend
+    }
+});
+
 
 console.log('✅ SafetyEye Dashboard JavaScript loaded successfully!');
