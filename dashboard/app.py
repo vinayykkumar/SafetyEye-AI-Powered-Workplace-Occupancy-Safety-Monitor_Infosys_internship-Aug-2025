@@ -282,7 +282,8 @@ def init_violations_system():
         if not os.path.exists(csv_path):
             with open(csv_path, 'w', newline='') as f:
                 writer = csv.writer(f)
-                writer.writerow(["timestamp", "frame", "person_id", "reason", "image_path", "helmet_conf", "vest_conf"])
+                writer.writerow(["timestamp", "frame", "person_id", "violation_type", "image_path", "helmet_conf", "vest_conf"])
+
         print("✅ Violations system initialized")
         return True
     except Exception as e:
@@ -304,19 +305,38 @@ def _ensure_violations_csv():
             writer.writerow(["timestamp", "frame", "person_id", "reason", "image_path", "helmet_conf", "vest_conf"])
 
 def log_violation_to_csv(violation_type, confidence=0.95, image_path="", person_id="0", frame_id="0", helmet_conf=None, vest_conf=None):
-    """Append a violation row to CSV with confidence values."""
+    """Append a violation row to CSV with correct confidence fields."""
     try:
         _ensure_violations_csv()
-        # Assign confidence values properly
-        if helmet_conf is None:
-            helmet_conf = confidence if "helmet" in violation_type.lower() or "hardhat" in violation_type.lower() else 0.0
-        if vest_conf is None:
-            vest_conf = confidence if "vest" in violation_type.lower() else 0.0
 
+        # Assign correct confidences
+        if helmet_conf is None and "helmet" in violation_type.lower():
+            helmet_conf = confidence
+        elif helmet_conf is None:
+            helmet_conf = 0.0
+
+        if vest_conf is None and "vest" in violation_type.lower():
+            vest_conf = confidence
+        elif vest_conf is None:
+            vest_conf = 0.0
+
+        # Ensure float formatting
+        helmet_conf = float(helmet_conf)
+        vest_conf = float(vest_conf)
+
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with open(VIOLATIONS_CSV_PATH, 'a', newline='') as f:
             writer = csv.writer(f)
-            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            writer.writerow([timestamp, frame_id, person_id, violation_type, image_path, f"{helmet_conf:.3f}", f"{vest_conf:.3f}"])
+            writer.writerow([
+                timestamp,
+                frame_id,
+                person_id,
+                violation_type,
+                image_path,
+                f"{helmet_conf:.2f}",
+                f"{vest_conf:.2f}"
+            ])
+        print(f"🟢 Logged {violation_type} | Helmet={helmet_conf:.2f} | Vest={vest_conf:.2f}")
         return True
     except Exception as e:
         print(f"❌ Failed to log violation to CSV: {e}")
@@ -345,7 +365,7 @@ def get_violations_from_csv(limit=1000):
                         'timestamp': ts,
                         'frame': row.get('frame', ''),
                         'person_id': row.get('person_id', ''),
-                        'violation_type': row.get('reason', '') or row.get('violation_type', ''),
+                        'violation_type': row.get('violation_type', '') or row.get('reason', ''),
                         'image_path': row.get('image_path', ''),
                         'helmet_conf': helmet_conf,
                         'vest_conf': vest_conf
@@ -623,12 +643,15 @@ def capture_loop(src):
                             continue
                         image_url = f"/violations/{filename}"
                         log_violation_to_csv(
-                            violation_type,
+                            violation_type=violation_type,
                             confidence=max(v['helmet_conf'], v['vest_conf']),
                             image_path=image_url,
                             person_id=person_id,
-                            frame_id=frame_count
+                            frame_id=frame_count,
+                            helmet_conf=v.get('helmet_conf', 0.0),
+                            vest_conf=v.get('vest_conf', 0.0)
                         )
+
                         print(f"⚠️ New violation logged: {violation_type} for person {person_id}")
         except Exception as e:
             print(f"❌ Error handling violations: {e}")
