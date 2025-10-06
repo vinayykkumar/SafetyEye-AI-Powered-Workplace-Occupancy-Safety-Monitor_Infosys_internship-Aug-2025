@@ -1022,6 +1022,79 @@ Construction Safety Monitor System 🚧
     except Exception as e:
         return False, f"❌ Email sending failed: {str(e)}"
 
+def get_master_csv_path():
+    """Get the path to the master CSV file"""
+    return "violation_history_master.csv"
+
+def initialize_master_csv():
+    """Initialize master CSV file if it doesn't exist"""
+    csv_path = get_master_csv_path()
+    if not os.path.exists(csv_path):
+        # Create with headers
+        df = pd.DataFrame(columns=[
+            'session_id', 'session_date', 'session_time', 'analysis_type',
+            'frame', 'timestamp', 'type', 'severity', 'location'
+        ])
+        df.to_csv(csv_path, index=False)
+        return True, "Master CSV file created"
+    return True, "Master CSV file exists"
+
+def append_to_master_csv(violations, analysis_type="Video Analysis"):
+    """Append violations from current session to master CSV"""
+    try:
+        csv_path = get_master_csv_path()
+        
+        # Initialize if doesn't exist
+        initialize_master_csv()
+        
+        # Generate session ID
+        session_id = datetime.now().strftime('%Y%m%d_%H%M%S')
+        session_date = datetime.now().strftime('%Y-%m-%d')
+        session_time = datetime.now().strftime('%H:%M:%S')
+        
+        # Prepare data for this session
+        session_data = []
+        for v in violations:
+            session_data.append({
+                'session_id': session_id,
+                'session_date': session_date,
+                'session_time': session_time,
+                'analysis_type': analysis_type,
+                'frame': v.get('frame', 'N/A'),
+                'timestamp': v.get('timestamp', 'N/A'),
+                'type': v.get('type', 'Unknown'),
+                'severity': v.get('severity', 'Unknown'),
+                'location': v.get('location', 'N/A')
+            })
+        
+        # Read existing data
+        if os.path.exists(csv_path) and os.path.getsize(csv_path) > 0:
+            existing_df = pd.read_csv(csv_path)
+            new_df = pd.DataFrame(session_data)
+            combined_df = pd.concat([existing_df, new_df], ignore_index=True)
+        else:
+            combined_df = pd.DataFrame(session_data)
+        
+        # Save combined data
+        combined_df.to_csv(csv_path, index=False)
+        
+        return True, f"Added {len(session_data)} violations to master CSV (Session: {session_id})"
+    except Exception as e:
+        return False, f"Failed to append to master CSV: {str(e)}"
+
+def load_master_csv():
+    """Load the master CSV file"""
+    try:
+        csv_path = get_master_csv_path()
+        if os.path.exists(csv_path) and os.path.getsize(csv_path) > 0:
+            df = pd.read_csv(csv_path)
+            return df, f"Loaded {len(df)} violations from {df['session_id'].nunique() if len(df) > 0 else 0} sessions"
+        else:
+            initialize_master_csv()
+            return pd.DataFrame(), "No historical data available yet"
+    except Exception as e:
+        return pd.DataFrame(), f"Error loading master CSV: {str(e)}"
+
 def send_realtime_violation_alert_direct(frame, violations, frame_number, recipient_email, sender_name, timestamp=None):
     """Direct email sending function for queue worker (same as send_realtime_violation_alert but without queue)"""
     if not violations:
@@ -2028,19 +2101,21 @@ def main():
     selected_model = st.sidebar.selectbox("Select Model", list(model_options.keys()), index=0)
     model_path = model_options[selected_model]
 
-    # Analysis mode: Video or Image
+    # Analysis mode: Video or Image or History
     analysis_mode = st.sidebar.radio(
         "Analysis Mode",
-        ["Video Analysis", "Image Analysis"],
+        ["Video Analysis", "Image Analysis", "📊 Violation History"],
         index=0,
-        help="Choose whether to analyze a video or a single image"
+        help="Choose whether to analyze a video, image, or view historical violation data"
     )
     
     # Show mode-specific description
     if analysis_mode == "Video Analysis":
         st.markdown("Upload a video to monitor construction site safety and detect PPE violations")
-    else:
+    elif analysis_mode == "Image Analysis":
         st.markdown("Upload an image to detect PPE violations and safety equipment")
+    else:
+        st.markdown("View and analyze historical violation data from all previous sessions")
     
     # Check if model file exists
     if not os.path.exists(model_path):
@@ -2127,7 +2202,128 @@ def main():
         # Stop here for image analysis
         st.stop()
     
-    # Detection confidence threshold
+    # If user selected Violation History, show the history dashboard
+    elif analysis_mode == "📊 Violation History":
+        st.markdown("### 📊 Violation History Dashboard")
+        st.markdown("View and analyze all historical violation data from previous sessions")
+        
+        # Load master CSV
+        df, message = load_master_csv()
+        
+        if len(df) == 0:
+            st.info("📝 " + message)
+            st.info("💡 Run some video/image analysis sessions to build violation history!")
+            st.stop()
+        
+        st.success(f"✅ {message}")
+        
+        # Summary statistics
+        st.markdown("### 📈 Overall Statistics")
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.metric("Total Violations", len(df))
+        with col2:
+            st.metric("Total Sessions", df['session_id'].nunique())
+        with col3:
+            high_count = len(df[df['severity'] == 'High'])
+            st.metric("High Severity", high_count)
+        with col4:
+            latest_session = df['session_date'].max() if len(df) > 0 else "N/A"
+            st.metric("Latest Session", latest_session)
+        
+        # Filters
+        st.markdown("### 🔍 Filter Data")
+        filter_col1, filter_col2, filter_col3 = st.columns(3)
+        
+        with filter_col1:
+            # Date range filter
+            if 'session_date' in df.columns and len(df) > 0:
+                date_options = ["All Dates"] + sorted(df['session_date'].unique().tolist(), reverse=True)
+                selected_date = st.selectbox("📅 Filter by Date", date_options)
+            else:
+                selected_date = "All Dates"
+        
+        with filter_col2:
+            # Severity filter
+            severity_options = ["All Severities"] + df['severity'].unique().tolist()
+            selected_severity = st.selectbox("⚠️ Filter by Severity", severity_options)
+        
+        with filter_col3:
+            # Session filter
+            session_options = ["All Sessions"] + sorted(df['session_id'].unique().tolist(), reverse=True)
+            selected_session = st.selectbox("📂 Filter by Session", session_options)
+        
+        # Apply filters
+        filtered_df = df.copy()
+        
+        if selected_date != "All Dates":
+            filtered_df = filtered_df[filtered_df['session_date'] == selected_date]
+        
+        if selected_severity != "All Severities":
+            filtered_df = filtered_df[filtered_df['severity'] == selected_severity]
+        
+        if selected_session != "All Sessions":
+            filtered_df = filtered_df[filtered_df['session_id'] == selected_session]
+        
+        # Show filtered results
+        st.markdown(f"### 📋 Filtered Results ({len(filtered_df)} violations)")
+        
+        if len(filtered_df) > 0:
+            # Display dataframe
+            st.dataframe(filtered_df, use_container_width=True, height=400)
+            
+            # Download filtered data
+            st.markdown("### 📥 Download Filtered Data")
+            col_d1, col_d2 = st.columns(2)
+            
+            with col_d1:
+                csv_data = filtered_df.to_csv(index=False)
+                filename = f"filtered_violations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+                st.download_button(
+                    label="📊 Download Filtered CSV",
+                    data=csv_data,
+                    file_name=filename,
+                    mime="text/csv",
+                    use_container_width=True
+                )
+            
+            with col_d2:
+                # Download full master CSV
+                full_csv = df.to_csv(index=False)
+                full_filename = f"master_violations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+                st.download_button(
+                    label="📁 Download Full History CSV",
+                    data=full_csv,
+                    file_name=full_filename,
+                    mime="text/csv",
+                    use_container_width=True
+                )
+            
+            # Visualizations
+            st.markdown("### 📊 Violation Analysis Charts")
+            
+            viz_col1, viz_col2 = st.columns(2)
+            
+            with viz_col1:
+                # Severity distribution
+                st.markdown("#### Severity Distribution")
+                severity_counts = filtered_df['severity'].value_counts()
+                st.bar_chart(severity_counts)
+            
+            with viz_col2:
+                # Violations by date
+                st.markdown("#### Violations by Date")
+                if 'session_date' in filtered_df.columns:
+                    date_counts = filtered_df['session_date'].value_counts().sort_index()
+                    st.line_chart(date_counts)
+        else:
+            st.warning("No violations match the selected filters")
+        
+        # Stop here for history view
+        st.stop()
+    
+    # Detection confidence threshold (for video analysis)
     confidence_threshold = st.sidebar.slider("Detection Confidence", 0.1, 1.0, 0.4, 0.1)
     
     # Additional sidebar information
@@ -2630,6 +2826,15 @@ def process_live_video(video_path, model, class_names, colors, confidence_thresh
                 use_container_width=True
             )
         
+        # Append violations to master CSV
+        st.markdown("### 💾 Saving to History")
+        with st.spinner("Saving violations to master history..."):
+            success, master_message = append_to_master_csv(total_violations, "Live Video Analysis")
+            if success:
+                st.success(f"✅ {master_message}")
+            else:
+                st.warning(f"⚠️ {master_message}")
+        
         # Send summary email ONLY if in summary mode (not real-time mode)
         if send_csv_summary and recipient_email and not real_time_alerts:
             if not sender_name:
@@ -2861,6 +3066,15 @@ def process_full_video(video_path, model, class_names, colors, confidence_thresh
                 mime="text/plain",
                 use_container_width=True
             )
+        
+        # Append violations to master CSV
+        st.markdown("### 💾 Saving to History")
+        with st.spinner("Saving violations to master history..."):
+            success, master_message = append_to_master_csv(all_violations, "Full Video Analysis")
+            if success:
+                st.success(f"✅ {master_message}")
+            else:
+                st.warning(f"⚠️ {master_message}")
         
         # Send summary email ONLY if in summary mode (not real-time mode)
         if send_csv_summary and recipient_email and not real_time_alerts:
