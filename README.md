@@ -1,7 +1,7 @@
 <<<<<<< Updated upstream
 # SafetyEye-AI-Powered-Workplace-Occupancy-Safety-Monitor_Infosys_internship-Aug-2025
 
- - **Author:** Shally Katariya Group 1
+ - **Author:** Aaditya Srinivasan Group 1
  - **Context:** Infosys Internship Project, August 2025  
 
 ---
