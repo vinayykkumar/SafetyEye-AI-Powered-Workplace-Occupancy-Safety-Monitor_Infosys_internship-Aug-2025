@@ -1,63 +1,16 @@
 timestamp,frame,person_id,violation_type,image_path,helmet_conf,vest_conf
-2025-10-06 23:38:34,0,0,unknown,,0.00,0.00
-2025-10-06 23:38:35,0,0,unknown,,0.00,0.00
-2025-10-06 23:38:36,0,0,unknown,,0.00,0.00
-2025-10-06 23:38:38,0,0,unknown,,0.00,0.00
-2025-10-06 23:38:40,0,0,unknown,,0.00,0.00
-2025-10-06 23:41:39,5,2,no_vest,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_234139_933617.jpg,0.45,0.00
-2025-10-06 23:41:40,20,3,no_helmet,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_234140_924917.jpg,0.00,0.32
-2025-10-06 23:41:42,37,12,no_helmet,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_234142_072378.jpg,0.00,0.43
-2025-10-06 23:41:43,60,19,no_vest,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_234143_661311.jpg,0.76,0.00
-2025-10-06 23:41:45,89,21,no_vest,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_234145_599329.jpg,0.66,0.00
-2025-10-06 23:42:50,5,24,"no_helmet, no_vest",D:\VSCode\SafetyAI_clean1\violations\violation_20251006_234250_982181.jpg,0.31,0.00
-2025-10-06 23:42:52,21,25,no_helmet,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_234252_062068.jpg,0.00,0.32
-2025-10-06 23:42:53,38,34,no_helmet,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_234253_241027.jpg,0.00,0.43
-2025-10-06 23:42:54,61,41,no_vest,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_234254_965654.jpg,0.76,0.00
-2025-10-06 23:42:57,89,43,no_vest,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_234257_056954.jpg,0.66,0.00
-2025-10-06 23:51:43,5,2,"no_helmet, no_vest",D:\VSCode\SafetyAI_clean1\violations\violation_20251006_235143_364666.jpg,0.31,0.00
-2025-10-06 23:51:44,21,3,no_helmet,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_235144_370388.jpg,0.00,0.32
-2025-10-06 23:51:45,38,12,no_helmet,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_235145_484966.jpg,0.00,0.43
-2025-10-06 23:51:47,61,19,no_vest,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_235147_011922.jpg,0.76,0.00
-2025-10-06 23:51:48,89,21,no_vest,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_235148_937955.jpg,0.66,0.00
-2025-10-06 23:52:11,5,24,no_vest,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_235211_324253.jpg,0.45,0.00
-2025-10-06 23:52:12,20,25,no_helmet,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_235212_313149.jpg,0.00,0.32
-2025-10-06 23:52:13,37,34,no_helmet,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_235213_436911.jpg,0.00,0.43
-2025-10-06 23:52:14,60,41,no_vest,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_235214_949635.jpg,0.76,0.00
-2025-10-06 23:52:16,89,43,no_vest,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_235216_960847.jpg,0.66,0.00
-2025-10-06 23:54:55,5,2,"no_helmet, no_vest",D:\VSCode\SafetyAI_clean1\violations\violation_20251006_235455_517188.jpg,0.31,0.00
-2025-10-06 23:54:56,21,3,no_helmet,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_235456_511553.jpg,0.00,0.32
-2025-10-06 23:54:57,38,12,no_helmet,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_235457_638337.jpg,0.00,0.43
-2025-10-06 23:54:59,61,19,no_vest,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_235459_249872.jpg,0.76,0.00
-2025-10-06 23:55:01,89,21,no_vest,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_235501_352443.jpg,0.66,0.00
-2025-10-06 23:58:07,5,2,no_vest,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_235807_864219.jpg,0.45,0.00
-2025-10-06 23:58:08,20,3,no_helmet,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_235808_866974.jpg,0.00,0.32
-2025-10-06 23:58:10,37,12,no_helmet,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_235810_042595.jpg,0.00,0.43
-2025-10-06 23:58:11,60,19,no_vest,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_235811_612619.jpg,0.76,0.00
-2025-10-06 23:58:13,89,21,no_vest,D:\VSCode\SafetyAI_clean1\violations\violation_20251006_235813_713287.jpg,0.66,0.00
-2025-10-07 00:00:55,5,2,"no_helmet, no_vest",/violations/violation_20251007_000055_760619.jpg,0.31,0.00
-2025-10-07 00:00:56,21,3,no_helmet,/violations/violation_20251007_000056_818164.jpg,0.00,0.32
-2025-10-07 00:00:57,38,12,no_helmet,/violations/violation_20251007_000057_967049.jpg,0.00,0.43
-2025-10-07 00:00:59,61,19,no_vest,/violations/violation_20251007_000059_572411.jpg,0.76,0.00
-2025-10-07 00:01:01,89,21,no_vest,/violations/violation_20251007_000101_567114.jpg,0.66,0.00
-2025-10-07 00:02:39,5,2,no_vest,/violations/violation_20251007_000239_387599.jpg,0.45,0.00
-2025-10-07 00:02:40,20,3,no_helmet,/violations/violation_20251007_000240_454703.jpg,0.00,0.32
-2025-10-07 00:02:41,37,12,no_helmet,/violations/violation_20251007_000241_735728.jpg,0.00,0.43
-2025-10-07 00:02:43,60,19,no_vest,/violations/violation_20251007_000243_367905.jpg,0.76,0.00
-2025-10-07 00:02:45,89,21,no_vest,/violations/violation_20251007_000245_376042.jpg,0.66,0.00
-2025-10-07 00:12:46,5,2,no_vest,/violations/violation_20251007_001246_502659.jpg,0.45,0.00
-2025-10-07 00:12:48,20,3,no_helmet,/violations/violation_20251007_001248_073664.jpg,0.00,0.32
-2025-10-07 00:12:49,37,12,no_helmet,/violations/violation_20251007_001249_896973.jpg,0.00,0.43
-2025-10-07 00:12:52,60,19,no_vest,/violations/violation_20251007_001252_374029.jpg,0.76,0.00
-2025-10-07 00:12:55,89,21,no_vest,/violations/violation_20251007_001255_482497.jpg,0.66,0.00
-2025-10-07 00:24:18,3,23,"no_helmet, no_vest",/violations/violation_20251007_002418_314224.jpg,0.00,0.00
-2025-10-07 00:24:27,63,27,"no_helmet, no_vest",/violations/violation_20251007_002427_639435.jpg,0.00,0.00
-2025-10-07 00:24:30,78,32,"no_helmet, no_vest",/violations/violation_20251007_002430_131741.jpg,0.00,0.00
-2025-10-07 00:24:31,87,33,"no_helmet, no_vest",/violations/violation_20251007_002431_746379.jpg,0.00,0.00
-2025-10-07 00:24:33,94,35,"no_helmet, no_vest",/violations/violation_20251007_002433_017749.jpg,0.00,0.00
-2025-10-07 00:24:33,97,36,"no_helmet, no_vest",/violations/violation_20251007_002433_498745.jpg,0.00,0.00
-2025-10-07 01:16:06,5,2,no_vest,/violations/violation_20251007_011606_190912.jpg,0.45,0.00
-2025-10-07 01:16:07,20,3,no_helmet,/violations/violation_20251007_011607_193111.jpg,0.00,0.32
-2025-10-07 01:16:08,37,12,no_helmet,/violations/violation_20251007_011608_312731.jpg,0.00,0.43
-2025-10-07 01:16:09,60,19,no_vest,/violations/violation_20251007_011609_867864.jpg,0.76,0.00
-2025-10-07 01:16:11,89,21,no_vest,/violations/violation_20251007_011611_849017.jpg,0.66,0.00
-2025-10-07 01:16:39,5,23,no_helmet,/violations/violation_20251007_011639_983501.jpg,0.00,0.72
+2025-10-05 14:31:09,5,2,"no_helmet, no_vest",/violations/violation_20251007_143109_429869.jpg,0.31,0.00
+2025-10-07 14:31:10,21,3,no_helmet,/violations/violation_20251007_143110_423514.jpg,0.00,0.32
+2025-10-07 14:31:11,38,12,no_helmet,/violations/violation_20251007_143111_525254.jpg,0.00,0.43
+2025-10-07 14:31:13,61,19,no_vest,/violations/violation_20251007_143113_035573.jpg,0.76,0.00
+2025-10-07 14:31:14,89,21,no_vest,/violations/violation_20251007_143114_983448.jpg,0.66,0.00
+2025-10-07 14:37:24,5,24,no_vest,/violations/violation_20251007_143724_994161.jpg,0.45,0.00
+2025-10-07 14:37:26,20,25,no_helmet,/violations/violation_20251007_143726_082800.jpg,0.00,0.32
+2025-10-07 14:37:27,37,34,no_helmet,/violations/violation_20251007_143727_285636.jpg,0.00,0.43
+2025-10-07 14:37:28,60,41,no_vest,/violations/violation_20251007_143728_859906.jpg,0.76,0.00
+2025-10-07 14:37:30,89,43,no_vest,/violations/violation_20251007_143730_799814.jpg,0.66,0.00
+2025-10-07 14:37:45,5,46,no_vest,/violations/violation_20251007_143745_548532.jpg,0.45,0.00
+2025-10-07 14:37:46,20,47,no_helmet,/violations/violation_20251007_143746_474718.jpg,0.00,0.32
+2025-10-07 14:37:47,37,56,no_helmet,/violations/violation_20251007_143747_586821.jpg,0.00,0.43
+2025-10-07 14:37:49,60,63,no_vest,/violations/violation_20251007_143749_190726.jpg,0.76,0.00
+2025-10-07 14:37:51,89,65,no_vest,/violations/violation_20251007_143751_135628.jpg,0.66,0.00

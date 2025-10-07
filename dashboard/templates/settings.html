@@ -129,11 +129,8 @@
             <div class="card-body">
                 <p class="warning-text">These actions are irreversible. Proceed with caution.</p>
                 <div class="danger-actions">
-                    <button id="clear-violations" class="btn btn-danger">
+                    <button id="clearViolationsBtn" class="btn btn-danger">
                         <i class="fas fa-trash"></i> Clear All Violations
-                    </button>
-                    <button id="reset-system" class="btn btn-danger">
-                        <i class="fas fa-redo"></i> Reset System
                     </button>
                 </div>
             </div>
@@ -181,4 +178,50 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const clearBtn = document.getElementById("clearViolationsBtn");
+
+  // 🗑️ Clear all violations
+  if (clearBtn) {
+    clearBtn.addEventListener("click", async () => {
+      if (!confirm("⚠️ Are you sure you want to delete all violations? This cannot be undone!")) return;
+
+      try {
+        const res = await fetch("/api/violations/clear", { method: "DELETE" });
+        const data = await res.json();
+        alert(data.message || "Done!");
+        if (data.success) location.reload();
+      } catch (err) {
+        alert("❌ Failed to clear violations: " + err.message);
+      }
+    });
+  }
+});
+document.addEventListener("DOMContentLoaded", async () => {
+  async function fetchSystemInfo() {
+    try {
+      const res = await fetch("/api/system/info");
+      const data = await res.json();
+
+      if (data.error) throw new Error(data.error);
+
+      document.querySelector(".info-value.real-time").textContent = data.detection_mode;
+      document.querySelectorAll(".info-value")[1].textContent = data.model_version;
+      document.getElementById("total-violations-count").textContent = data.total_violations;
+      document.getElementById("system-uptime").textContent = data.system_uptime;
+      document.getElementById("last-report").textContent = data.last_report_sent;
+
+    } catch (err) {
+      console.error("❌ Failed to load system info:", err);
+    }
+  }
+
+  // Fetch immediately and every 30 seconds
+  fetchSystemInfo();
+  setInterval(fetchSystemInfo, 30000);
+});
+</script>
+
 {% endblock %}

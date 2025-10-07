@@ -312,12 +312,12 @@ def _ensure_violations_csv():
             writer = csv.writer(f)
             writer.writerow([
                 "timestamp",
-                "violation_type",
-                "person_id",
                 "frame",
+                "person_id",
+                "violation_type",
+                "image_path",
                 "helmet_conf",
-                "vest_conf",
-                "image_path"
+                "vest_conf"
             ])
 
 def log_violation_to_csv(violation_type, confidence=0.95, image_path="", person_id="0", frame_id="0",
@@ -585,6 +585,7 @@ Please find the detailed CSV report attached.
         server.quit()
 
         os.remove(csv_path)
+        LAST_REPORT_SENT = datetime.now()  # ✅ record the time
         print(f"✅ Daily report sent successfully to {email_config['recipient_email']}")
         return True
     except Exception as e:
@@ -1112,6 +1113,22 @@ def download_csv():
             ])
     return send_file(csv_path, as_attachment=True, download_name=csv_filename)
 
+@app.route('/api/violations/clear', methods=['DELETE'])
+def clear_all_violations():
+    """Delete all entries in the violations CSV file."""
+    try:
+        _ensure_violations_csv()
+        with open(VIOLATIONS_CSV_PATH, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(["timestamp", "frame", "person_id", "violation_type", "image_path", "helmet_conf", "vest_conf"])
+        print("🗑️ All violations cleared from CSV.")
+        return jsonify({'success': True, 'message': 'All violations cleared successfully.'})
+    except Exception as e:
+        print(f"❌ Error clearing violations: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+
 
 # --------------------------------------------
 # 📊 Dashboard Stats API — with compliance trend
@@ -1174,6 +1191,52 @@ def serve_violation_image(filename):
     except Exception as e:
         print(f"❌ Could not serve image: {e}")
         abort(404)
+
+# ----------------------------
+# 📡 System Information API
+# ----------------------------
+APP_START_TIME = datetime.now()
+LAST_REPORT_SENT = None  # will update whenever a report is sent
+
+@app.route('/api/system/info', methods=['GET'])
+def get_system_info():
+    """Return real-time system info for the settings page."""
+    try:
+        # ✅ Calculate uptime
+        uptime_seconds = (datetime.now() - APP_START_TIME).total_seconds()
+        days = int(uptime_seconds // 86400)
+        hours = int((uptime_seconds % 86400) // 3600)
+        minutes = int((uptime_seconds % 3600) // 60)
+        uptime_str = f"{days}d {hours}h {minutes}m"
+
+        # ✅ Count total violations from CSV
+        total_violations = 0
+        if os.path.exists(VIOLATIONS_CSV_PATH):
+            with open(VIOLATIONS_CSV_PATH, 'r', newline='') as f:
+                reader = list(csv.DictReader(f))
+                total_violations = len(reader)
+
+        # ✅ Detection mode
+        detection_mode = "REAL YOLO" if safety_monitor.model_loaded else "MOCK"
+
+        # ✅ Model name
+        model_name = "N/A"
+        if safety_monitor.model_loaded and hasattr(safety_monitor, "model") and hasattr(safety_monitor.model, "names"):
+            model_name = os.path.basename(MODEL_PATH)
+
+        # ✅ Last report time
+        last_report = LAST_REPORT_SENT.strftime("%Y-%m-%d %H:%M:%S") if LAST_REPORT_SENT else "Never"
+
+        return jsonify({
+            "detection_mode": detection_mode,
+            "model_version": model_name,
+            "total_violations": total_violations,
+            "system_uptime": uptime_str,
+            "last_report_sent": last_report
+        })
+    except Exception as e:
+        print(f"❌ Error in get_system_info: {e}")
+        return jsonify({"error": str(e)}), 500
 
 
 # -----------------------
