@@ -46,6 +46,11 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 violations_dir = os.path.join(parent_dir, 'violations')
 os.makedirs(violations_dir, exist_ok=True)
 
+APP_START_TIME = datetime.now()  # 🕒 track when app started
+LAST_REPORT_FILE = "last_report.json"  # 💾 store last report timestamp persistently
+LAST_REPORT_SENT = None  # 🧭 will be loaded from file on startup
+processing_flag = {"active": False}
+
 # -----------------------
 # Email Configuration (update these)
 # -----------------------
@@ -56,6 +61,40 @@ email_config = {
     'sender_password': 'your-app-password',
     'recipient_email': 'admin@company.com'
 }
+
+
+# =========================
+# Helper Functions for Last Report Time
+# =========================
+def save_last_report_time():
+    """Save current time as last report timestamp to file."""
+    global LAST_REPORT_SENT
+    LAST_REPORT_SENT = datetime.now()
+    try:
+        with open(LAST_REPORT_FILE, "w") as f:
+            json.dump({"last_sent": LAST_REPORT_SENT.strftime("%Y-%m-%d %H:%M:%S")}, f)
+        print(f"💾 Saved LAST_REPORT_SENT = {LAST_REPORT_SENT}")
+    except Exception as e:
+        print(f"❌ Failed to save last report time: {e}")
+
+def load_last_report_time():
+    """Load the last report timestamp from file if available."""
+    global LAST_REPORT_SENT
+    if os.path.exists(LAST_REPORT_FILE):
+        try:
+            with open(LAST_REPORT_FILE, "r") as f:
+                data = json.load(f)
+                LAST_REPORT_SENT = datetime.strptime(data["last_sent"], "%Y-%m-%d %H:%M:%S")
+                print(f"📂 Loaded LAST_REPORT_SENT = {LAST_REPORT_SENT}")
+        except Exception as e:
+            print(f"⚠️ Could not load last report time: {e}")
+            LAST_REPORT_SENT = None
+    else:
+        LAST_REPORT_SENT = None
+
+# ✅ Load saved report time immediately on startup
+load_last_report_time()
+
 
 # -----------------------
 # Import detection utilities (attempt)
@@ -586,6 +625,8 @@ Please find the detailed CSV report attached.
 
         os.remove(csv_path)
         LAST_REPORT_SENT = datetime.now()  # ✅ record the time
+        # ✅ Load saved report time immediately on startup
+        save_last_report_time()
         print(f"✅ Daily report sent successfully to {email_config['recipient_email']}")
         return True
     except Exception as e:
@@ -741,8 +782,10 @@ def close_capture():
 def capture_loop(src):
     global latest_raw_frame, latest_processed_frame, detected_violations_session
     print(f"🎬 Capture loop started for source: {src}")
+    processing_flag["active"] = True
     cap_ok = open_capture(src)
     if not cap_ok:
+        processing_flag["active"] = False  # ensure flag resets even if open fails
         print(f"❌ open_capture failed for {src}")
         return
 
@@ -827,6 +870,8 @@ def capture_loop(src):
         time.sleep(frame_delay)
 
     close_capture()
+    processing_flag["active"] = False  # <— mark processing done here
+    print("✅ Capture loop exiting — processing_flag set to False")
     print("✅ Capture loop exiting")
 
 
@@ -995,6 +1040,7 @@ def api_upload_video():
                 pass
             return jsonify({'error': 'Uploaded video is invalid or corrupted'}), 400
         tcap.release()
+        processing_flag["active"] = True
         # start capture thread on uploaded file
         # reset frame buffer and start capture
         global latest_processed_frame
@@ -1002,8 +1048,19 @@ def api_upload_video():
         start_capture_thread(save_path)
         return jsonify({'status': 'started', 'source': 'uploaded_video', 'filename': filename})
     except Exception as e:
+        processing_flag["active"] = False
         print(f"❌ upload_video error: {e}")
         return jsonify({'error': f'Upload failed: {str(e)}'}), 500
+
+# ✅ ADD THIS DIRECTLY BELOW
+@app.route("/api/is_processing", methods=["GET"])
+def is_processing():
+    """Return whether the system is currently processing a video."""
+    try:
+        return jsonify({"processing": processing_flag["active"]})
+    except Exception as e:
+        print(f"❌ Error in is_processing: {e}")
+        return jsonify({"processing": False, "error": str(e)}), 500
 
 @app.route('/api/violations/all', methods=['GET'])
 def get_violations():

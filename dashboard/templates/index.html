@@ -152,8 +152,6 @@
 
 {% block scripts %}
 <script>
-    // Current violation data for email
-
 document.addEventListener("DOMContentLoaded", function () {
     const startBtn = document.getElementById("start-webcam");
     const stopBtn = document.getElementById("stop-processing");
@@ -163,6 +161,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const videoFeed = document.getElementById("video-feed");
     const noFeed = document.getElementById("no-feed");
     const processingStatus = document.getElementById("processing-status");
+
+    let isResetting = false; // 🧠 Prevent duplicate resets
 
     // 🟢 Start webcam
     startBtn.addEventListener("click", async () => {
@@ -190,25 +190,24 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // 🟢 Stop processing
+    // 🟢 Stop processing (manual)
     stopBtn.addEventListener("click", async () => {
+        if (isResetting) return;
+        isResetting = true;
+
         stopBtn.disabled = true;
         try {
-            const res = await fetch("/api/stop_processing", { method: "POST" });
-            const data = await res.json();
+            await fetch("/api/stop_processing", { method: "POST" });
             uploadStatus.innerText = "🛑 Processing stopped";
-            processingStatus.innerText = "OFFLINE";
-            processingStatus.classList.remove("status-online");
-            processingStatus.classList.add("status-offline");
-            startBtn.disabled = false;
-            uploadBtn.disabled = false;
+            resetUI();
         } catch (err) {
             console.error("Stop error:", err);
+        } finally {
+            isResetting = false;
         }
     });
 
-
-    // 🟢 File selected
+    // 🟢 File upload (video)
     fileInput.addEventListener("change", async () => {
         const file = fileInput.files[0];
         if (!file) return;
@@ -228,17 +227,75 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
             const res = await fetch("/api/upload_video", { method: "POST", body: formData });
             const data = await res.json();
+
             if (data.error) {
                 uploadStatus.innerText = "❌ " + data.error;
-            } else {
-                uploadStatus.innerText = "✅ Processing video: " + data.filename;
+                return;
             }
+
+            uploadStatus.innerText = "✅ Processing video: " + data.filename;
+
+            // 🔁 Poll backend every 2s until done
+            const interval = setInterval(async () => {
+                if (isResetting) {
+                    clearInterval(interval);
+                    return;
+                }
+
+                try {
+                    const res = await fetch("/api/is_processing");
+                    const status = await res.json();
+
+                    if (!status.processing) {
+                        clearInterval(interval);
+                        console.log("✅ Processing finished — resetting system automatically");
+                        await autoReset();
+                    }
+                } catch (err) {
+                    console.warn("⚠️ Could not check processing status:", err);
+                    clearInterval(interval);
+                }
+            }, 2000);
+
         } catch (err) {
             console.error("Upload error:", err);
             uploadStatus.innerText = "❌ Upload failed";
         }
     });
-});
 
+    // 🎬 Optional: Listen for video 'ended' event (for real <video> tags)
+    if (videoFeed && videoFeed.tagName === "VIDEO") {
+        videoFeed.addEventListener("ended", async () => {
+            console.log("✅ Video playback ended — resetting system automatically");
+            await autoReset();
+        });
+    }
+
+    // 🧩 Helper: Unified reset logic
+    async function autoReset() {
+        if (isResetting) return;
+        isResetting = true;
+        try {
+            await fetch("/api/stop_processing", { method: "POST" });
+            resetUI();
+            uploadStatus.innerText = "✅ Video finished — ready for next upload";
+        } catch (err) {
+            console.error("Auto reset failed:", err);
+        } finally {
+            isResetting = false;
+        }
+    }
+
+    // 🧩 Helper: Restore UI state
+    function resetUI() {
+        processingStatus.innerText = "OFFLINE";
+        processingStatus.classList.remove("status-online");
+        processingStatus.classList.add("status-offline");
+
+        startBtn.disabled = false;
+        uploadBtn.disabled = false;
+        stopBtn.disabled = true;
+    }
+});
 </script>
 {% endblock %}
