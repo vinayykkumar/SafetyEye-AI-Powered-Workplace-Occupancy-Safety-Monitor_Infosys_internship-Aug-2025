@@ -1,68 +1,108 @@
-# SafetyEye-AI-Powered-Workplace-Occupancy-Safety-Monitor_Infosys_internship-Aug-2025
-An AI-based system that uses video surveillance feeds to monitor workplace occupancy levels and detect Personal Protective Equipment (PPE) compliance, ensuring a safer and more efficient environment.
+# SafetyEye — AI-Powered Workplace Safety Monitor
 
-**🚀 Project Overview**
-This project addresses two critical challenges in modern workplace management: ensuring employee safety and optimizing space utilization. By leveraging the YOLOv8 object detection model, the system analyzes real-time video feeds from construction sites or industrial spaces to automatically detect safety compliance violations, such as missing helmets or safety vests. The platform is designed to provide administrators with a real-time dashboard, offering actionable insights through visualizations and instant alerts to improve safety protocols and manage space effectively.
+**Project:** SafetyEye — AI-Powered-Workplace-Occupancy-Safety-Monitor
+**Internship:** Infosys — Aug 2025
 
-**Key Features**:-
+---
 
-Automated PPE Detection: Identifies workers and detects whether they are wearing essential safety gear like helmets, masks, and vests.
+## 🚀 Overview
 
-Real-time Violation Alerts: Generates instant notifications when a safety compliance violation is detected.
+SafetyEye is an AI-based system built using YOLOv8 to monitor workplace occupancy and PPE compliance in real time. It detects missing safety gear such as helmets, masks, and vests, tracks workers, and visualizes data through a Streamlit dashboard.
 
-Occupancy Monitoring: Tracks the number of people in designated zones to help managers optimize space.
+---
 
-Data-driven Dashboard: A live dashboard for administrators to view compliance statistics, recent events, and overall safety trends.
+## 🔑 Features
 
-**Dataset**
-This project utilizes the Construction Site Safety Image Dataset available on Kaggle. It contains images with YOLO-formatted annotations for various classes related to personal protective equipment and construction site environments.
+* **PPE Detection:** Detects Hardhat, Mask, and Safety Vest usage.
+* **Violation Alerts:** Instantly flags workers missing essential PPE.
+* **Occupancy Monitoring:** Counts and tracks people in different zones.
+* **Dashboard Analytics:** Displays live video feed, violation logs, and compliance trends.
 
-Source: Construction Site Safety Image Dataset on Kaggle
+---
 
-**🛠️ Getting Started**
-Follow these steps to set up and run the project on your local machine.
+## 🛠️ Tech Stack
 
-Prerequisites
-Python 3.8 or higher
+Python • OpenCV • Ultralytics YOLOv8 • PyTorch • Streamlit • Albumentations • scikit-learn
 
-Pip (Python package installer)
+---
 
-1. Clone the Repository
-git clone https://github.com/your-username/your-repository-name.git
-cd your-repository-name
+## 🏗️ Setup
 
-2. Set Up a Virtual Environment
-It is recommended to use a virtual environment to manage project dependencies.
-
-
-3. Install Dependencies
-Install all the required packages using the requirements.txt file.
+```bash
+git clone <repo-url>
+cd SafetyEye
+python -m venv venv
+source venv/bin/activate  # or venv\Scripts\activate on Windows
 pip install -r requirements.txt
+```
 
-4. Download the Dataset
-Download the dataset from the Kaggle link.
-Unzip the file and place its contents into a dataset/raw directory in the project root. 
+**Dataset:** Construction Site Safety Image Dataset (Kaggle) → place in `dataset/raw/`.
 
-5. Run the Preprocessing Script
-The script will clean, split, and augment the dataset, preparing it for training.
-After running, a new dataset/processed folder will be created with the prepared data.
+---
 
-🧠 Model Training
-Once the dataset is preprocessed, you can begin training the YOLOv8 model.
+## ⚙️ Usage
 
-The training results and the best model weights (best.pt) will be saved in a runs/ directory.
+```bash
+python src/preprocess.py             # Prepare data
+python src/train.py --epochs 50      # Train YOLOv8
+python src/realtime_detection.py     # Run real-time detection
+streamlit run src/dashboard_app.py   # Launch dashboard
+```
 
-**💻 Technologies Used**
-Python: Core programming language
+---
 
-OpenCV: For image processing
+## 📂 Structure
 
-Ultralytics YOLOv8: The object detection model
+```
+├─ dataset/ (raw + processed)
+├─ src/
+│  ├─ preprocess.py
+│  ├─ train.py
+│  ├─ realtime_detection.py
+│  └─ dashboard_app.py
+└─ outputs/, runs/, requirements.txt
+```
 
-Albumentations: For advanced image augmentation
+---
 
-NumPy: For numerical operations
+## 📊 Milestones
 
-Pillow: For image handling and verification
+### 🧩 Milestone 1: Data Preparation & Setup
 
-scikit-learn: For splitting the dataset
+* Uploaded **`src/preprocess.py`** — handles data cleaning, augmentation, and YOLOv8-compatible structure creation.
+* Processed Construction Site Safety Dataset from Kaggle and organized it into `dataset/processed/`.
+* Configured virtual environment and installed all dependencies.
+
+### 🤖 Milestone 2: Model Training & Validation
+
+* Uploaded **`src/train.py`** and **`src/validate.py`** — used to train and evaluate YOLOv8.
+* Fine-tuned model to detect helmets, masks, and vests.
+* Achieved reliable detection accuracy on validation set (saved model in `runs/detect/`).
+
+### 🎥 Milestone 3: Real-Time Detection & Alerts
+
+* Uploaded **`src/realtime_detection.py`** — performs live video inference.
+* Integrated PPE rule logic (`NO-Hardhat`, `NO-Mask`, `NO-Safety Vest`) and violation alerting.
+* Processes webcam or video feeds and saves annotated results in `outputs/`.
+
+### 📊 Milestone 4: Dashboard Integration
+
+* Uploaded **`src/dashboard_app.py`** — Streamlit dashboard for monitoring and analytics.
+* Displays live video, violation logs, charts, and summary statistics.
+* Added CSV export and unique violation tracking using ByteTrack-based IDs.
+
+---
+
+## ⚙️ Config Summary
+
+Violation Classes: `{'NO-Hardhat','NO-Mask','NO-Safety Vest'}`
+Confidence Threshold: `0.5`
+Alert Cooldown: `5s`
+
+---
+
+## 📽️ Demo
+
+Dashboard & detection demo: [CSE Dashboard](https://drive.google.com/file/d/1yi4jGCHp2YO9nfXNRqf1-9mjJ2yhnyXO/view?usp=sharing)
+
+---
