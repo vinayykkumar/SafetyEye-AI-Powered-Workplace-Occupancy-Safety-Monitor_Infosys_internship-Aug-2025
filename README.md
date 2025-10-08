@@ -1,7 +1,4 @@
-# SafetyEye — AI-Powered Workplace Safety Monitor
-
-**Project:** SafetyEye — AI-Powered-Workplace-Occupancy-Safety-Monitor
-**Internship:** Infosys — Aug 2025
+# SafetyEye-AI-Powered-Workplace-Occupancy-Safety-Monitor_Infosys_internship-Aug-2025
 
 ---
 
