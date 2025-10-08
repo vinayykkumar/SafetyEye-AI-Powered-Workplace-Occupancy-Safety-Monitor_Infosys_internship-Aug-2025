@@ -785,7 +785,7 @@ def capture_loop(src):
     processing_flag["active"] = True
     cap_ok = open_capture(src)
     if not cap_ok:
-        processing_flag["active"] = False  # ensure flag resets even if open fails
+        processing_flag["active"] = False
         print(f"❌ open_capture failed for {src}")
         return
 
@@ -810,9 +810,20 @@ def capture_loop(src):
         frame_count += 1
         latest_raw_frame = frame.copy()
 
-        # Run YOLO detection
+        # ✅ Run YOLO detection once per frame
         try:
             processed_frame, violations = safety_monitor.process_frame(frame.copy())
+
+            # ✅ Update live statistics
+            global total_detections_today, current_occupancy_estimate
+            if hasattr(safety_monitor, "tracker") and hasattr(safety_monitor.tracker, "objects"):
+                current_occupancy_estimate = len(safety_monitor.tracker.objects)
+            else:
+                current_occupancy_estimate = max(1, len(violations)) if violations else 0
+
+            if current_occupancy_estimate > 0:
+                total_detections_today += current_occupancy_estimate
+
         except Exception as e:
             print(f"❌ Exception during detection: {e}")
             processed_frame = frame.copy()
@@ -832,11 +843,9 @@ def capture_loop(src):
                 vest_conf = violation.get('vest_conf', 0.0)
                 types = violation.get('types', [])
 
-                # Create a readable string for the violation type(s)
                 violation_type_str = ', '.join(types) if isinstance(types, list) else str(types)
-
-                # Avoid duplicate logging
                 key = (person_id, violation_type_str)
+
                 if key not in detected_violations_session:
                     detected_violations_session.append(key)
 
@@ -845,12 +854,8 @@ def capture_loop(src):
                     image_path = os.path.join(violations_dir, image_filename)
                     cv2.imwrite(image_path, processed_frame)
 
-                    # ✅ Store web-accessible relative path
                     public_image_path = f"/violations/{image_filename}"
 
-        
-
-                    # ✅ Log violation with all details
                     log_violation_to_csv(
                         violation_type=violation_type_str,
                         confidence=0.95,
@@ -870,9 +875,9 @@ def capture_loop(src):
         time.sleep(frame_delay)
 
     close_capture()
-    processing_flag["active"] = False  # <— mark processing done here
+    processing_flag["active"] = False
     print("✅ Capture loop exiting — processing_flag set to False")
-    print("✅ Capture loop exiting")
+
 
 
 def start_capture_thread(src):
