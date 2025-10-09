@@ -89,20 +89,19 @@ SafetyEye-AI/
 │   └── raw/
 ├── data_preprocessing/
 │   ├── _pycache_/
-│   ├── data_augmentation.py
-│   ├── duplicate_data.py
-│   ├── preprocess.py
-│   └── resize_normalise.py
+│   ├── val/images/labels/labels.cache
+│   ├── train/images/labels/labels.cache
+│   └── test/images/labels/labels.cache
 ├── detection/
 ├── docs/
 ├── model_training/
 ├── models/
 ├── notebooks/
-├── outputs/
+├── logs/
 ├── predictions/
 ├── runs/
 ├── safetyeye_env/
-├── src/
+├── src/ "constains preprocessing and augmented files"
 ├── test_images/
 ├── .dockerfile
 ├── .gitignore
