@@ -61,5 +61,35 @@ The system uses *YOLOv8* for object detection, a *Streamlit dashboard* for visua
 ---
 
 ## 🗂 Folder Structure
-
+'''SafetyEye-AI/
+├── .vscode/
+├── alerts/
+├── dashboard/
+├── data/
+│   ├── processed/
+│   │   ├── augmented_data/
+│   │   ├── final_dataset/
+│   │   └── ppe_dataset/
+│   └── raw/
+├── data_preprocessing/
+│   ├── _pycache_/
+│   ├── data_augmentation.py
+│   ├── duplicate_data.py
+│   ├── preprocess.py
+│   └── resize_normalise.py
+├── detection/
+├── docs/
+├── model_training/
+├── models/
+├── notebooks/
+├── outputs/
+├── predictions/
+├── runs/
+├── safetyeye_env/
+├── src/
+├── test_images/
+├── .dockerfile
+├── .gitignore
+├── README.md
+└── yolov8n.pt'''
 
