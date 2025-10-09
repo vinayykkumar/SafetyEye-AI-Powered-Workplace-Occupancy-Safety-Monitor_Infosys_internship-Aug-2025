@@ -39,6 +39,17 @@ A comprehensive Streamlit web application that leverages custom-trained YOLOv8 m
 - **Adjustable Confidence**: Fine-tune detection sensitivity for images
 - **Visual Results**: Annotated images with bounding boxes and labels
 
+#### 🎥 Live Camera Analysis
+
+- **Real-time Camera Feed**: Use your device camera for continuous safety monitoring
+- **Instant Violation Detection**: Live PPE violation alerts as they happen
+- **Session Controls**: Start, stop, and save camera sessions with ease
+- **Live Statistics Dashboard**: Real-time metrics including violations, workers, and compliance rates
+- **Email Integration**: Real-time alerts or session summary emails
+- **Session History**: All camera sessions automatically saved to master violation database
+- **Multi-Format Reports**: Export camera sessions as CSV or interactive HTML reports
+- **~30 FPS Processing**: Smooth real-time analysis with optimized frame processing
+
 #### 📊 Violation History
 
 - **Master CSV Database**: Persistent storage of all violation data across sessions
@@ -165,10 +176,11 @@ construction-safety-monitor/
 
 3. **Select Analysis Mode**:
 
-   Choose from three modes in the sidebar:
+   Choose from four modes in the sidebar:
 
    - **📹 Video Analysis**: Process construction site videos
    - **🖼️ Image Analysis**: Analyze single images
+   - **🎥 Live Camera**: Real-time monitoring with device camera
    - **📊 Violation History**: View historical violation data
 
 ### Video Analysis Mode
@@ -211,6 +223,37 @@ construction-safety-monitor/
 3. **Download Results**:
    - Save annotated image
    - Export violation data as CSV
+
+### Live Camera Analysis Mode
+
+1. **Configure Email Notifications** (optional):
+   - Enable email notifications checkbox
+   - Enter recipient email address
+   - Choose notification type:
+     - 🚨 Real-time Alerts: Instant emails with frame images when violations detected
+     - 📊 CSV Summary: Email CSV report after saving session
+
+2. **Start Camera Session**:
+   - Click "Start Camera" to begin live monitoring
+   - Live feed displays with ~30 FPS processing
+   - Violations detected and displayed in real-time
+
+3. **Monitor Live**:
+   - View live camera feed with violation detection
+   - See instant violation alerts as they occur
+   - Track real-time statistics (workers, violations, compliance rate)
+   - Review violation history during session
+
+4. **Control Session**:
+   - **Stop Camera**: Pause monitoring (data retained)
+   - **Start Camera**: Resume monitoring
+   - **Save Session**: Finalize and export results
+
+5. **Save and Export**:
+   - Click "Save Session" to finalize camera session
+   - Session automatically saved to master violation database
+   - Download session data (CSV or HTML report)
+   - Email summary sent if configured
 
 ### Violation History Dashboard
 
@@ -362,6 +405,11 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 **Recent Updates:**
 
+- ✅ Added Live Camera Analysis mode with real-time monitoring
+- ✅ Implemented device camera integration with ~30 FPS processing
+- ✅ Added session management for camera analysis (start/stop/save)
+- ✅ Integrated email notifications for live camera sessions
+- ✅ Master CSV auto-save for camera session violations
 - ✅ Added Image Analysis mode for single image processing
 - ✅ Implemented Violation History dashboard with master CSV database
 - ✅ Added email notification system with real-time alerts and HTML reports
