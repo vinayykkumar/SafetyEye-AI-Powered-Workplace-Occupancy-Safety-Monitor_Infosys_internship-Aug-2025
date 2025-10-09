@@ -2086,6 +2086,202 @@ def generate_html_report_with_graphs(total_violations, frame_stats):
     
     return html_report
 
+def process_live_camera(model, class_names, colors, confidence_threshold, debug_mode,
+                       recipient_email=None, sender_name=None, 
+                       real_time_alerts=False, send_csv_summary=False):
+    """Process live camera feed with real-time analysis"""
+    
+    st.markdown("### 📹 Live Camera Analysis")
+    
+    # Start email queue worker if real-time alerts are enabled
+    if real_time_alerts and recipient_email:
+        email_queue.start_worker()
+        st.info("📧 Email notification system activated")
+    
+    # Control buttons
+    col_btn1, col_btn2, col_btn3 = st.columns(3)
+    
+    with col_btn1:
+        start_camera = st.button("🎥 Start Camera", use_container_width=True)
+    with col_btn2:
+        stop_camera = st.button("⏹️ Stop Camera", use_container_width=True)
+    with col_btn3:
+        save_session = st.button("💾 Save Session", use_container_width=True)
+    
+    # Create session state for camera control
+    if 'camera_running' not in st.session_state:
+        st.session_state.camera_running = False
+    if 'camera_violations' not in st.session_state:
+        st.session_state.camera_violations = []
+    if 'camera_frame_stats' not in st.session_state:
+        st.session_state.camera_frame_stats = []
+    if 'camera_frame_count' not in st.session_state:
+        st.session_state.camera_frame_count = 0
+    
+    if start_camera:
+        st.session_state.camera_running = True
+        st.session_state.camera_violations = []
+        st.session_state.camera_frame_stats = []
+        st.session_state.camera_frame_count = 0
+    
+    if stop_camera:
+        st.session_state.camera_running = False
+    
+    # Layout: Camera feed and alerts side by side
+    col1, col2 = st.columns([3, 2])
+    
+    with col1:
+        st.markdown("#### 📹 Live Feed")
+        frame_placeholder = st.empty()
+    
+    with col2:
+        st.markdown("#### 🚨 Live Alerts")
+        alert_placeholder = st.empty()
+    
+    # Statistics section
+    st.markdown("### 📊 Live Statistics")
+    stats_placeholder = st.empty()
+    
+    # Camera processing
+    if st.session_state.camera_running:
+        cap = cv2.VideoCapture(0)  # 0 for default camera
+        
+        if not cap.isOpened():
+            st.error("❌ Cannot access camera. Please check camera permissions.")
+            st.session_state.camera_running = False
+        else:
+            st.success("✅ Camera active - Press 'Stop Camera' to end session")
+            
+            # Process frames
+            email_sent_count = 0
+            
+            while st.session_state.camera_running:
+                ret, frame = cap.read()
+                
+                if not ret:
+                    st.warning("⚠️ Failed to capture frame")
+                    break
+                
+                st.session_state.camera_frame_count += 1
+                
+                # Process frame
+                annotated_frame, violations, person_count, safety_equipped, filtered_count = process_video_frame(
+                    frame, model, class_names, colors, debug_mode
+                )
+                
+                # Update statistics
+                st.session_state.camera_frame_stats.append({
+                    'frame': st.session_state.camera_frame_count,
+                    'violations': len(violations),
+                    'persons': person_count,
+                    'safety_equipped': safety_equipped,
+                    'filtered': filtered_count
+                })
+                
+                # Add violations to session list
+                for violation in violations:
+                    violation['frame'] = st.session_state.camera_frame_count
+                    violation['timestamp'] = datetime.now().strftime('%H:%M:%S')
+                    st.session_state.camera_violations.append(violation)
+                
+                # Send real-time email alerts
+                if real_time_alerts and recipient_email and violations:
+                    timestamp = datetime.now().strftime('%H:%M:%S')
+                    send_realtime_violation_alert(
+                        annotated_frame, violations, st.session_state.camera_frame_count,
+                        recipient_email, sender_name, timestamp
+                    )
+                    email_sent_count += 1
+                
+                # Display frame
+                frame_rgb = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
+                frame_placeholder.image(frame_rgb, channels="RGB", use_container_width=True)
+                
+                # Update alerts
+                update_live_alerts(alert_placeholder, st.session_state.camera_violations, st.session_state.camera_frame_count)
+                
+                # Update stats
+                update_live_stats(stats_placeholder, st.session_state.camera_violations, 
+                                st.session_state.camera_frame_stats, st.session_state.camera_frame_count,
+                                show_email_queue=real_time_alerts)
+                
+                # Small delay to reduce CPU usage
+                import time
+                time.sleep(0.03)  # ~30 FPS
+            
+            cap.release()
+            
+            # Stop email queue worker
+            if real_time_alerts and recipient_email:
+                email_queue.stop_worker()
+                if email_sent_count > 0:
+                    st.success(f"✅ Sent {email_sent_count} real-time violation alerts")
+    
+    # Save session functionality
+    if save_session and len(st.session_state.camera_violations) > 0:
+        st.markdown("---")
+        st.markdown("### 💾 Save Session Data")
+        
+        # Append to master CSV
+        success, message = append_to_master_csv(st.session_state.camera_violations, "Live Camera Analysis")
+        if success:
+            st.success(f"✅ {message}")
+        else:
+            st.error(f"❌ {message}")
+        
+        # Generate reports
+        col_save1, col_save2 = st.columns(2)
+        
+        with col_save1:
+            # CSV Report
+            csv_data = "Frame,Type,Severity,Location,Timestamp\n"
+            for v in st.session_state.camera_violations:
+                csv_data += f"{v['frame']},{v['type']},{v['severity']},{v.get('location', 'N/A')},{v.get('timestamp', 'N/A')}\n"
+            
+            filename = f"live_camera_violations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+            st.download_button(
+                label="📊 Download CSV Report",
+                data=csv_data,
+                file_name=filename,
+                mime="text/csv",
+                use_container_width=True
+            )
+        
+        with col_save2:
+            # HTML Report
+            html_content = generate_html_report_with_graphs(
+                st.session_state.camera_violations,
+                st.session_state.camera_frame_stats
+            )
+            html_filename = f"live_camera_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
+            st.download_button(
+                label="📄 Download HTML Report",
+                data=html_content,
+                file_name=html_filename,
+                mime="text/html",
+                use_container_width=True
+            )
+        
+        # Send email summary if configured
+        if send_csv_summary and recipient_email:
+            send_csv_summary_queued(csv_data, filename, recipient_email, sender_name, "Live Camera Analysis")
+            st.info(f"📧 CSV summary queued for email to {recipient_email}")
+        
+        # Show session summary
+        st.markdown("### 📈 Session Summary")
+        sum_col1, sum_col2, sum_col3, sum_col4 = st.columns(4)
+        
+        with sum_col1:
+            st.metric("Total Frames", st.session_state.camera_frame_count)
+        with sum_col2:
+            st.metric("Total Violations", len(st.session_state.camera_violations))
+        with sum_col3:
+            high_count = len([v for v in st.session_state.camera_violations if v['severity'] == 'High'])
+            st.metric("High Severity", high_count)
+        with sum_col4:
+            total_persons = sum(f['persons'] for f in st.session_state.camera_frame_stats)
+            st.metric("Total Workers", total_persons)
+
 def main():
     st.title("🚧 Construction Site Safety Monitor")
     
@@ -2101,12 +2297,12 @@ def main():
     selected_model = st.sidebar.selectbox("Select Model", list(model_options.keys()), index=0)
     model_path = model_options[selected_model]
 
-    # Analysis mode: Video or Image or History
+    # Analysis mode: Video or Image or History or Live Camera
     analysis_mode = st.sidebar.radio(
         "Analysis Mode",
-        ["Video Analysis", "Image Analysis", "Violation History"],
+        ["Video Analysis", "Image Analysis", "Live Camera", "Violation History"],
         index=0,
-        help="Choose whether to analyze a video, image, or view historical violation data"
+        help="Choose whether to analyze a video, image, live camera feed, or view historical violation data"
     )
     
     # Show mode-specific description
@@ -2114,6 +2310,8 @@ def main():
         st.markdown("Upload a video to monitor construction site safety and detect PPE violations")
     elif analysis_mode == "Image Analysis":
         st.markdown("Upload an image to detect PPE violations and safety equipment")
+    elif analysis_mode == "Live Camera":
+        st.markdown("🎥 Use your device camera for real-time construction site safety monitoring")
     else:
         st.markdown("View and analyze historical violation data from all previous sessions")
     
@@ -2200,6 +2398,65 @@ def main():
                 st.warning("No detections found in the image.")
 
         # Stop here for image analysis
+        st.stop()
+    
+    # If user selected Live Camera, show the live camera interface
+    elif analysis_mode == "Live Camera":
+        # Camera uses same settings as video analysis
+        confidence_threshold = st.sidebar.slider("Detection Confidence", 0.1, 1.0, 0.4, 0.1)
+        
+        st.sidebar.markdown("### Detection Settings")
+        st.sidebar.info("Lower threshold detects more objects but may include false positives")
+        
+        # Email configuration for live camera
+        st.sidebar.markdown("---")
+        st.sidebar.markdown("### 📧 Email Notification")
+        
+        send_email = st.sidebar.checkbox(
+            "📬 Enable email notifications",
+            value=False,
+            help="Choose how you want to receive safety violation alerts"
+        )
+        
+        if send_email:
+            recipient_email = st.sidebar.text_input(
+                "📮 Recipient Email",
+                placeholder="recipient@example.com",
+                help="Email address to receive the results"
+            )
+            
+            sender_name = "Construction Safety Monitor - Live Camera"
+            
+            st.sidebar.markdown("#### 📬 Notification Type")
+            email_mode = st.sidebar.radio(
+                "Select notification method:",
+                ["🚨 Real-time Alerts (Email per violation with frame image)", 
+                 "📊 CSV Summary (Email report when you save session)"],
+                help="Choose when to receive email notifications"
+            )
+            
+            real_time_alerts = email_mode.startswith("🚨")
+            send_csv_summary = email_mode.startswith("📊")
+        else:
+            recipient_email = None
+            sender_name = None
+            real_time_alerts = False
+            send_csv_summary = False
+        
+        # Debug mode
+        debug_mode = st.sidebar.checkbox("👨‍💻 Developer Mode", help="Show detailed technical information")
+        
+        # Vehicle filtering info
+        with st.sidebar.expander("🚗 Enhanced Vehicle Filtering"):
+            st.info("✅ Active: Multi-method filtering to reduce false positives from vehicles and machinery")
+        
+        # Process live camera
+        process_live_camera(
+            model, class_names, colors, confidence_threshold, debug_mode,
+            recipient_email, sender_name, real_time_alerts, send_csv_summary
+        )
+        
+        # Stop here for live camera
         st.stop()
     
     # If user selected Violation History, show the history dashboard
