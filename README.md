@@ -37,21 +37,36 @@ The system uses *YOLOv8* for object detection, a *Streamlit dashboard* for visua
 
 ---
 
-## 🚀 How It Works  
+## 🎬 Demo Instructions
 
-1. *Choose Input Source:*  
-   - Select either *Camera* or *Video File* in the sidebar.  
+This demo shows the *real-time safety monitoring system* in action.  
 
-2. *Start Detection:*  
-   - Click *▶ Start Detection* to begin monitoring.  
-   - The dashboard displays the live video, violation logs, and bar chart side-by-side.  
+### 1️⃣ Live Camera Detection
+- Click *▶ Start Detection* to start the camera feed.  
+- The system detects *violations* like *no helmet, no mask, no vest* in real-time.  
+- Violations are highlighted with *red bounding boxes, and safe items in **green*.  
+- Logs and a *bar chart* are updated live.  
+- Click *⏹ Stop Detection* to stop, while *logs and charts remain visible*.  
+- An *email summary* is sent automatically with the violations detected.
 
-3. *Stop Detection:*  
-   - Click *⏹ Stop Detection*.  
-   - The system retains logs and charts for review.  
+### 2️⃣ Video File Detection
+- Upload a *video file* (mp4, avi, mov).  
+- The system takes *3 snapshots* from the video and detects violations.  
+- Violations on snapshots are highlighted with bounding boxes.  
+- Logs and charts are displayed similar to the live camera feed.  
+- Email summary is sent automatically with detected violations.
 
-4. *Email Summary:*  
-   - Once stopped, a summarized report of violations with timestamps is automatically emailed.  
+### 3️⃣ Confidence Threshold
+- Use the *slider in the sidebar* to adjust YOLO detection *confidence threshold*.  
+- Lower threshold (0.2–0.3) is suitable for detecting subtle or small violations.  
+
+### ✅ Features Observed During Demo
+- Real-time detection on camera and uploaded videos  
+- Violation logs with timestamps  
+- Bar chart visualization  
+- Email notification of main violations only  
+<img width="1918" height="863" alt="Screenshot 2025-10-09 205114" src="https://github.com/user-attachments/assets/563e4c67-8408-4cbd-a60f-d0619cdef5d3" />
+*Note:* This system is designed for demonstration and testing purposes during the Infosys Internship project, August 2025.
 
 ---
 
@@ -94,3 +109,15 @@ SafetyEye-AI/
 ├── README.md
 └── yolov8n.pt
 ```
+
+---
+
+## 📌 Conclusion
+
+*SafetyEye-AI* is an advanced AI-driven safety monitoring system designed to detect workplace compliance violations such as missing helmets, masks, and safety vests. The system supports both *live camera feeds* and *video uploads, providing real-time dashboards, violation logs, and visual summaries. Detected violations can trigger **automated email notifications*, ensuring timely reporting and enhanced workplace safety.
+
+This project demonstrates the seamless integration of *computer vision, **real-time analytics, and **interactive visualization*, offering an end-to-end solution for monitoring and enforcing safety protocols effectively.
+
+---
+
+
