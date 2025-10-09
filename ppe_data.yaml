@@ -1,0 +1,6 @@
+train: Datasets/train/images
+val: Datasets/val/images
+test: Datasets/test/images
+
+nc: 3  # Number of classes (e.g., helmet, vest, mask)
+names: ['helmet', 'vest', 'mask']
