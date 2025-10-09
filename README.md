@@ -101,7 +101,7 @@ SafetyEye-AI/
 ├── predictions/
 ├── runs/
 ├── safetyeye_env/
-├── src/ "constains preprocessing and augmented files"
+├── src/ "contains preprocessing and augmented files"
 ├── test_images/
 ├── .dockerfile
 ├── .gitignore
