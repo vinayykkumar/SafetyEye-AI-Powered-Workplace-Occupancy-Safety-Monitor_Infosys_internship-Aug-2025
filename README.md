@@ -56,5 +56,10 @@ The system uses *YOLOv8* for object detection, a *Streamlit dashboard* for visua
 ---
 
 ## 📊 Output Example  
+<img width="737" height="346" alt="image" src="https://github.com/user-attachments/assets/f0733ccc-b9f9-4ad6-81d1-e1ee9f255159" />
 
-*Detected Violations:*
+---
+
+## 🗂 Folder Structure
+
+
