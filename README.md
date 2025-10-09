@@ -116,7 +116,7 @@ SafetyEye-AI/
 
 *SafetyEye-AI* is an advanced AI-driven safety monitoring system designed to detect workplace compliance violations such as missing helmets, masks, and safety vests. The system supports both *live camera feeds* and *video uploads, providing real-time dashboards, violation logs, and visual summaries. Detected violations can trigger **automated email notifications*, ensuring timely reporting and enhanced workplace safety.
 
-This project demonstrates the seamless integration of *computer vision, **real-time analytics, and **interactive visualization*, offering an end-to-end solution for monitoring and enforcing safety protocols effectively.
+This project demonstrates the seamless integration of computer vision, real-time analytics and interactive visualization, offering an end-to-end solution for monitoring and enforcing safety protocols effectively.
 
 ---
 
