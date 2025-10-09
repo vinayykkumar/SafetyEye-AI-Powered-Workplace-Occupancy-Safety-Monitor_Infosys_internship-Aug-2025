@@ -1,6 +1,6 @@
 # SafetyEye-AI-Powered-Workplace-Occupancy-Safety-Monitor_Infosys_internship-Aug-2025
 
-### 👩‍💻 Developed by: *Sudeshna Sarkar*  
+### 💻 Developed by: *Sudeshna Sarkar*  
 *Group 4 | Infosys Internship Project – August 2025*  
 
 ---
