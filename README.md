@@ -61,7 +61,7 @@ The system uses *YOLOv8* for object detection, a *Streamlit dashboard* for visua
 ---
 
 ## 🗂 Folder Structure
-'''SafetyEye-AI/
+SafetyEye-AI/
 ├── .vscode/
 ├── alerts/
 ├── dashboard/
@@ -91,5 +91,5 @@ The system uses *YOLOv8* for object detection, a *Streamlit dashboard* for visua
 ├── .dockerfile
 ├── .gitignore
 ├── README.md
-└── yolov8n.pt'''
+└── yolov8n.pt
 
