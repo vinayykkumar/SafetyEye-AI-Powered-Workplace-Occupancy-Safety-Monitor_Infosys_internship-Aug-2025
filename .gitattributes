@@ -1,0 +1,4 @@
+*.pt filter=lfs diff=lfs merge=lfs -text
+*.onnx filter=lfs diff=lfs merge=lfs -text
+outputs/runs/detect/**/*.pt filter=lfs diff=lfs merge=lfs -text
+outputs/runs/detect/**/*.onnx filter=lfs diff=lfs merge=lfs -text

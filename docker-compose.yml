@@ -1,0 +1,13 @@
+services:
+  app:
+    image: safety-eye
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app  # NEW: Syncs live code changes (dashboard.py, src/, etc.)
+      - ./logs:/app/logs
+      - ./outputs:/app/outputs
+      - ./data:/app/dataset
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped

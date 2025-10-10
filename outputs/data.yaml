@@ -1,0 +1,19 @@
+names:
+- Fall-Detected
+- Gloves
+- Goggles
+- Hardhat
+- Ladder
+- Mask
+- NO-Gloves
+- NO-Goggles
+- NO-Hardhat
+- NO-Mask
+- NO-Safety Vest
+- Person
+- Safety Cone
+- Safety Vest
+nc: 14
+test: d:\Safety_EYE\data\processed\balanced\test\images
+train: d:\Safety_EYE\data\processed\balanced\train\images
+val: d:\Safety_EYE\data\processed\balanced\valid\images
