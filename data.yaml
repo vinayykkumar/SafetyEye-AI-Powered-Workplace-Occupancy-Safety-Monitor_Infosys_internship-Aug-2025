@@ -1,0 +1,12 @@
+names:
+- helmet
+- mask
+- no_helmet
+- no_mask
+- no_vest
+- person
+- machinery
+- vest
+nc: 8
+train: C:/safetyeye/preprocessed/train/images
+val: C:/safetyeye/preprocessed/val/images
