@@ -1,6 +1,0 @@
-train: preprocessed/train/images
-val: preprocessed/val/images
-test: preprocessed/test/images
-
-nc: 2
-names: ['Helmet', 'No_Helmet']
