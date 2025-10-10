@@ -38,7 +38,7 @@ if not os.path.exists(LOG_FILE):
 
 # ---------------- EMAIL CONFIG ----------------
 SENDER_EMAIL = "quickqart30@gmail.com"
-SENDER_PASSWORD = "....."
+SENDER_PASSWORD = "...."
 EMAIL_COOLDOWN_SECONDS = 60
 last_batch_email_time = datetime.now() - timedelta(seconds=EMAIL_COOLDOWN_SECONDS)
 batch_violations, batch_screenshots = [], []
