@@ -111,9 +111,13 @@ Mobile app interface for supervisors
 🧪 Testing Checklist:
 
 ✔️ Model tested with multiple lighting conditions
+
 ✔️ Verified detection accuracy for helmets and vests
+
 ✔️ Dashboard tested for real-time performance
+
 ✔️ Alerts triggered correctly on rule violations
+
 ✔️ Logs created and stored automatically
 
 📝 Deliverables:
