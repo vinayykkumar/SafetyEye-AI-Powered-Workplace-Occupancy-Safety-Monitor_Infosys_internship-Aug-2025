@@ -12,8 +12,15 @@ Thumbs.db
 archive/
 OneDrive/
 
+
+
 # But track specific files inside the directory
 # !OneDrive/Documents/Desktop/Safety\ AI\ Monitoring/*OneDrive/Documents/Desktop/Safety AI Monitoring/
 *.code-workspace
 *.pyc
 .DS_Store
+compliance_report.json
+compliance_chart.png
+violations
+outputs/
+
