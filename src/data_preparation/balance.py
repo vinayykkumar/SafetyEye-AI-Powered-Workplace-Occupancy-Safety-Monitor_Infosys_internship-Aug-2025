@@ -1,36 +1,36 @@
 import os
 from collections import Counter
+import matplotlib.pyplot as plt
 
-# Paths
-DATASET_PATH = "../../archive/data"
-SPLITS = ["train", "valid", "test"]  
+# ✅ List your YOLO labels folders here
+labels_folders = [
+    "../../archive/data/train/labels",
+    "../../archive/data/train/labels_aug3"
+]
 
-def count_classes(lbl_dir):
-    counter = Counter()
-    if not os.path.exists(lbl_dir):
-        print(f"⚠ Missing: {lbl_dir}")
-        return counter
+# Count objects per class
+class_counts = Counter()
 
-    for lbl_file in os.listdir(lbl_dir):
-        if lbl_file.endswith(".txt"):
-            with open(os.path.join(lbl_dir, lbl_file), "r") as f:
+for folder in labels_folders:
+    for file in os.listdir(folder):
+        if file.endswith(".txt"):
+            with open(os.path.join(folder, file), "r") as f:
                 for line in f:
-                    cls_id = line.strip().split()[0]
-                    counter[cls_id] += 1
-    return counter
+                    class_id = int(float(line.split()[0]))  # convert '0.0' → 0
+                    class_counts[class_id] += 1
 
+# Print counts
+print("📊 Class distribution:")
+for cls, count in sorted(class_counts.items()):
+    print(f"Class {cls}: {count} objects")
 
-print("📊 Checking class balance...\n")
-for split in SPLITS:
-    lbl_dir = os.path.join(DATASET_PATH, split, "labels")
-    counter = count_classes(lbl_dir)
+# Plot distribution
+classes = list(class_counts.keys())
+counts = list(class_counts.values())
 
-    if not counter:
-        continue
-
-    total = sum(counter.values())
-    print(f"📂 {split.upper()} - Total labels: {total}")
-    for cls_id, count in counter.items():
-        pct = (count / total) * 100
-        print(f"   Class {cls_id}: {count} ({pct:.2f}%)")
-    print()
+plt.figure(figsize=(10,5))
+plt.bar(classes, counts, color='skyblue')
+plt.xlabel("Class ID")
+plt.ylabel("Number of Objects")
+plt.title("YOLO Dataset Class Distribution")
+plt.show()

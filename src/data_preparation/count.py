@@ -2,11 +2,11 @@ import os
 
 # Base directory of your dataset
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../archive/data"))
-splits = ["train", "valid", "test"]
+splits = ["train"]
 
 for split in splits:
-    img_dir = os.path.join(BASE_DIR, split, "images")
-    lbl_dir = os.path.join(BASE_DIR, split, "labels")
+    img_dir = os.path.join(BASE_DIR, split, "images_aug3")
+    lbl_dir = os.path.join(BASE_DIR, split, "labels_aug3")
     
     print(f"Checking: {img_dir}")
     print(f"Checking: {lbl_dir}")

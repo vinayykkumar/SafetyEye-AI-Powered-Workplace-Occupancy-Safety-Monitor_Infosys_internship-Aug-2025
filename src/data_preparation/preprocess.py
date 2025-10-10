@@ -12,8 +12,8 @@ with open(YAML_FILE, "r") as f:
 nc = data_yaml["nc"]
 
 def check_dataset(split):
-    img_dir = os.path.join(DATASET_PATH, split, "images")
-    label_dir = os.path.join(DATASET_PATH, split, "labels")
+    img_dir = os.path.join(DATASET_PATH, split, "images_aug1")
+    label_dir = os.path.join(DATASET_PATH, split, "labels_aug1")
 
     img_files = [f for f in os.listdir(img_dir) if f.lower().endswith((".jpg", ".jpeg", ".png"))]
     label_files = [f for f in os.listdir(label_dir) if f.endswith(".txt")]
