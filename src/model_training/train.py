@@ -1,21 +1,27 @@
-import yaml
+from ultralytics import YOLO
 import os
 
-# Load configuration from data.yaml
-with open('data/data.yaml', 'r') as file:
-    config = yaml.safe_load(file)
 
-# Extract configurations
-data_config = config['data']
-training_config = config['training']
-model_config = config['model']
-augmentation_config = config['augmentation']
+model = YOLO("yolov8s.pt")   # use yolov8m.pt if GPU allows, but s is safe for Colab free
 
-# Example training function
-def train_model():
-    print(f"Training {model_config['architecture']} for {training_config['epochs']} epochs...")
-    # Implement training logic here
-    # This is where you would load your data, initialize your model, and start training.
+project_folder = "/content/drive/MyDrive/YOLOv8_train"
+run_name = "ppe_yolov8_adamw"
 
-if __name__ == "__main__":
-    train_model()
+model.train(
+    data="/content/drive/MyDrive/dataset/data.yaml",
+    epochs=50,
+    batch=16,
+    imgsz=640,
+    optimizer="AdamW",
+    lr0=0.002,
+    lrf=0.1,
+    weight_decay=0.01,
+    workers=4,
+    project=project_folder,  # Drive path
+    name=run_name,
+    exist_ok=True,
+    augment=True,
+    patience=10
+)
+
+print(f"✅ Training complete! Best model saved in {project_folder}/{run_name}/best.pt")

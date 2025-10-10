@@ -3,7 +3,6 @@ import cv2
 import yaml
 from collections import Counter
 
-
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 DATASET_PATH = os.path.join(PROJECT_ROOT, "archive", "data")
 YAML_FILE = os.path.join(DATASET_PATH, "data.yaml")
@@ -19,7 +18,7 @@ def check_dataset(split):
     label_dir = os.path.join(DATASET_PATH, split, "labels")
 
     img_files = {os.path.splitext(f)[0] for f in os.listdir(img_dir)}
-    label_files = {os.path.splitext(f)[0] for f in os.listdir(label_dir)}
+    label_files = {os.path.splitext(f)[0] for f in os.listdir(label_dir) if f.endswith(".txt") and f != "filename_mapping.txt"}
 
     missing_labels = img_files - label_files
     missing_images = label_files - img_files
@@ -31,10 +30,12 @@ def check_dataset(split):
     if not missing_labels and not missing_images:
         print("[✅] All images and labels are matched")
 
-
     class_counts = Counter()
 
     for label_file in os.listdir(label_dir):
+        if not label_file.endswith(".txt") or label_file == "filename_mapping.txt":
+            continue
+
         path = os.path.join(label_dir, label_file)
         with open(path, "r") as f:
             for line in f:
@@ -44,7 +45,12 @@ def check_dataset(split):
                     continue
 
                 cls, x, y, w, h = parts
-                cls = int(cls)
+                try:
+                    cls = int(float(cls))  # handles "0", "0.0"
+                except ValueError:
+                    print(f"[❌] Invalid class ID in {label_file}: {cls}")
+                    continue
+
                 if cls < 0 or cls >= nc:
                     print(f"[❌] Invalid class {cls} in {label_file}")
                 else:
@@ -56,7 +62,6 @@ def check_dataset(split):
                         print(f"[❌] Invalid bbox in {label_file}: {vals}")
                 except:
                     print(f"[❌] Non-numeric values in {label_file}: {line}")
-
 
     for img_file in os.listdir(img_dir):
         img_path = os.path.join(img_dir, img_file)
@@ -74,8 +79,7 @@ def check_dataset(split):
         percent = (count / total * 100) if total > 0 else 0
         print(f" - {class_names[i]}: {count} ({percent:.2f}%)")
 
-
 if __name__ == "__main__":
-    for split in ["train", "valid", "test"]:
-        check_dataset(split)
-
+    for split in ["train", "valid", "test", "train_aug"]:  # include augmented set
+        if os.path.exists(os.path.join(DATASET_PATH, split)):
+            check_dataset(split)
