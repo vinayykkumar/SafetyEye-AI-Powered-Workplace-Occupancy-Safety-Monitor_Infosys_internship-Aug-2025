@@ -1,6 +1,5 @@
-train: ./data/train/images
+train: ./data/train/aug_images
 valid: ./data/valid/images
 test: ./data/test/images
-nc: 10
-names: [Hardhat, Mask, NO-Hardhat, NO-Mask, NO-Safety Vest, Person, Safety Cone,
-    Safety Vest, machinery, vehicle]
+nc: 5
+names: [person, machinery,helmet, vest, cone]
