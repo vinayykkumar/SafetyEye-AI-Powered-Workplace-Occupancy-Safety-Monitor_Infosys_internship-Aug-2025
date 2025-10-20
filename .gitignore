@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environment
+safetyeye_env/
+
+# IDE / Editor folders
+.vscode/
+.idea/
+
+# Datasets - VERY IMPORTANT
+# Do not commit large data files to Git.
+data/
+ppe_dataset/
+augmented_data/
+final_dataset/
+*.zip
+
+# Ultralytics Runs & Results
+runs/
+
+# Media
+*.mp4
+*.mov
+*.avi
+
+# Images
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff

@@ -1,0 +1,394 @@
+{% extends "base.html" %}
+
+{% block title %}Violation Logs - SafetyEye{% endblock %}
+
+{% block content %}
+<div class="logs-container">
+    <!-- Header -->
+    <div class="logs-header">
+        <h1><i class="fas fa-clipboard-list" ></i> Violation Logs</h1>
+        <p>Comprehensive history of all safety violations</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-panel">
+        <div class="filter-card">
+            <h3><i class="fas fa-filter"></i> Filter Violations</h3>
+            <div class="filter-controls">
+                <div class="date-range">
+                    <div class="date-input">
+                        <label>Start Date:</label>
+                        <input type="date" id="start-date" class="date-picker">
+                    </div>
+                    <div class="date-input">
+                        <label>End Date:</label>
+                        <input type="date" id="end-date" class="date-picker">
+                    </div>
+                    <button id="apply-filter" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Apply Filter
+                    </button>
+                    <button id="resetFilterBtn" class="btn btn-secondary">
+                        <i class="fas fa-refresh"></i> Reset
+                    </button>
+                </div>
+                <div class="violation-type-filter">
+                    <label>Violation Type:</label>
+                    <select id="type-filter">
+                        <option value="all">All Types</option>
+                       <option value="no_hardhat">No Hardhat</option>
+                        <option value="no_vest">No Vest</option>
+                        <option value="both">No Hardhat & No Vest</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="summary-card">
+            <h3><i class="fas fa-chart-pie"></i> Summary</h3>
+            <div class="summary-stats">
+                <div class="summary-item">
+                    <div class="summary-value" id="total-violations">0</div>
+                    <div class="summary-label">Total Violations</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value" id="no-helmet-count">0</div>
+                    <div class="summary-label">No Helmet</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value" id="no-vest-count">0</div>
+                    <div class="summary-label">No Vest</div>
+                </div>
+            </div>
+            <button id="download-csv" class="btn btn-success" disabled>
+                <i class="fas fa-download"></i> Download CSV
+            </button>
+        </div>
+    </div>
+
+    <!-- Violations Table -->
+    <div class="violations-table-section">
+        <div class="section-header">
+            <h3><i class="fas fa-table"></i> Violation Records</h3>
+            <div class="table-actions">
+                <button id="refresh-table" class="btn btn-secondary">
+                    <i class="fas fa-sync"></i> Refresh
+                </button>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table class="violations-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Timestamp</th>
+                        <th>Violation Type</th>
+                        <th>Person ID</th>
+                        <th>Frame</th>
+                        <th>Helmet Conf</th>
+                        <th>Vest Conf</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="violations-table-body">
+                    <tr>
+                        <td colspan="8" class="no-data">No violations found for selected date range</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+            <button id="prev-page" class="btn btn-secondary" disabled>
+                <i class="fas fa-chevron-left"></i> Previous
+            </button>
+            <span class="page-info">Page <span id="current-page">1</span> of <span id="total-pages">1</span></span>
+            <button id="next-page" class="btn btn-secondary" disabled>
+                Next <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Log Detail Modal -->
+<div id="log-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-info-circle"></i> Violation Details</h3>
+            <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Violation ID:</label>
+                    <span id="log-id">-</span>
+                </div>
+                <div class="detail-item">
+                    <label>Timestamp:</label>
+                    <span id="log-timestamp">-</span>
+                </div>
+                <div class="detail-item">
+                    <label>Violation Type:</label>
+                    <span id="log-type" class="violation-badge">-</span>
+                </div>
+                <div class="detail-item">
+                    <label>Person ID:</label>
+                    <span id="log-person-id">-</span>
+                </div>
+                <div class="detail-item">
+                    <label>Frame Number:</label>
+                    <span id="log-frame">-</span>
+                </div>
+                <div class="detail-item">
+                    <label>Helmet Confidence:</label>
+                    <span id="log-helmet-conf">-</span>
+                </div>
+                <div class="detail-item">
+                    <label>Vest Confidence:</label>
+                    <span id="log-vest-conf">-</span>
+                </div>
+                <div class="detail-item">
+                    <label>Image Path:</label>
+                    <span id="log-image-path">-</span>
+                </div>
+            </div>
+            <div class="violation-image">
+                <h4>Violation Snapshot</h4>
+                <img id="log-image" src="" alt="Violation Snapshot" onerror="this.style.display='none'">
+                <div id="no-image" class="no-image-message">
+                    <i class="fas fa-image"></i>
+                    <p>No image available for this violation</p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="log-send-email" class="btn btn-primary">
+                <i class="fas fa-envelope"></i> Send Email
+            </button>
+            <button class="btn btn-secondary close-modal">Close</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("✅ DOM fully loaded — initializing logs page");
+
+  const itemsPerPage = 10;
+  let currentViolations = [];
+  let currentPage = 1;
+
+  // 🧩 Fetch and render all violations (used for initial load)
+  async function fetchAllViolations() {
+    try {
+      const res = await fetch("/api/violations", { cache: "no-store" });
+      const data = await res.json();
+      currentViolations = data;
+      currentPage = 1;
+      renderViolationsTable(data);
+      updateSummaryStats(data);
+      updatePagination();
+      console.log(`✅ Loaded ${data.length} violations`);
+    } catch (err) {
+      console.error("❌ Failed to fetch all violations:", err);
+    }
+  }
+
+  // 🧠 Apply filters (using date-range API)
+  document.getElementById("apply-filter").addEventListener("click", async () => {
+    const start = document.getElementById("start-date").value;
+    const end = document.getElementById("end-date").value;
+    const type = document.getElementById("type-filter").value;
+
+    if (!start || !end) {
+      alert("⚠️ Please select both start and end dates.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/violations/date-range?start=${start}&end=${end}`, { cache: "no-store" });
+      let data = await res.json();
+
+      if (type !== "all") {
+        data = data.filter(v => {
+          const t = v.violation_type.toLowerCase();
+          if (type === "no_hardhat") return t.includes("helmet");
+          if (type === "no_vest") return t.includes("vest");
+          if (type === "both") return t.includes("helmet") && t.includes("vest");
+          return true;
+        });
+      }
+
+      currentViolations = data;
+      currentPage = 1;
+      renderViolationsTable(data);
+      updateSummaryStats(data);
+      updatePagination();
+
+      console.log(`✅ Filtered results: ${data.length} violations`);
+    } catch (err) {
+      console.error("❌ Error applying filters:", err);
+    }
+  });
+
+  // 🔄 Reset filters (use full date range to show all violations)
+  async function resetFilters() {
+    console.log("🧹 Reset button clicked");
+    try {
+      // Clear UI inputs
+      document.getElementById("start-date").value = "";
+      document.getElementById("end-date").value = "";
+      document.getElementById("type-filter").value = "all";
+
+      // Use full date range
+      const start = "1970-01-01";
+      const end = new Date().toISOString().split("T")[0];
+      console.log(`📅 Fetching all violations from ${start} → ${end}`);
+
+      const res = await fetch(`/api/violations/date-range?start=${start}&end=${end}`, { cache: "no-store" });
+      const data = await res.json();
+
+      currentViolations = data;
+      currentPage = 1;
+
+      renderViolationsTable(data, true);
+      updateSummaryStats(data);
+
+      // Disable pagination since showing all
+      document.getElementById("prev-page").disabled = true;
+      document.getElementById("next-page").disabled = true;
+      document.getElementById("current-page").textContent = 1;
+      document.getElementById("total-pages").textContent = 1;
+
+      console.log(`✅ Reset loaded ${data.length} total violations`);
+    } catch (err) {
+      console.error("❌ Reset failed:", err);
+    }
+  }
+
+  // 🧮 Render violations table
+  function renderViolationsTable(data, showAll = false) {
+    const tbody = document.getElementById("violations-table-body");
+    tbody.innerHTML = "";
+
+    if (!data.length) {
+      tbody.innerHTML = `<tr><td colspan="8" class="no-data">No violations found</td></tr>`;
+      return;
+    }
+
+    const startIndex = showAll ? 0 : (currentPage - 1) * itemsPerPage;
+    const paginated = showAll ? data : data.slice(startIndex, startIndex + itemsPerPage);
+
+    paginated.forEach((v, i) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${startIndex + i + 1}</td>
+        <td>${v.timestamp}</td>
+        <td>${v.violation_type}</td>
+        <td>${v.person_id}</td>
+        <td>${v.frame}</td>
+        <td>${v.helmet_conf.toFixed(2)}</td>
+        <td>${v.vest_conf.toFixed(2)}</td>
+        <td>
+          <button class="btn btn-primary btn-sm" onclick="viewDetails(${startIndex + i})">
+            <i class="fas fa-eye"></i> View
+          </button>
+        </td>`;
+      tbody.appendChild(row);
+    });
+  }
+
+  // 📊 Update summary stats
+  function updateSummaryStats(data) {
+    document.getElementById("total-violations").textContent = data.length;
+    document.getElementById("no-helmet-count").textContent = data.filter(v => v.violation_type.toLowerCase().includes("helmet")).length;
+    document.getElementById("no-vest-count").textContent = data.filter(v => v.violation_type.toLowerCase().includes("vest")).length;
+  }
+
+  // ⏩ Pagination
+  function updatePagination() {
+    const totalPages = Math.max(1, Math.ceil(currentViolations.length / itemsPerPage));
+    document.getElementById("current-page").textContent = currentPage;
+    document.getElementById("total-pages").textContent = totalPages;
+
+    document.getElementById("prev-page").disabled = currentPage === 1;
+    document.getElementById("next-page").disabled = currentPage === totalPages;
+
+    document.getElementById("prev-page").onclick = () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderViolationsTable(currentViolations);
+        updatePagination();
+      }
+    };
+
+    document.getElementById("next-page").onclick = () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderViolationsTable(currentViolations);
+        updatePagination();
+      }
+    };
+
+    console.log(`📄 Pagination updated: Page ${currentPage} of ${totalPages}`);
+  }
+
+  // 📦 Violation details modal
+  window.viewDetails = function (index) {
+    const v = currentViolations[index];
+    if (!v) return;
+
+    document.getElementById("log-id").textContent = index + 1;
+    document.getElementById("log-timestamp").textContent = v.timestamp;
+    document.getElementById("log-type").textContent = v.violation_type;
+    document.getElementById("log-person-id").textContent = v.person_id;
+    document.getElementById("log-frame").textContent = v.frame;
+    document.getElementById("log-helmet-conf").textContent = v.helmet_conf.toFixed(2);
+    document.getElementById("log-vest-conf").textContent = v.vest_conf.toFixed(2);
+    document.getElementById("log-image-path").textContent = v.image_path;
+
+    const img = document.getElementById("log-image");
+    const noImg = document.getElementById("no-image");
+    if (v.image_path && v.image_path.trim() !== "") {
+      img.src = v.image_path;
+      img.style.display = "block";
+      noImg.style.display = "none";
+    } else {
+      img.style.display = "none";
+      noImg.style.display = "block";
+    }
+
+    document.getElementById("log-modal").style.display = "block";
+  };
+
+  // ❌ Close modal
+  document.querySelectorAll(".close-modal").forEach(btn =>
+    btn.addEventListener("click", () => {
+      document.getElementById("log-modal").style.display = "none";
+    })
+  );
+
+  // ✅ Attach event listeners
+  const resetBtn = document.getElementById("resetFilterBtn");
+  const refreshBtn = document.getElementById("refresh-table");
+
+  if (resetBtn) {
+    resetBtn.addEventListener("click", resetFilters);
+    console.log("✅ Reset button listener attached");
+  } else {
+    console.warn("⚠️ Reset button not found in DOM");
+  }
+
+  if (refreshBtn) {
+    refreshBtn.addEventListener("click", fetchAllViolations);
+  }
+
+  // 🚀 Initial load
+  fetchAllViolations();
+});
+</script>
+{% endblock %}
