@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - SafetyEye{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <!-- Header -->
+    <div class="settings-header">
+        <h1><i class="fas fa-cog"></i> System Settings</h1>
+        <p>Configure SafetyEye system preferences and notifications</p>
+    </div>
+
+    <div class="settings-grid">
+        <!-- Email Settings -->
+        <div class="settings-card">
+            <div class="card-header">
+                <h3><i class="fas fa-envelope"></i> Email Notifications</h3>
+            </div>
+            <div class="card-body">
+                <form id="email-settings-form">
+                    <div class="form-group">
+                        <label for="smtp-server">SMTP Server:</label>
+                        <input type="text" id="smtp-server" name="smtp_server" 
+                               value="{{ email_config.smtp_server }}" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="smtp-port">SMTP Port:</label>
+                        <input type="number" id="smtp-port" name="smtp_port" 
+                               value="{{ email_config.smtp_port }}" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="sender-email">Sender Email:</label>
+                        <input type="email" id="sender-email" name="sender_email" 
+                               value="{{ email_config.sender_email }}" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="sender-password">App Password:</label>
+                        <input type="password" id="sender-password" name="sender_password" 
+                               value="{{ email_config.sender_password }}" class="form-input" 
+                               placeholder="Enter app password">
+                        <small class="form-help">Use app password for Gmail, not your regular password</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="recipient-email">Recipient Email:</label>
+                        <input type="email" id="recipient-email" name="recipient_email" 
+                               value="{{ email_config.recipient_email }}" class="form-input">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Email Settings
+                        </button>
+                        <button type="button" id="test-email" class="btn btn-secondary">
+                            <i class="fas fa-paper-plane"></i> Test Email
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- System Settings -->
+        <div class="settings-card">
+            <div class="card-header">
+                <h3><i class="fas fa-sliders-h"></i> System Configuration</h3>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label for="report-frequency">Report Frequency:</label>
+                    <select id="report-frequency" class="form-input">
+                        <option value="15">Every 15 minutes</option>
+                        <option value="30">Every 30 minutes</option>
+                        <option value="60">Every hour</option>
+                        <option value="1440">Daily</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="violation-threshold">Violation Threshold (frames):</label>
+                    <input type="number" id="violation-threshold" value="10" class="form-input">
+                    <small class="form-help">Consecutive frames without PPE before violation</small>
+                </div>
+                <div class="form-group">
+                    <label for="confidence-threshold">Confidence Threshold:</label>
+                    <input type="number" id="confidence-threshold" value="0.45" step="0.05" min="0.1" max="1.0" class="form-input">
+                    <small class="form-help">Minimum confidence for PPE detection</small>
+                </div>
+                <div class="form-actions">
+                    <button id="save-system-settings" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save System Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Information -->
+        <div class="settings-card">
+            <div class="card-header">
+                <h3><i class="fas fa-info-circle"></i> System Information</h3>
+            </div>
+            <div class="card-body">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Detection Mode:</label>
+                        <span class="info-value real-time">REAL YOLO</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Model Version:</label>
+                        <span class="info-value">YOLOv8n PPE</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Total Violations:</label>
+                        <span class="info-value" id="total-violations-count">422</span>
+                    </div>
+                    <div class="info-item">
+                        <label>System Uptime:</label>
+                        <span class="info-value" id="system-uptime">0d 0h 0m</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Last Report Sent:</label>
+                        <span class="info-value" id="last-report">Never</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="settings-card danger-zone">
+            <div class="card-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
+            </div>
+            <div class="card-body">
+                <p class="warning-text">These actions are irreversible. Proceed with caution.</p>
+                <div class="danger-actions">
+                    <button id="clearViolationsBtn" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Clear All Violations
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Test Email Modal -->
+<div id="test-email-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-paper-plane"></i> Test Email</h3>
+            <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>Send a test email to verify your email settings are working correctly.</p>
+            <div class="form-group">
+                <label for="test-recipient">Recipient Email:</label>
+                <input type="email" id="test-recipient" class="form-input" 
+                       value="{{ email_config.recipient_email }}">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="confirm-test-email" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i> Send Test Email
+            </button>
+            <button class="btn btn-secondary close-modal">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmation-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="confirmation-title">Confirm Action</h3>
+            <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p id="confirmation-message">Are you sure you want to perform this action?</p>
+        </div>
+        <div class="modal-footer">
+            <button id="confirm-action" class="btn btn-danger">Confirm</button>
+            <button class="btn btn-secondary close-modal">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const clearBtn = document.getElementById("clearViolationsBtn");
+
+  // 🗑️ Clear all violations
+  if (clearBtn) {
+    clearBtn.addEventListener("click", async () => {
+      if (!confirm("⚠️ Are you sure you want to delete all violations? This cannot be undone!")) return;
+
+      try {
+        const res = await fetch("/api/violations/clear", { method: "DELETE" });
+        const data = await res.json();
+        alert(data.message || "Done!");
+        if (data.success) location.reload();
+      } catch (err) {
+        alert("❌ Failed to clear violations: " + err.message);
+      }
+    });
+  }
+});
+document.addEventListener("DOMContentLoaded", async () => {
+  async function fetchSystemInfo() {
+    try {
+      const res = await fetch("/api/system/info");
+      const data = await res.json();
+
+      if (data.error) throw new Error(data.error);
+
+      document.querySelector(".info-value.real-time").textContent = data.detection_mode;
+      document.querySelectorAll(".info-value")[1].textContent = data.model_version;
+      document.getElementById("total-violations-count").textContent = data.total_violations;
+      document.getElementById("system-uptime").textContent = data.system_uptime;
+      document.getElementById("last-report").textContent = data.last_report_sent;
+
+    } catch (err) {
+      console.error("❌ Failed to load system info:", err);
+    }
+  }
+
+  // Fetch immediately and every 30 seconds
+  fetchSystemInfo();
+  setInterval(fetchSystemInfo, 30000);
+});
+</script>
+
+{% endblock %}

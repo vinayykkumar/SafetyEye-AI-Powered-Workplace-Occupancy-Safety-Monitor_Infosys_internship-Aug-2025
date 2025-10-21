@@ -1,0 +1,7 @@
+{
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": 587,
+    "sender_email": "reranko00@gmail.com",
+    "sender_password": "epngtzlinyoxchkm",
+    "recipient_email": "rankozone@gmail.com"
+}
