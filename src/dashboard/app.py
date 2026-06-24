@@ -20,7 +20,7 @@
 
 
 # st.set_page_config(page_title="SafetyEye Dashboard", layout="wide")
-# st.title("AI-Powered Workplace Safety Monitor 👷")
+# st.title("AI-Powered Workplace Safety Monitor ")
 # live_feed_placeholder = st.empty()
 # message_placeholder = st.empty()
 # st.sidebar.title("Alerts & Screenshots")
@@ -36,7 +36,7 @@
     
 #     cap = cv2.VideoCapture(0)
 #     if not cap.isOpened():
-#         st.error("❌ Could not open webcam!")
+#         st.error(" Could not open webcam!")
 #         return
 
 #     while cap.isOpened():
@@ -76,7 +76,7 @@
 #             if (current_time - last_violation_alert_time).total_seconds() > VIOLATION_ALERT_COOLDOWN_SECONDS:
 #                 # NEW: Join all active violation names for a single, clear message
 #                 violation_msg = ", ".join(set(active_violations)) 
-#                 message_placeholder.error(f"🚨 **VIOLATION DETECTED:** {violation_msg}")
+#                 message_placeholder.error(f" **VIOLATION DETECTED:** {violation_msg}")
 #                 last_violation_alert_time = current_time
             
 #             # Save screenshot with a cooldown (existing logic)
@@ -84,7 +84,7 @@
 #                 timestamp = current_time.strftime("%Y-%m-%d_%H-%M-%S")
 #                 filename = os.path.join(OUTPUT_DIR, f"violation_{timestamp}.jpg")
 #                 cv2.imwrite(filename, annotated_frame)
-#                 st.sidebar.success(f"📸 Screenshot saved: {filename}")
+#                 st.sidebar.success(f" Screenshot saved: {filename}")
 #                 last_screenshot_time = current_time
 #         else:
 #             message_placeholder.empty()
@@ -161,7 +161,7 @@
 # # ----------------------------------------
 
 # st.set_page_config(page_title="SafetyEye Dashboard", layout="wide")
-# st.title("AI-Powered Workplace Safety Monitor 👷")
+# st.title("AI-Powered Workplace Safety Monitor ")
 
 # # Placeholders for dynamic content
 # live_feed_placeholder = st.empty()
@@ -193,7 +193,7 @@
 #         try:
 #             df = pd.read_csv(LOG_FILE)
 #             st.markdown("---")
-#             st.markdown("## 📜 Violation Log")
+#             st.markdown("## Violation Log")
             
 #             # Display the log, showing the most recent 10 entries
 #             st.dataframe(df.tail(10).style.set_properties(**{'font-size': '10pt'}), use_container_width=True)
@@ -239,7 +239,7 @@
 #         # --- Display alert message with a cooldown in the main section ---
 #         if (current_time - last_violation_alert_time).total_seconds() > VIOLATION_ALERT_COOLDOWN_SECONDS:
 #             violation_msg = ", ".join(set(active_violations)) 
-#             message_placeholder.error(f"🚨 **VIOLATION DETECTED:** {violation_msg}")
+#             message_placeholder.error(f" **VIOLATION DETECTED:** {violation_msg}")
 #             last_violation_alert_time = current_time
         
 #         # --- Save screenshot with a cooldown ---
@@ -257,7 +257,7 @@
 #                 writer.writerow(log_entry)
 #             # --- END NEW: Logging the event ---
             
-#             st.sidebar.success(f"📸 Screenshot saved: {filename}")
+#             st.sidebar.success(f" Screenshot saved: {filename}")
 #             last_screenshot_time = current_time
 #     else:
 #         message_placeholder.empty()
@@ -285,7 +285,7 @@
 #         alert_placeholder.info("Webcam active. Detecting live...")
 #         cap = cv2.VideoCapture(0)
 #         if not cap.isOpened():
-#             st.error("❌ Could not open webcam!")
+#             st.error(" Could not open webcam!")
 #         else:
 #             while cap.isOpened():
 #                 ret, frame = cap.read()
@@ -334,7 +334,7 @@
             
 #             cap = cv2.VideoCapture(tfile)
 #             if not cap.isOpened():
-#                 st.error("❌ Could not open uploaded video!")
+#                 st.error(" Could not open uploaded video!")
 #             else:
 #                 video_status = st.empty()
 #                 frame_count = 0
@@ -361,7 +361,7 @@
 #         alert_placeholder.info(f"Select a source in the sidebar.")
 #         live_feed_placeholder.markdown("""
 #             <div style='text-align: center; padding: 50px; border: 2px dashed #4B88FF; border-radius: 10px; margin-top: 20px;'>
-#                 <h3>▶️ Select an **Input Source** (Photo, Webcam, or Video) in the sidebar to start the Safety Monitor.</h3>
+#                 <h3>Select an **Input Source** (Photo, Webcam, or Video) in the sidebar to start the Safety Monitor.</h3>
 #                 <p>No video stream is active until a source is selected.</p>
 #             </div>
 #         """, unsafe_allow_html=True)
@@ -423,7 +423,7 @@
 # # ----------------------------------------
 
 # st.set_page_config(page_title="SafetyEye Dashboard", layout="wide")
-# st.title("AI-Powered Workplace Safety Monitor 👷")
+# st.title("AI-Powered Workplace Safety Monitor ")
 
 # live_feed_placeholder = st.empty()
 # message_placeholder = st.empty()
@@ -469,7 +469,7 @@
 #     df = load_log_data()
     
 #     st.markdown("---")
-#     st.markdown("## 📊 Compliance Statistics")
+#     st.markdown("## Compliance Statistics")
 
 #     # --- KPI METRICS ---
 #     total_violations = len(df)
@@ -492,7 +492,7 @@
 #     st.markdown("---")
     
 #     # --- VIOLATION FREQUENCY CHART ---
-#     st.markdown("## 📈 Incident Trends by Type")
+#     st.markdown("## Incident Trends by Type")
 #     if not violation_counts.empty:
 #         # Convert series to DataFrame for Plotly chart
 #         chart_df = violation_counts.reset_index()
@@ -513,7 +513,7 @@
 #     df = load_log_data()
 
 #     st.markdown("---")
-#     st.markdown("## 📜 Violation Log")
+#     st.markdown("## Violation Log")
     
 #     if not df.empty:
 #         # Display the log, showing the most recent 10 entries
@@ -522,7 +522,7 @@
 #         # --- ADD DOWNLOAD BUTTON ---
 #         csv_data = df.to_csv(index=False)
 #         b64 = base64.b64encode(csv_data.encode()).decode()
-#         href = f'<a href="data:file/csv;base64,{b64}" download="violation_log.csv">📥 Download Full Log (CSV)</a>'
+#         href = f'<a href="data:file/csv;base64,{b64}" download="violation_log.csv">Download Full Log (CSV)</a>'
 #         st.markdown(href, unsafe_allow_html=True)
         
 #     else:
@@ -569,7 +569,7 @@
 #         # --- Display alert message with a cooldown in the main section ---
 #         if (current_time - last_violation_alert_time).total_seconds() > VIOLATION_ALERT_COOLDOWN_SECONDS:
 #             violation_msg = ", ".join(set(active_violations)) 
-#             message_placeholder.error(f"🚨 **VIOLATION DETECTED:** {violation_msg}")
+#             message_placeholder.error(f" **VIOLATION DETECTED:** {violation_msg}")
 #             last_violation_alert_time = current_time
         
 #         # --- Save screenshot and log event with cooldown ---
@@ -587,7 +587,7 @@
 #                 writer.writerow(log_entry)
 #             # --- End Logging ---
             
-#             st.sidebar.success(f"📸 Screenshot saved: {filename}")
+#             st.sidebar.success(f" Screenshot saved: {filename}")
 #             last_screenshot_time = current_time
 #     else:
 #         message_placeholder.empty()
@@ -615,7 +615,7 @@
 #         alert_placeholder.info("Webcam active. Detecting live...")
 #         cap = cv2.VideoCapture(0)
 #         if not cap.isOpened():
-#             st.error("❌ Could not open webcam!")
+#             st.error(" Could not open webcam!")
 #         else:
 #             while cap.isOpened():
 #                 ret, frame = cap.read()
@@ -669,7 +669,7 @@
             
 #             cap = cv2.VideoCapture(tfile)
 #             if not cap.isOpened():
-#                 st.error("❌ Could not open uploaded video!")
+#                 st.error(" Could not open uploaded video!")
 #             else:
 #                 video_status = st.empty()
 #                 frame_count = 0
@@ -695,7 +695,7 @@
 #         st.sidebar.info(f"Select a source in the sidebar.")
 #         live_feed_placeholder.markdown("""
 #             <div style='text-align: center; padding: 50px; border: 2px dashed #4B88FF; border-radius: 10px; margin-top: 20px;'>
-#                 <h3>▶️ Select an **Input Source** (Photo, Webcam, or Video) in the sidebar to start the Safety Monitor.</h3>
+#                 <h3> Select an **Input Source** (Photo, Webcam, or Video) in the sidebar to start the Safety Monitor.</h3>
 #                 <p>No video stream is active until a source is selected.</p>
 #             </div>
 #         """, unsafe_allow_html=True)
@@ -895,7 +895,7 @@ def send_email_alert(violation_types, frame_time_str, screenshot_path, recipient
     
     # 2. Configure Content and Attachment based on type
     if alert_type == 'Real-time Violation Alerts':
-        subject = f"🚨 URGENT: HIGH-PRIORITY VIOLATION DETECTED ({violation_list})!"
+        subject = f"URGENT: HIGH-PRIORITY VIOLATION DETECTED ({violation_list})!"
         body = f"""
         Dear Safety Officer,
         A **HIGH-PRIORITY SAFETY VIOLATION** was instantly detected by the SafetyEye monitoring system.
@@ -928,10 +928,10 @@ def send_email_alert(violation_types, frame_time_str, screenshot_path, recipient
                                    subtype='octet-stream', 
                                    filename=file_name)
             except Exception as e:
-                st.sidebar.error(f"❌ Failed to attach log file: {e}")
+                st.sidebar.error(f" Failed to attach log file: {e}")
                 return False 
         else:
-            st.sidebar.error("❌ Summary Report Failed: Log file not found.")
+            st.sidebar.error(" Summary Report Failed: Log file not found.")
             return False
             
     # 3. Finalize and Send Email
@@ -949,7 +949,7 @@ def send_email_alert(violation_types, frame_time_str, screenshot_path, recipient
         return True
     
     except Exception as e:
-        st.sidebar.error(f"❌ Email Failed: {e}")
+        st.sidebar.error(f" Email Failed: {e}")
         return False
     return False
 
@@ -973,7 +973,7 @@ def display_compliance_stats():
     df = load_log_data()
     
     st.markdown("---")
-    st.markdown("## 📊 Compliance Statistics")
+    st.markdown("## Compliance Statistics")
 
     total_violations = len(df)
     violation_counts = df['ViolationType'].str.split(', ').explode().str.strip().value_counts()
@@ -992,7 +992,7 @@ def display_compliance_stats():
 
     st.markdown("---")
     
-    st.markdown("## 📈 Incident Trends by Type")
+    st.markdown("## Incident Trends by Type")
     if not violation_counts.empty:
         chart_df = violation_counts.reset_index()
         chart_df.columns = ['Violation Type', 'Count']
@@ -1058,7 +1058,7 @@ def display_recent_logs():
     df = load_log_data()
 
     st.markdown("---")
-    st.markdown("## 📜 Violation Log")
+    st.markdown("## Violation Log")
     
     if not df.empty:
         # st.dataframe(df.tail(10).style.set_properties({'font-size': '10pt'}), use_container_width=True)
@@ -1109,7 +1109,7 @@ def save_and_display_alert(annotated_frame, violation_detected, active_violation
         # --- Display alert message with a cooldown in the main section ---
         if (current_time - last_violation_alert_time).total_seconds() > VIOLATION_ALERT_COOLDOWN_SECONDS:
             violation_msg = ", ".join(set(active_violations)) 
-            message_placeholder.error(f"🚨 *VIOLATION DETECTED:* {violation_msg}")
+            message_placeholder.error(f"*VIOLATION DETECTED:* {violation_msg}")
             last_violation_alert_time = current_time
         
         # --- Save screenshot and log event with cooldown ---
@@ -1136,7 +1136,7 @@ def save_and_display_alert(annotated_frame, violation_detected, active_violation
                 notification_type   # Pass the radio button state
             )
             
-            st.sidebar.success(f"📸 Screenshot saved: {filename}")
+            st.sidebar.success(f"Screenshot saved: {filename}")
             last_screenshot_time = current_time
     else:
         message_placeholder.empty()
@@ -1164,7 +1164,7 @@ if __name__ == "__main__":
         alert_placeholder.info("Webcam active. Detecting live...")
         cap = cv2.VideoCapture(0)
         if not cap.isOpened():
-            st.error("❌ Could not open webcam!")
+            st.error("Could not open webcam!")
         else:
             while cap.isOpened():
                 ret, frame = cap.read()
@@ -1221,7 +1221,7 @@ if __name__ == "__main__":
             
             cap = cv2.VideoCapture(tfile)
             if not cap.isOpened():
-                st.error("❌ Could not open uploaded video!")
+                st.error(" Could not open uploaded video!")
             else:
                 video_status = st.empty()
                 frame_count = 0
@@ -1267,7 +1267,7 @@ if __name__ == "__main__":
         st.markdown("<br><br><br><br>", unsafe_allow_html=True) # Spacer
         # Add the button that calls the send_summary_on_demand function
         st.button(
-            "📧 Send Summary Report Now", 
+            " Send Summary Report Now", 
             on_click=send_summary_on_demand, 
             args=(recipient_email, enable_email)
         )
