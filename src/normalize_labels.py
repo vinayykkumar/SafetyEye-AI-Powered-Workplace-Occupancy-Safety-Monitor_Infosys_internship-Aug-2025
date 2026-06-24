@@ -49,4 +49,4 @@ for split in ["train", "val", "test"]:
         with open(label_path, "w") as f:
             f.writelines(new_lines)
 
-print("✅ Normalization complete for all splits.")
+print(" Normalization complete for all splits.")
