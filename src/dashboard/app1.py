@@ -156,7 +156,7 @@ def send_summary_report():
     pass  # Implement same as your code for summary CSV report
 
 # ---------------- DASHBOARD TABS ----------------
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["📹 Monitoring", "📊 Compliance Stats", "📜 Violation Logs","📅 Reports & Data Export","⚙ Settings"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["📹 Monitoring", " Compliance Stats", "Violation Logs","Reports & Data Export","⚙ Settings"])
 
 # --- TAB 1: Monitoring ---
 # --- TAB 1: Monitoring ---
@@ -233,7 +233,7 @@ with tab1:
 # --- TAB 2: Compliance Stats ---
 # ---------------- TAB 2 : Compliance Stats ----------------
 with tab2:
-    st.markdown("### 📊 Compliance Statistics")
+    st.markdown("###  Compliance Statistics")
 
     df = load_log_data()
     if df.empty:
@@ -314,11 +314,11 @@ with tab2:
 
             # ---------------- SEND EMAIL BUTTON ----------------
             st.markdown("---")
-            st.markdown("### 📧 Send Compliance Report")
-            if st.button("📤 Send Compliance Report to Admin Email"):
+            st.markdown("###  Send Compliance Report")
+            if st.button(" Send Compliance Report to Admin Email"):
                 try:
                     msg = EmailMessage()
-                    msg['Subject'] = f"📊 Compliance Report ({filter_mode}) - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+                    msg['Subject'] = f" Compliance Report ({filter_mode}) - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
                     msg['From'] = SENDER_EMAIL
                     msg['To'] = SENDER_EMAIL
                     msg.set_content("Attached is the latest compliance report with graph and data summary.")
@@ -336,19 +336,19 @@ with tab2:
                         smtp.login(SENDER_EMAIL, SENDER_PASSWORD)
                         smtp.send_message(msg)
 
-                    st.success(f"✅ Compliance report sent successfully to {SENDER_EMAIL}!")
+                    st.success(f" Compliance report sent successfully to {SENDER_EMAIL}!")
 
                 except Exception as e:
-                    st.error(f"❌ Failed to send report: {e}")
+                    st.error(f" Failed to send report: {e}")
 
 with tab3:
-    st.markdown("### 📜 Recent Violation Logs")
+    st.markdown("###  Recent Violation Logs")
 
     df = load_log_data()  # Load data
 
     if not df.empty:
         # ---------------- DATE RANGE FILTER ----------------
-        st.subheader("🔎 Filter Logs")
+        st.subheader(" Filter Logs")
         col1, col2 = st.columns(2)
 
         # Convert Timestamp column to datetime
@@ -389,15 +389,15 @@ with tab3:
 
             # ---------------- EMAIL REPORT ----------------
             st.markdown("---")
-            st.subheader("📧 Send Report to Admin")
+            st.subheader(" Send Report to Admin")
 
-            if st.button("📤 Send Report to Admin"):
+            if st.button(" Send Report to Admin"):
                 csv_path = f"filtered_violation_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
                 filtered_df.to_csv(csv_path, index=False)
 
                 try:
                     msg = EmailMessage()
-                    msg['Subject'] = f"📋 Safety Violation Report ({start_date} → {end_date})"
+                    msg['Subject'] = f" Safety Violation Report ({start_date} → {end_date})"
                     msg['From'] = SENDER_EMAIL
                     msg['To'] = SENDER_EMAIL
                     msg.set_content(
@@ -406,8 +406,8 @@ with tab3:
 Please find attached the latest Safety Violation Report.
 
 🗓 Date Range: {start_date} → {end_date}
-🚨 Violations Included: {', '.join(selected_violations)}
-📊 Total Records: {len(filtered_df)}
+ Violations Included: {', '.join(selected_violations)}
+ Total Records: {len(filtered_df)}
 
 Best regards,
 Safety Monitoring Dashboard
@@ -426,10 +426,10 @@ Safety Monitoring Dashboard
                         smtp.login(SENDER_EMAIL, SENDER_PASSWORD)
                         smtp.send_message(msg)
 
-                    st.success(f"✅ Report sent successfully to {SENDER_EMAIL}!")
+                    st.success(f"Report sent successfully to {SENDER_EMAIL}!")
 
                 except Exception as e:
-                    st.error(f"❌ Failed to send email: {e}")
+                    st.error(f" Failed to send email: {e}")
 
         else:
             st.warning("⚠ No violations found for the selected filters.")
@@ -438,7 +438,7 @@ Safety Monitoring Dashboard
 
 # --- TAB 4: Reports ---
 with tab4:
-    st.markdown("## 📅 Reports & Data Export")
+    st.markdown("##  Reports & Data Export")
 
     # Load data
     df = load_log_data()
@@ -449,7 +449,7 @@ with tab4:
         # Convert timestamp to datetime safely
         df["Timestamp"] = pd.to_datetime(df["Timestamp"], errors="coerce")
 
-        st.markdown("### 🔍 Select Report Type")
+        st.markdown("###  Select Report Type")
         col1, col2, col3 = st.columns(3)
 
         report_mode = col1.selectbox(
@@ -485,12 +485,12 @@ with tab4:
         filtered_df = df[(df["Timestamp"].dt.date >= start_date) & (df["Timestamp"].dt.date <= end_date)]
 
         st.markdown("---")
-        st.markdown(f"### 📊 Data Summary ({start_date} → {end_date})")
+        st.markdown(f"### Data Summary ({start_date} → {end_date})")
 
         if filtered_df.empty:
             st.warning(f"No data found between {start_date} and {end_date}.")
         else:
-            st.success(f"✅ Found {len(filtered_df)} violation records.")
+            st.success(f" Found {len(filtered_df)} violation records.")
             st.dataframe(filtered_df.tail(10), use_container_width=True)
 
             # ---------------- REPORT GENERATION ----------------
@@ -499,7 +499,7 @@ with tab4:
             chart_path = None
             zip_path = None
 
-            if st.button("📥 Generate Report ZIP", key="tab4_generate_zip"):
+            if st.button(" Generate Report ZIP", key="tab4_generate_zip"):
                 try:
                     range_label = f"{start_date}to{end_date}".replace(":", "-")
                     report_dir = os.path.join(OUTPUT_DIR_ROOT, f"report_{range_label}")
@@ -508,17 +508,17 @@ with tab4:
                     os.makedirs(images_dir, exist_ok=True)
                     os.makedirs(visual_dir, exist_ok=True)
 
-                    # 1️⃣ Save CSV
+                    # 1️ Save CSV
                     csv_path = os.path.join(report_dir, "violation_data.csv")
                     filtered_df.to_csv(csv_path, index=False)
 
-                    # 2️⃣ Copy screenshots if column exists
+                    # 2️ Copy screenshots if column exists
                     if "ScreenshotPath" in filtered_df.columns:
                         for path in filtered_df["ScreenshotPath"].dropna():
                             if os.path.exists(path):
                                 shutil.copy(path, os.path.join(images_dir, os.path.basename(path)))
 
-                    # 3️⃣ Generate chart if column exists
+                    # 3️ Generate chart if column exists
                     if "ViolationType" in filtered_df.columns:
                         violation_counts = (
                             filtered_df["ViolationType"].str.split(",").explode().value_counts()
@@ -537,7 +537,7 @@ with tab4:
                             chart_path = os.path.join(visual_dir, f"chart_{range_label}.png")
                             fig.write_image(chart_path)
 
-                    # 4️⃣ Create ZIP
+                    # 4️ Create ZIP
                     zip_path = shutil.make_archive(report_dir, 'zip', report_dir)
                     zip_generated = True
 
@@ -546,16 +546,16 @@ with tab4:
                         b64 = base64.b64encode(f.read()).decode()
                     href = f'<a href="data:application/zip;base64,{b64}" download="SafetyEye_Report_{range_label}.zip">📦 Download Full Report (ZIP)</a>'
                     st.markdown(href, unsafe_allow_html=True)
-                    st.success("✅ Report ZIP generated successfully!")
+                    st.success(" Report ZIP generated successfully!")
 
                 except Exception as e:
-                    st.error(f"❌ Error generating report: {e}")
+                    st.error(f" Error generating report: {e}")
 
             # ---------------- SEND EMAIL ----------------
-            if zip_generated and st.button("📤 Send Report ZIP to Admin Email", key="tab4_send_email"):
+            if zip_generated and st.button(" Send Report ZIP to Admin Email", key="tab4_send_email"):
                 try:
                     msg = EmailMessage()
-                    msg["Subject"] = f"📅 SafetyEye Report ({report_mode}) - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+                    msg["Subject"] = f" SafetyEye Report ({report_mode}) - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
                     msg["From"] = SENDER_EMAIL
                     msg["To"] = SENDER_EMAIL
                     msg.set_content(f"Attached is the generated SafetyEye Report for {start_date} to {end_date}.")
@@ -569,10 +569,10 @@ with tab4:
                         smtp.login(SENDER_EMAIL, SENDER_PASSWORD)
                         smtp.send_message(msg)
 
-                    st.success(f"✅ Report successfully emailed to {SENDER_EMAIL}")
+                    st.success(f" Report successfully emailed to {SENDER_EMAIL}")
 
                 except Exception as e:
-                    st.error(f"❌ Failed to send email: {e}")
+                    st.error(f" Failed to send email: {e}")
 # ---------------- Sidebar Settings Button ----------------
 with tab5:
     st.markdown("## ⚙ Settings")
@@ -587,26 +587,26 @@ with tab5:
                 pd.DataFrame(columns=['Timestamp', 'ViolationType', 'PersonID', 'ScreenshotPath']).to_csv(LOG_FILE, index=False)
             shutil.rmtree(OUTPUT_DIR, ignore_errors=True)
             os.makedirs(OUTPUT_DIR, exist_ok=True)
-            st.success("✅ All violations cleared successfully!")
+            st.success(" All violations cleared successfully!")
         except Exception as e:
-            st.error(f"❌ Failed to clear violations: {e}")
+            st.error(f" Failed to clear violations: {e}")
 
     # ---------------- Email Configuration ----------------
-    st.markdown("### 📧 Email Configuration")
+    st.markdown("### Email Configuration")
     sender_email_input = st.text_input("Sender Email", value=SENDER_EMAIL)
     sender_password_input = st.text_input("Sender Password", type="password", value=SENDER_PASSWORD)
-    if st.button("💾 Save Email Settings"):
+    if st.button(" Save Email Settings"):
         SENDER_EMAIL = sender_email_input
         SENDER_PASSWORD = sender_password_input
-        st.success("✅ Email settings saved!")
+        st.success(" Email settings saved!")
 
     # ---------------- Report Preferences ----------------
-    st.markdown("### 📊 Report Preferences")
+    st.markdown("###  Report Preferences")
     default_report_mode = st.selectbox(
         "Default Report Type",
         ["Daily", "Date Range", "Last Month", "Last Year"],
         index=0
     )
     default_csv_name = st.text_input("Default CSV Filename", "violation_report.csv")
-    if st.button("💾 Save Report Preferences"):
-        st.success(f"✅ Report preferences saved! Default mode: {default_report_mode}, CSV name: {default_csv_name}")
+    if st.button(" Save Report Preferences"):
+        st.success(f" Report preferences saved! Default mode: {default_report_mode}, CSV name: {default_csv_name}")
