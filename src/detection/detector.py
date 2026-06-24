@@ -6,7 +6,7 @@
 # from tkinter import filedialog
 
 # # ---------------------------
-# # 1. Load YOLOv8 model
+# #  Load YOLOv8 model
 # # ---------------------------
 # model = YOLO(r"C:\SafetyEye\models\best.pt")
 #   # replace with your trained weights
