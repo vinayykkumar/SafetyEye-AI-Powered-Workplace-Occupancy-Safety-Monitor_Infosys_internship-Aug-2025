@@ -62,4 +62,4 @@ def run_checks():
 
 if __name__ == "__main__":
     run_checks()
-    print("\n✅ Preprocessing check complete. Dataset is ready for training!")
+    print("\n Preprocessing check complete. Dataset is ready for training!")
