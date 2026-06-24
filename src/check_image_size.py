@@ -4,7 +4,7 @@ from collections import Counter
 
 DATASET_PATH = "data/processed"
 
-print("📊 Checking image sizes...")
+print("Checking image sizes...")
 
 all_sizes = []
 
@@ -12,7 +12,7 @@ for split in ["train", "val", "test"]:
     img_dir = os.path.join(DATASET_PATH, split, "images")
     
     if not os.path.exists(img_dir):
-        print(f"⚠️ {split}/images not found")
+        print(f" {split}/images not found")
         continue
     
     img_files = [f for f in os.listdir(img_dir) 
@@ -37,4 +37,4 @@ if all_sizes:
     
     print(f"\nTotal unique sizes: {len(size_counts)}")
 else:
-    print("❌ No images found!")
+    print(" No images found!")
