@@ -35,7 +35,7 @@
 #                 filetypes=[("Image Files", "*.jpg *.jpeg *.png")]
 #             )
 #         if not source:
-#             print("❌ No photo selected!")
+#             print("No photo selected!")
 #             return
 
 #         frame = cv2.imread(source)
@@ -51,12 +51,12 @@
 #                 filetypes=[("Video Files", "*.mp4 *.avi *.mov")]
 #             )
 #         if not source:
-#             print("❌ No video selected!")
+#             print("No video selected!")
 #             return
 
 #         cap = cv2.VideoCapture(source)
 #         if not cap.isOpened():
-#             print("❌ Could not open video!")
+#             print(" Could not open video!")
 #             return
 
 #         while True:
@@ -74,7 +74,7 @@
 #     elif mode == "webcam":
 #         cap = cv2.VideoCapture(0)
 #         if not cap.isOpened():
-#             print("❌ Could not open webcam!")
+#             print("Could not open webcam!")
 #             return
 
 #         while True:
@@ -90,7 +90,7 @@
 #         cv2.destroyAllWindows()
 
 #     else:
-#         print("❌ Invalid mode! Choose 'photo', 'video', or 'webcam'.")
+#         print("Invalid mode! Choose 'photo', 'video', or 'webcam'.")
 
 # # ---------------------------
 # # 4. CLI argument parsing
@@ -154,7 +154,7 @@
 #             violation_detected = True
 
 #             # Print a console alert for testing
-#             print(f"🚨 VIOLATION DETECTED: {label}")
+#             print(f"VIOLATION DETECTED: {label}")
         
 #         # Draw the bounding box and label
 #         cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), box_color, 2)
@@ -178,7 +178,7 @@
 #                 filetypes=[("Image Files", "*.jpg *.jpeg *.png")]
 #             )
 #         if not source:
-#             print("❌ No photo selected!")
+#             print(" No photo selected!")
 #             return
 
 #         frame = cv2.imread(source)
@@ -194,12 +194,12 @@
 #                 filetypes=[("Video Files", "*.mp4 *.avi *.mov")]
 #             )
 #         if not source:
-#             print("❌ No video selected!")
+#             print("No video selected!")
 #             return
 
 #         cap = cv2.VideoCapture(source)
 #         if not cap.isOpened():
-#             print("❌ Could not open video!")
+#             print("Could not open video!")
 #             return
 
 #         while True:
@@ -217,7 +217,7 @@
 #     elif mode == "webcam":
 #         cap = cv2.VideoCapture(0)
 #         if not cap.isOpened():
-#             print("❌ Could not open webcam!")
+#             print("Could not open webcam!")
 #             return
 
 #         while True:
@@ -237,7 +237,7 @@
 #         cv2.destroyAllWindows()
 
 #     else:
-#         print("❌ Invalid mode! Choose 'photo', 'video', or 'webcam'.")
+#         print("Invalid mode! Choose 'photo', 'video', or 'webcam'.")
 
 # # ---------------------------
 # # 4. CLI argument parsing
@@ -314,7 +314,7 @@ def process_frame(frame):
             violation_detected = True
 
             # Print a console alert
-            print(f"🚨 VIOLATION DETECTED: {label}  (Confidence: {conf:.2f})")
+            print(f" VIOLATION DETECTED: {label}  (Confidence: {conf:.2f})")
         
         # Draw the bounding box and label
         cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), box_color, 2)
@@ -348,7 +348,7 @@ def main(mode, source=None):
                 filetypes=[("Image Files", "*.jpg *.jpeg *.png")]
             )
         if not source:
-            print("❌ No photo selected!")
+            print(" No photo selected!")
             return
 
         frame = cv2.imread(source)
@@ -364,12 +364,12 @@ def main(mode, source=None):
                 filetypes=[("Video Files", "*.mp4 *.avi *.mov")]
             )
         if not source:
-            print("❌ No video selected!")
+            print(" No video selected!")
             return
 
         cap = cv2.VideoCapture(source)
         if not cap.isOpened():
-            print("❌ Could not open video!")
+            print(" Could not open video!")
             return
 
         while True:
@@ -387,7 +387,7 @@ def main(mode, source=None):
     elif mode == "webcam":
         cap = cv2.VideoCapture(0)
         if not cap.isOpened():
-            print("❌ Could not open webcam!")
+            print(" Could not open webcam!")
             return
 
         while True:
@@ -403,7 +403,7 @@ def main(mode, source=None):
         cv2.destroyAllWindows()
 
     else:
-        print("❌ Invalid mode! Choose 'photo', 'video', or 'webcam'.")
+        print(" Invalid mode! Choose 'photo', 'video', or 'webcam'.")
 
 # ---------------------------
 # 4. CLI argument parsing
