@@ -40,4 +40,4 @@ for split in SPLITS:
             print(f"🗑 Removing {lbl_file} (no image)")
             os.remove(os.path.join(lbl_dir, lbl_file))
 
-print("✅ Dataset cleaned successfully!")
+print("Dataset cleaned successfully!")
